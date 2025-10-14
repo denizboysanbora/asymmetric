@@ -24,6 +24,13 @@ This backend relies on scripts from the `asymmetric/` folder:
 
 The `execute_command.py` script is called from the Next.js API route at `/api/investor`.
 
+## Setup
+
+1. Use Python 3.10 or newer (the MCP SDK requires 3.10+). We recommend Homebrew's `python3.11`.
+2. Create a virtual environment in the repo root: `python3.11 -m venv .venv`.
+3. Install the trading dependencies: `pip install -r alpaca/alpaca-mcp-server/requirements.txt`.
+4. Activate the environment whenever you run the investor scripts.
+
 Environment variables:
 - `INVESTOR_COMMAND_SCRIPT` - Path to execute_command.py (optional, auto-detected)
 - `INVESTOR_PYTHON_BIN` - Path to Python interpreter (optional, defaults to system python3)
