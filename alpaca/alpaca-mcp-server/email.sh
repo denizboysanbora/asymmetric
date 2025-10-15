@@ -3,7 +3,8 @@
 # Usage: ./email.sh AVGO
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-GMAIL_DIR="/Users/deniz/Library/CloudStorage/Dropbox/Bora/Code/box/investor/gmail"
+REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+GMAIL_DIR="$REPO_DIR/gmail"
 GMAIL_PY="$GMAIL_DIR/venv/bin/python3"
 EMAIL_SCRIPT="$GMAIL_DIR/scripts/send_email.py"
 RECIPIENT="deniz@bora.box"
@@ -21,4 +22,3 @@ else
     echo "No signals to email" >&2
     exit 1
 fi
-

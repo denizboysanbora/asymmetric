@@ -3,7 +3,8 @@
 # Usage: ./tweet.sh AVGO
 
 SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
-X_DIR="/Users/deniz/Library/CloudStorage/Dropbox/Bora/Code/box/investor/x"
+REPO_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
+X_DIR="$REPO_DIR/x"
 X_PY="$X_DIR/venv/bin/python3"
 TWEET_SCRIPT="$X_DIR/scripts/tweet_with_limit.py"
 
@@ -27,4 +28,3 @@ else
     echo "No signals to tweet" >&2
     exit 1
 fi
-

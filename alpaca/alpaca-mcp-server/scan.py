@@ -10,6 +10,7 @@ import os
 import sys
 import subprocess
 from datetime import datetime, timedelta
+from pathlib import Path
 import numpy as np
 from dotenv import load_dotenv
 from alpaca.data.historical.stock import StockHistoricalDataClient
@@ -20,6 +21,11 @@ from alpaca.data.timeframe import TimeFrame, TimeFrameUnit
 from compute_spike_params_stocks import classify_long_entry, format_signal_line
 
 load_dotenv()
+
+REPO_DIR = Path(__file__).resolve().parents[2]
+GMAIL_DIR = Path(os.getenv("INVESTOR_GMAIL_DIR", REPO_DIR / "gmail")).resolve()
+X_DIR = Path(os.getenv("INVESTOR_X_DIR", REPO_DIR / "x")).resolve()
+RECIPIENT = os.getenv("INVESTOR_EMAIL_RECIPIENT", "deniz@bora.box")
 
 def analyze_symbol(symbol, client, now):
     """Analyze a single symbol."""
@@ -97,14 +103,15 @@ def analyze_symbol(symbol, client, now):
 
 def send_email(signal_text):
     """Send email using gmail script."""
-    gmail_dir = "/Users/deniz/Library/CloudStorage/Dropbox/Bora/Code/box/investor/gmail"
-    email_script = f"{gmail_dir}/scripts/send_email.py"
-    gmail_py = f"{gmail_dir}/venv/bin/python3"
-    recipient = "deniz@bora.box"
-    
+    email_script = GMAIL_DIR / "scripts" / "send_email.py"
+    gmail_py = GMAIL_DIR / "venv" / "bin" / "python3"
+
     try:
-        subprocess.run([gmail_py, email_script, recipient, "Signal", signal_text], 
-                      check=True, capture_output=True)
+        subprocess.run(
+            [str(gmail_py), str(email_script), RECIPIENT, "Signal", signal_text],
+            check=True,
+            capture_output=True
+        )
         return True
     except Exception as e:
         print(f"Email error: {e}", file=sys.stderr)
@@ -112,13 +119,15 @@ def send_email(signal_text):
 
 def send_tweet(signal_text):
     """Send tweet using X script."""
-    x_dir = "/Users/deniz/Library/CloudStorage/Dropbox/Bora/Code/box/investor/x"
-    tweet_script = f"{x_dir}/scripts/tweet_with_limit.py"
-    x_py = f"{x_dir}/venv/bin/python3"
-    
+    tweet_script = X_DIR / "scripts" / "tweet_with_limit.py"
+    x_py = X_DIR / "venv" / "bin" / "python3"
+
     try:
-        subprocess.run([x_py, tweet_script, signal_text], 
-                      check=True, capture_output=True)
+        subprocess.run(
+            [str(x_py), str(tweet_script), signal_text],
+            check=True,
+            capture_output=True
+        )
         return True
     except Exception as e:
         print(f"Tweet error: {e}", file=sys.stderr)

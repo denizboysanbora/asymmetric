@@ -11,7 +11,7 @@ import subprocess
 import sys
 from pathlib import Path
 
-BASE_DIR = Path(__file__).resolve().parents[1]
+BASE_DIR = Path(__file__).resolve().parent
 ALPACA_DIR = Path(
     os.getenv("ALPACA_DIR", BASE_DIR / "alpaca" / "alpaca-mcp-server")
 ).resolve()
@@ -19,6 +19,24 @@ ALPACA_DIR = Path(
 SCAN_SCRIPT = str(Path(os.getenv("TRADER_SCAN_SCRIPT", ALPACA_DIR / "scan.sh")).resolve())
 EMAIL_SCRIPT = str(Path(os.getenv("TRADER_EMAIL_SCRIPT", ALPACA_DIR / "email.sh")).resolve())
 TWEET_SCRIPT = str(Path(os.getenv("TRADER_TWEET_SCRIPT", ALPACA_DIR / "tweet.sh")).resolve())
+
+DEFAULT_TIMEOUT = 30
+
+
+def run_script(script_path, symbol):
+    """Run helper scripts and centralize error handling."""
+    try:
+        result = subprocess.run(
+            [script_path, symbol],
+            capture_output=True,
+            text=True,
+            timeout=DEFAULT_TIMEOUT
+        )
+        return result, None
+    except subprocess.TimeoutExpired:
+        return None, "Command timed out"
+    except Exception as exc:
+        return None, str(exc)
 
 def validate_symbol(symbol):
     """Validate symbol format (alphanumeric, 1-5 chars)."""
@@ -28,120 +46,82 @@ def validate_symbol(symbol):
 
 def execute_scan(symbol):
     """Execute scan command."""
-    scan_script = SCAN_SCRIPT
-    try:
-        result = subprocess.run(
-            [scan_script, symbol],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        if result.returncode == 0:
-            return {
-                "success": True,
-                "output": result.stdout.strip(),
-                "error": None
-            }
-        else:
-            return {
-                "success": False,
-                "output": None,
-                "error": result.stderr.strip() or "Scan failed"
-            }
-    except subprocess.TimeoutExpired:
+    result, error = run_script(SCAN_SCRIPT, symbol)
+    if error:
         return {
             "success": False,
             "output": None,
-            "error": "Command timed out"
+            "error": error
         }
-    except Exception as e:
+
+    if result.returncode == 0:
         return {
-            "success": False,
-            "output": None,
-            "error": str(e)
+            "success": True,
+            "output": result.stdout.strip(),
+            "error": None
         }
+
+    return {
+        "success": False,
+        "output": None,
+        "error": result.stderr.strip() or "Scan failed"
+    }
 
 def execute_email(symbol):
     """Execute email command."""
-    email_script = EMAIL_SCRIPT
-    try:
-        result = subprocess.run(
-            [email_script, symbol],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        if result.returncode == 0:
-            return {
-                "success": True,
-                "output": f"✉️ Email sent for ${symbol}",
-                "error": None
-            }
-        else:
-            return {
-                "success": False,
-                "output": None,
-                "error": result.stderr.strip() or "Email failed"
-            }
-    except subprocess.TimeoutExpired:
+    result, error = run_script(EMAIL_SCRIPT, symbol)
+    if error:
         return {
             "success": False,
             "output": None,
-            "error": "Command timed out"
+            "error": error
         }
-    except Exception as e:
+
+    if result.returncode == 0:
         return {
-            "success": False,
-            "output": None,
-            "error": str(e)
+            "success": True,
+            "output": f"✉️ Email sent for ${symbol}",
+            "error": None
         }
+
+    return {
+        "success": False,
+        "output": None,
+        "error": result.stderr.strip() or "Email failed"
+    }
 
 def execute_tweet(symbol):
     """Execute tweet command."""
-    tweet_script = TWEET_SCRIPT
-    try:
-        result = subprocess.run(
-            [tweet_script, symbol],
-            capture_output=True,
-            text=True,
-            timeout=30
-        )
-        
-        output = result.stdout.strip()
-        error = result.stderr.strip()
-        
-        if result.returncode == 0:
-            return {
-                "success": True,
-                "output": output or f"🐦 Tweet sent for ${symbol}",
-                "error": None
-            }
-        elif "Rate limit reached" in error:
-            return {
-                "success": False,
-                "output": None,
-                "error": "🚫 Rate limit reached (17 tweets/24h)"
-            }
-        else:
-            return {
-                "success": False,
-                "output": None,
-                "error": error or "Tweet failed"
-            }
-    except subprocess.TimeoutExpired:
+    result, error = run_script(TWEET_SCRIPT, symbol)
+    if error:
         return {
             "success": False,
             "output": None,
-            "error": "Command timed out"
+            "error": error
         }
-    except Exception as e:
+
+    output = result.stdout.strip()
+    error_text = result.stderr.strip()
+
+    if result.returncode == 0:
+        return {
+            "success": True,
+            "output": output or f"🐦 Tweet sent for ${symbol}",
+            "error": None
+        }
+
+    if "Rate limit reached" in error_text:
         return {
             "success": False,
             "output": None,
-            "error": str(e)
+            "error": "🚫 Rate limit reached (17 tweets/24h)"
         }
+
+    return {
+        "success": False,
+        "output": None,
+        "error": error_text or "Tweet failed"
+    }
 
 def parse_command(command_text):
     """Parse command text into (action, symbol)."""
@@ -203,4 +183,3 @@ def main():
 
 if __name__ == "__main__":
     main()
-

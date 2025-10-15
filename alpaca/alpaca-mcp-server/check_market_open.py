@@ -11,7 +11,6 @@ from datetime import datetime, timezone
 
 from dotenv import load_dotenv
 from alpaca.trading.client import TradingClient
-from alpaca.trading.requests import GetCalendarRequest
 
 load_dotenv()
 
@@ -24,19 +23,10 @@ def market_status(now_utc: datetime) -> str:
 
     client = TradingClient(api_key, secret_key, paper=True)
 
-    request = GetCalendarRequest(start=now_utc.date(), end=now_utc.date())
-    calendar = client.get_calendar(request=request)
-    if not calendar:
-        return "closed"
-
-    session = calendar[0]
-    session_open = session.open.astimezone(timezone.utc)
-    session_close = session.close.astimezone(timezone.utc)
-
-    if session_open <= now_utc < session_close:
-        return "open"
-
-    return "closed"
+    # Get current market clock
+    clock = client.get_clock()
+    
+    return "open" if clock.is_open else "closed"
 
 
 def main() -> int:
