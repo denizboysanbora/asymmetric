@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
 Log trading signals to database.
-Usage: log_signal.py "$BTC $67,450 +2.45% | 2.25x ATR | Z 2.24 | Breakout Signal" "crypto"
+Usage: log_signal.py "$BTC $67,450 +2.45% | 2.25x ATR | Z 2.24 | Breakout" "crypto"
 """
 import sqlite3
 import os
@@ -13,10 +13,10 @@ DB_PATH = os.path.join(os.path.dirname(__file__), 'signals.db')
 
 def parse_signal(signal_text):
     """
-    Parse signal format: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout Signal
+    Parse signal format: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout
     Returns: (symbol, price, change_pct, tr_atr, z_score, signal_type)
     """
-    # Pattern: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout Signal
+    # Pattern: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout
     # Note: Z score can be positive or negative with optional space after Z
     pattern = r'\$(\w+)\s+\$([0-9,]+(?:\.[0-9]+)?)\s+([\+\-][0-9\.]+)%\s+\|\s+([0-9\.]+)x\s+ATR\s+\|\s+Z\s+([\+\-]?[0-9\.]+)(?:\s+\|\s+([^|]+))?'
     
