@@ -203,7 +203,7 @@ def classify_long_entry(
         if not (vws > 0 and abs(vws) >= vws_min):
             return None
 
-    return "Breakout Signal"
+        return "Breakout"
 
 # === QUANT FORMATTER (L/E) ===
 def format_signal_line(
@@ -216,7 +216,7 @@ def format_signal_line(
     *,
     vwap_disp: float | None = None,
 ) -> str:
-    """Quant-style compact format: $SYMBOL $PRICE ±X.XX% | 4.73x ATR | Z 8.82 | VW+0.45 | Breakout Signal"""
+    """Quant-style compact format: $SYMBOL $PRICE ±X.XX% | 4.73x ATR | Z 8.82 | VW+0.45 | Breakout"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
     line = f"${symbol} {price_str} {dpp:+.2f}% | {tr_atr:.2f}x ATR | Z {z:.2f}"

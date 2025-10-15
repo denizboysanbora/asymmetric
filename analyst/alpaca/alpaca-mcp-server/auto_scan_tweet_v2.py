@@ -109,7 +109,7 @@ def parse_signal_metrics(signal):
     """Extract TR/ATR and Z-score from signal string for ranking."""
     import re
     
-    # Format: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout Signal
+    # Format: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout
     tr_atr_match = re.search(r'(\d+\.\d+)x\s+ATR', signal)
     z_match = re.search(r'Z\s+([\-\+]?\d+\.\d+)', signal)
     pct_match = re.search(r'([\-\+]\d+\.\d+)%', signal)
@@ -140,8 +140,8 @@ def select_best_signal(signals):
     best = ranked[0]
     best_signal = best[1]
     
-    # Check if it meets thresholds (has "| Breakout Signal" at the end)
-    meets_threshold = best_signal.endswith("| Breakout Signal")
+        # Check if it meets thresholds (has "| Breakout" at the end)
+        meets_threshold = best_signal.endswith("| Breakout")
     
     if meets_threshold:
         log(f"   ✅ Signal meets thresholds (TR/ATR={best[2]:.2f}, Z={best[3]:.2f}, %={best[4]:.2f})")

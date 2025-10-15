@@ -45,7 +45,7 @@ Comprehensive automated trading signal system that scans markets, tweets signals
 
 ## 📊 Signal Criteria
 
-### Stock Thresholds (to get "| Breakout Signal" designation)
+### Stock Thresholds (to get "| Breakout" designation)
 - **TR/ATR** > 2.0 (volatility 2x above average)
 - **Z-Score** > 2.0 (2 standard deviations)
 - **24h Change** > 2% (significant move)
@@ -59,12 +59,12 @@ Comprehensive automated trading signal system that scans markets, tweets signals
 If no signals meet thresholds:
 - System still selects the highest ranked signal
 - Ensures you don't miss important moves
-- Tagged without "| Breakout Signal"
+- Tagged without "| Breakout"
 
 ## 📈 Tweet Format
 
 ```
-$AAPL $247.54 +2.93% | 2.45x ATR | Z 3.27 | Breakout Signal
+$AAPL $247.54 +2.93% | 2.45x ATR | Z 3.27 | Breakout
 ```
 
 Components:
@@ -73,7 +73,7 @@ Components:
 - `±X.XX%` - 24-hour change
 - `X.XXx ATR` - True Range / Average True Range
 - `Z X.XX` - Z-score (volatility measure)
-- `| Breakout Signal` - Long breakout signal (if meets thresholds)
+- `| Breakout` - Long breakout signal (if meets thresholds)
 
 ## 🗄️ Database Schema
 

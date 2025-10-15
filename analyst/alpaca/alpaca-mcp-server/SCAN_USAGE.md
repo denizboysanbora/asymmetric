@@ -58,15 +58,15 @@ $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX
 
 **With signal:**
 ```
-$SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout Signal
+$SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout
 ```
 
-- **L** = Long signal (meets all criteria)
+- **Breakout** = Long signal (meets all criteria)
 - No indicator shown when criteria not met (cleaner display)
 
 ## Signal Criteria
 
-For a ticker to show **L** (all must pass):
+For a ticker to show **Breakout** (all must pass):
 - TR/ATR > 2.0
 - |Z-score| > 2.0  
 - |ΔP| > 2%

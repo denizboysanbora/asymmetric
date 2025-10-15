@@ -14,7 +14,7 @@ Investor monitors both crypto and stock markets every 5 minutes and:
 **Schedule:** Every 5 minutes (via cron)  
 **Email:** deniz@bora.box  
 **Subject:** "Signal" (for both crypto and stocks)  
-**Format:** `$SYMBOL $PRICE +X.XX% | X.XXx ATR | Z X.XX | Breakout Signal`  
+**Format:** `$SYMBOL $PRICE +X.XX% | X.XXx ATR | Z X.XX | Breakout`  
 **Tweets:** Rate limited (max 17 tweets per 24h)  
 **Note:** Each signal sent as separate email; tweets skipped if limit reached (emails always sent)  
 **Price Format:** No cents for $1,000+, with cents for under $1,000
@@ -42,16 +42,16 @@ Investor monitors both crypto and stock markets every 5 minutes and:
 - 📧 Immediate email to deniz@bora.box with subject "Signal" (one per signal)
 - 🐦 Immediate separate tweet for each crypto signal
 ```
-$BTC $67,450 +2.45% | 2.25x ATR | Z 2.24 | Breakout Signal
-$ETH $3,240 +2.78% | 2.38x ATR | Z 2.56 | Breakout Signal
+$BTC $67,450 +2.45% | 2.25x ATR | Z 2.24 | Breakout
+$ETH $3,240 +2.78% | 2.38x ATR | Z 2.56 | Breakout
 ```
 
 **Stock Signals (if triggered):**
 - 📧 Immediate email to deniz@bora.box with subject "Signal" (one per signal)
 - 🐦 Immediate separate tweet for each stock signal
 ```
-$NVDA $183.15 +2.52% | 2.18x ATR | Z 2.45 | Breakout Signal
-$AMD $142.34 +2.85% | 2.32x ATR | Z 2.67 | Breakout Signal
+$NVDA $183.15 +2.52% | 2.18x ATR | Z 2.45 | Breakout
+$AMD $142.34 +2.85% | 2.32x ATR | Z 2.67 | Breakout
 ```
 
 ## Files
