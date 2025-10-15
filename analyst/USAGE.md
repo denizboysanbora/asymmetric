@@ -2,19 +2,21 @@
 
 ## Quick Start
 
-### 1. Start the chat API (optional)
+### 1. Email & Social Media Setup
 
 ```bash
-cd /Users/deniz/Code/asymmetric/output/chat
-npm install
-npm run dev
-```
+# Gmail setup (if not already done)
+cd /Users/deniz/Code/asymmetric/output/gmail/scripts
+python3 gmail_auth.py
 
-The API will start on `http://localhost:5174`.
+# Twitter/X rate limit check
+cd /Users/deniz/Code/asymmetric/output/x/scripts
+python3 rate_limit_status.py
+```
 
 ### 2. Using the Web Interface
 
-Navigate to your frontend as configured, or query the chat API directly.
+Use the investor commands to scan, email, and tweet signals.
 
 Type commands in the chat interface:
 - `scan AAPL` - Scan Apple stock
@@ -235,12 +237,11 @@ The scanner uses `classify_long_entry()` from `compute_spike_params_stocks.py` t
 
 ## Troubleshooting
 
-### Server not starting
+### Gmail authentication issues
 
 ```bash
-cd /Users/deniz/Code/asymmetric/output/chat
-npm install  # Reinstall dependencies
-npm run dev
+cd /Users/deniz/Code/asymmetric/output/gmail/scripts
+python3 gmail_auth.py  # Re-run OAuth flow
 ```
 
 ### Python venv issues
@@ -285,8 +286,9 @@ python3 execute_command.py "scan AAPL"
 cd /Users/deniz/Code/asymmetric/analyst/alpaca/alpaca-mcp-server
 ./scan.sh TSLA
 
-# Test 3: Chat API (optional)
-curl -s http://localhost:5174/api/signals?limit=5 | jq .
+# Test 3: Twitter/X rate limits
+cd /Users/deniz/Code/asymmetric/output/x/scripts
+python3 rate_limit_status.py
 ```
 
 All three should return successful scan results.

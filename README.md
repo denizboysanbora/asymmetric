@@ -14,7 +14,6 @@ A modular trading and market analysis system organized into three main domains.
 ### `output/` - External Communication
 - **`gmail/`** - Email notifications and alerts
 - **`x/`** - Twitter/X posting with rate limiting
-- **`chat/`** - Web interface for signal visualization
 - **`email_btc_snapshot.py`** - BTC price email sender
 
 ### `investor/` - Trading Strategies
@@ -56,12 +55,11 @@ python3 execute_command.py "tweet NVDA"
 python3 output/email_btc_snapshot.py you@example.com
 ```
 
-### 4. Chat Interface
+### 4. Twitter/X Integration
 ```bash
-cd output/chat
-npm install
-npm run dev
-# API available at http://localhost:5174
+cd output/x/scripts
+python3 rate_limit_status.py  # Check rate limits
+python3 tweet_with_limit.py   # Send tweets with rate limiting
 ```
 
 ## Configuration
