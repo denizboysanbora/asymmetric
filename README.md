@@ -1,36 +1,93 @@
-# Investor Backend
+# Asymmetric Trading System
 
-This folder contains the backend logic for the Investor feature (formerly Trader).
+A modular trading and market analysis system organized into three main domains.
 
-## Contents
+## Structure
 
-- `execute_command.py` - Command executor for investor operations (scan/email/tweet)
+### `analyst/` - Market Data & Analysis
+- **`alpaca/`** - Alpaca Markets integration for real-time data
+- **`database/`** - SQLite database for signal storage
+- **`tests/`** - Unit tests for the system
+- **`fetch_btc_price.py`** - Live BTC price fetcher
+- **Shell scripts**: `start_auto_trader.sh`, `stop_auto_trader.sh`, `status.sh`
 
-## Commands
+### `output/` - External Communication
+- **`gmail/`** - Email notifications and alerts
+- **`x/`** - Twitter/X posting with rate limiting
+- **`chat/`** - Web interface for signal visualization
+- **`email_btc_snapshot.py`** - BTC price email sender
 
-The investor interface supports three commands:
-- `scan SYMBOL` - Scan a stock or crypto symbol
-- `email SYMBOL` - Send an email alert for a symbol
-- `tweet SYMBOL` - Tweet about a symbol
+### `investor/` - Trading Strategies
+- **`investor_backend/`** - Core command execution engine
+- **`trader/`** - Legacy trader tools and scripts
+- **`execute_command.py`** - Main entry point for investor commands
 
-## Dependencies
+## Quick Start
 
-This backend relies on scripts from the `asymmetric/` folder:
-- Scan scripts in `asymmetric/alpaca/alpaca-mcp-server/`
-- Email scripts in `asymmetric/gmail/`
-- Tweet scripts in `asymmetric/x/`
+### 1. Market Data Analysis
+```bash
+# Start automated scanning
+cd analyst
+./start_auto_trader.sh
 
-## Usage
+# Check status
+./status.sh
 
-The `execute_command.py` script is called from the Next.js API route at `/api/investor`.
+# Stop scanning
+./stop_auto_trader.sh
+```
 
-## Setup
+### 2. Investor Commands
+```bash
+# Scan a stock
+cd investor
+python3 execute_command.py "scan AAPL"
 
-1. Use Python 3.10 or newer (the MCP SDK requires 3.10+). We recommend Homebrew's `python3.11`.
-2. Create a virtual environment in the repo root: `python3.11 -m venv .venv`.
-3. Install the trading dependencies: `pip install -r alpaca/alpaca-mcp-server/requirements.txt`.
-4. Activate the environment whenever you run the investor scripts.
+# Email a signal
+python3 execute_command.py "email TSLA"
 
-Environment variables:
-- `INVESTOR_COMMAND_SCRIPT` - Path to execute_command.py (optional, auto-detected)
-- `INVESTOR_PYTHON_BIN` - Path to Python interpreter (optional, defaults to system python3)
+# Tweet a signal
+python3 execute_command.py "tweet NVDA"
+```
+
+### 3. BTC Email Test
+```bash
+# Send live BTC price email (requires Gmail auth)
+python3 output/email_btc_snapshot.py you@example.com
+```
+
+### 4. Chat Interface
+```bash
+cd output/chat
+npm install
+npm run dev
+# API available at http://localhost:5174
+```
+
+## Configuration
+
+### Required Credentials
+1. **Alpaca API**: `analyst/alpaca/alpaca-mcp-server/.env`
+2. **Gmail API**: `output/gmail/config/token.json`
+3. **Twitter API**: `output/x/config/` (optional)
+
+### Gmail Setup
+```bash
+cd output/gmail/scripts
+python3 gmail_auth.py
+# Follow OAuth flow to generate token.json
+```
+
+## Documentation
+- **Setup**: `analyst/SETUP_FIXES.md`
+- **Usage**: `analyst/USAGE.md`
+- **System**: `analyst/SYSTEM_SUMMARY.md`
+
+## Key Features
+- Real-time market data via Alpaca
+- Technical analysis with ATR and Z-scores
+- Automated scanning (stocks weekdays, crypto weekends)
+- Rate-limited social media posting
+- Email notifications
+- SQLite signal storage
+- Web-based signal visualization

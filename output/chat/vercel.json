@@ -1,0 +1,21 @@
+{
+  "buildCommand": "npm run build",
+  "outputDirectory": "dist",
+  "rewrites": [
+    {
+      "source": "/api/signals/latest",
+      "destination": "/api/signals/latest.js"
+    },
+    {
+      "source": "/api/signals",
+      "destination": "/api/signals.js"
+    }
+  ],
+  "functions": {
+    "api/**/*.js": {
+      "memory": 1024,
+      "maxDuration": 10
+    }
+  }
+}
+
