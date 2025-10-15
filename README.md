@@ -8,13 +8,11 @@ A modular trading and market analysis system organized into three main domains.
 - **`alpaca/`** - Alpaca Markets integration for real-time data
 - **`database/`** - SQLite database for signal storage
 - **`tests/`** - Unit tests for the system
-- **`fetch_btc_price.py`** - Live BTC price fetcher
 - **Shell scripts**: `start_auto_trader.sh`, `stop_auto_trader.sh`, `status.sh`
 
 ### `output/` - External Communication
 - **`gmail/`** - Email notifications and alerts
 - **`x/`** - Twitter/X posting with rate limiting
-- **`email_btc_snapshot.py`** - BTC price email sender
 
 ### `investor/` - Trading Strategies
 - **`investor_backend/`** - Core command execution engine
@@ -51,8 +49,6 @@ python3 execute_command.py "tweet NVDA"
 
 ### 3. BTC Email Test
 ```bash
-# Send live BTC price email (requires Gmail auth)
-python3 output/email_btc_snapshot.py you@example.com
 ```
 
 ### 4. Twitter/X Integration

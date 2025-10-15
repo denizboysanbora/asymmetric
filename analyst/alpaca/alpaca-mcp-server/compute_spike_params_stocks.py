@@ -328,9 +328,10 @@ def main():
         
         # Classify
         sig = classify_long_entry(tr_atr, z, dpp, "stocks")
-        if sig:
-            signal_line = format_signal_line(sym, closes[-1], dpp, tr_atr, z, sig)
-            signals.append(signal_line)
+        
+        # Always show data in requested format: $SYMBOL $PRICE +X.XX% | X.XXx ATR | Z X.XX
+        signal_line = format_signal_line(sym, closes[-1], dpp, tr_atr, z, None)  # No "| Breakout" suffix
+        signals.append(signal_line)
     
     for s in signals:
         print(s)

@@ -302,6 +302,5 @@ Check the setup documentation in `SETUP_FIXES.md` for recent changes and fixes.
 To send yourself a live BTC snapshot email (requires `output/gmail/config/token.json`):
 
 ```bash
-python3 output/email_btc_snapshot.py you@example.com
 ```
 
