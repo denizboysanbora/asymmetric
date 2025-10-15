@@ -58,7 +58,7 @@ $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX
 
 **With signal:**
 ```
-$SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | L
+$SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout Signal
 ```
 
 - **L** = Long signal (meets all criteria)

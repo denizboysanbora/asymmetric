@@ -45,7 +45,7 @@ echo "[$TIMESTAMP] Investor monitor starting..." | tee -a "$LOG_FILE"
 CRYPTO_SIGNALS=$($ALPACA_PY $CRYPTO_SCRIPT 2>&1 \
     | grep -v "Scanning" \
     | grep -v "Warning" \
-    | grep ' | L$' || true)
+    | grep ' | Breakout Signal$' || true)
 
 if [ -n "$CRYPTO_SIGNALS" ]; then
     # Send each crypto signal as separate email and log to database
@@ -65,7 +65,7 @@ fi
 STOCKS_SIGNALS=$($ALPACA_PY $STOCKS_SCRIPT 2>&1 \
     | grep -v "Scanning" \
     | grep -v "Warning" \
-    | grep ' | L$' || true)
+    | grep ' | Breakout Signal$' || true)
 
 STOCK_EMAILS_ENABLED=0
 MARKET_STATUS=""

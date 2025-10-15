@@ -45,7 +45,7 @@ Comprehensive automated trading signal system that scans markets, tweets signals
 
 ## 📊 Signal Criteria
 
-### Stock Thresholds (to get "| L" or "| S" designation)
+### Stock Thresholds (to get "| Breakout Signal" designation)
 - **TR/ATR** > 2.0 (volatility 2x above average)
 - **Z-Score** > 2.0 (2 standard deviations)
 - **24h Change** > 2% (significant move)
@@ -59,7 +59,7 @@ Comprehensive automated trading signal system that scans markets, tweets signals
 If no signals meet thresholds:
 - System still selects the highest ranked signal
 - Ensures you don't miss important moves
-- Tagged without "| L" or "| S"
+- Tagged without "| Breakout Signal"
 
 ## 📈 Tweet Format
 
@@ -73,7 +73,7 @@ Components:
 - `±X.XX%` - 24-hour change
 - `X.XXx ATR` - True Range / Average True Range
 - `Z X.XX` - Z-score (volatility measure)
-- `| Breakout Signal` or `| S` - Long breakout or Short signal (if meets thresholds)
+- `| Breakout Signal` - Long breakout signal (if meets thresholds)
 
 ## 🗄️ Database Schema
 

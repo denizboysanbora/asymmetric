@@ -30,8 +30,6 @@ export const formatSignalLine = (signal: SignalRecord) => {
     // Handle both old "L" format and new "Breakout Signal" format
     if (code === "L") {
       line += ` | Breakout Signal`;
-    } else if (code === "S") {
-      line += ` | ${code}`; // Keep "S" for short signals
     } else {
       line += ` | ${code}`;
     }
