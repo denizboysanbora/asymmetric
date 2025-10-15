@@ -281,8 +281,13 @@ def main():
     stock_client = StockHistoricalDataClient(os.getenv('ALPACA_API_KEY'), os.getenv('ALPACA_SECRET_KEY'))
     now = datetime.now()
     
-    # Get liquid stocks dynamically
-    stock_symbols = get_liquid_stocks()
+    # Optional single-symbol override via CLI: --symbol TSLA
+    symbol_override = None
+    if len(sys.argv) >= 3 and sys.argv[1] == '--symbol':
+        symbol_override = sys.argv[2].upper().strip()
+
+    # Get liquid stocks dynamically (or override)
+    stock_symbols = [symbol_override] if symbol_override else get_liquid_stocks()
     print(f"Scanning {len(stock_symbols)} stocks...", file=sys.stderr)
     
     # Fetch 5-min bars for last 24 hours (use default feed - works with free tier)
