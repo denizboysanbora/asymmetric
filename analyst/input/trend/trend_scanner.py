@@ -7,6 +7,7 @@ import os
 import sys
 import numpy as np
 from datetime import datetime, timedelta
+import json
 from pathlib import Path
 
 # Add alpaca directory to path
@@ -225,6 +226,19 @@ def main():
             return
         
         print(f"Found {len(movers)} trending stocks", file=sys.stderr)
+        
+        # Persist asset classifications for orchestrator use
+        state_dir = Path(__file__).parent / "state"
+        state_dir.mkdir(parents=True, exist_ok=True)
+        state_path = state_dir / "last_trends.json"
+        try:
+            state_payload = [{
+                "symbol": item["symbol"],
+                "asset_type": item.get("asset_type", "stock")
+            } for item in movers]
+            state_path.write_text(json.dumps(state_payload, indent=2))
+        except Exception as e:
+            print(f"Warning: could not write trend state: {e}", file=sys.stderr)
         
         # Output formatted signals
         for mover in movers:

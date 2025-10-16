@@ -81,6 +81,8 @@ BREAKOUT_OUTPUT=$($BREAKOUT_PY $BREAKOUT_SCRIPT 2>&1) || {
 }
 
 BREAKOUT_SIGNALS=$(echo "$BREAKOUT_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep ' | Breakout$' || true)
+# Pick top breakout by absolute % move
+TOP_BREAKOUT=$(echo "$BREAKOUT_SIGNALS" | awk 'match($0, /([+-][0-9]+(\.[0-9]+)?)%/, m){v=m[1]; gsub("\\+","",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
 BREAKOUT_COUNT=$(echo "$BREAKOUT_SIGNALS" | wc -l)
 
 if [ -n "$BREAKOUT_SIGNALS" ]; then
@@ -101,11 +103,13 @@ if [ -n "$BREAKOUT_SIGNALS" ]; then
                 echo "[$TIMESTAMP] ❌ Breakout email failed: $signal" | tee -a "$LOG_FILE"
             fi
             
-            # Send tweet
-            if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
-                echo "[$TIMESTAMP] 🐦 Breakout tweet sent: $signal" | tee -a "$LOG_FILE"
-            else
-                echo "[$TIMESTAMP] ❌ Breakout tweet failed: $signal" | tee -a "$LOG_FILE"
+            # Tweet only the TOP breakout
+            if [ "$signal" = "$TOP_BREAKOUT" ]; then
+                if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
+                    echo "[$TIMESTAMP] 🐦 Breakout tweet sent (top): $signal" | tee -a "$LOG_FILE"
+                else
+                    echo "[$TIMESTAMP] ❌ Breakout tweet failed (top): $signal" | tee -a "$LOG_FILE"
+                fi
             fi
             
             # Log to database
@@ -126,13 +130,21 @@ TREND_OUTPUT=$($TREND_PY $TREND_SCRIPT 2>&1) || {
     TREND_OUTPUT=""
 }
 
-TREND_SIGNALS=$(echo "$TREND_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep '^$[A-Z]' || true)
+TREND_SIGNALS=$(echo "$TREND_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep '^\$[A-Z0-9]' || true)
+# Pick top trend by absolute % move
+TOP_TREND=$(echo "$TREND_SIGNALS" | awk 'match($0, /([+-][0-9]+(\.[0-9]+)?)%/, m){v=m[1]; gsub("\\+","",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
 TREND_COUNT=$(echo "$TREND_SIGNALS" | wc -l)
 
 if [ -n "$TREND_SIGNALS" ]; then
     echo "[$TIMESTAMP] 📊 Trend signals detected!" | tee -a "$LOG_FILE"
     echo "$TREND_SIGNALS" | while IFS= read -r signal; do
         if [ -n "$signal" ]; then
+            # Determine asset class for trend: check against crypto majors
+            SYMBOL_ONLY=$(echo "$signal" | awk '{print $1}' | sed 's/^\$//')
+            case ",BTC,ETH,SOL,XRP,DOGE,ADA,AVAX,LTC,DOT,LINK,UNI,ATOM,BNB,TON,SHIB,TRX,NEAR,ICP,XLM,XMR,APT,SUI,ARB,OP," in
+              *",${SYMBOL_ONLY},"*) asset_class="crypto" ;;
+              *) asset_class="stock" ;;
+            esac
             # Send email
             if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Trend" "$signal" 2>/dev/null; then
                 echo "[$TIMESTAMP] 📧 Trend email sent: $signal" | tee -a "$LOG_FILE"
@@ -140,15 +152,17 @@ if [ -n "$TREND_SIGNALS" ]; then
                 echo "[$TIMESTAMP] ❌ Trend email failed: $signal" | tee -a "$LOG_FILE"
             fi
             
-            # Send tweet
-            if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
-                echo "[$TIMESTAMP] 🐦 Trend tweet sent: $signal" | tee -a "$LOG_FILE"
-            else
-                echo "[$TIMESTAMP] ❌ Trend tweet failed: $signal" | tee -a "$LOG_FILE"
+            # Tweet logic: only tweet trend if there were NO breakouts, and only the TOP trend
+            if [ -z "$TOP_BREAKOUT" ] && [ "$signal" = "$TOP_TREND" ]; then
+                if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
+                    echo "[$TIMESTAMP] 🐦 Trend tweet sent (top, fallback): $signal" | tee -a "$LOG_FILE"
+                else
+                    echo "[$TIMESTAMP] ❌ Trend tweet failed (top, fallback): $signal" | tee -a "$LOG_FILE"
+                fi
             fi
             
             # Log to database
-            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "stock" "Trending" 2>/dev/null || true
+            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "$asset_class" "Trending" 2>/dev/null || true
         fi
     done
 else

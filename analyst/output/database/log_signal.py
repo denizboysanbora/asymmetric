@@ -9,6 +9,8 @@ import os
 import sys
 import re
 from datetime import datetime
+import json
+import requests
 
 DB_PATH = os.path.join(os.path.dirname(__file__), 'signals.db')
 
@@ -63,20 +65,67 @@ def log_signal(signal_text, asset_class, signal_type_override=None):
     # Use override if provided
     if signal_type_override:
         signal_type = signal_type_override
-    
+
+    # Prepare row for DBs
+    local_timestamp = datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S')
+    row = {
+        "timestamp": local_timestamp,
+        "symbol": symbol,
+        "price": float(price),
+        "change_pct": float(change_pct),
+        "tr_atr": float(tr_atr),
+        "z_score": float(z_score),
+        "signal_type": str(signal_type),
+        "asset_class": str(asset_class),
+    }
+
+    # Try Supabase first (if configured)
+    supabase_url = os.getenv("SUPABASE_URL")
+    supabase_key = (
+        os.getenv("SUPABASE_SERVICE_KEY")
+        or os.getenv("SUPABASE_ANON_KEY")
+        or os.getenv("SUPABASE_KEY")
+    )
+    supabase_ok = False
+    if supabase_url and supabase_key:
+        try:
+            endpoint = supabase_url.rstrip('/') + "/rest/v1/signals"
+            headers = {
+                "apikey": supabase_key,
+                "Authorization": f"Bearer {supabase_key}",
+                "Content-Type": "application/json",
+                "Prefer": "return=representation",
+            }
+            resp = requests.post(endpoint, headers=headers, data=json.dumps(row), timeout=10)
+            if 200 <= resp.status_code < 300:
+                supabase_ok = True
+            else:
+                print(f"Supabase insert failed: {resp.status_code} {resp.text}", file=sys.stderr)
+        except Exception as e:
+            print(f"Supabase insert error: {e}", file=sys.stderr)
+
+    # Always write to local SQLite as well (fallback + local history)
     conn = sqlite3.connect(DB_PATH)
     cursor = conn.cursor()
-    local_timestamp = datetime.now().astimezone().strftime('%Y-%m-%d %H:%M:%S')
     
     try:
         cursor.execute("""
             INSERT INTO signals 
             (timestamp, symbol, price, change_pct, tr_atr, z_score, signal_type, asset_class)
             VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (local_timestamp, symbol, price, change_pct, tr_atr, z_score, signal_type, asset_class))
+        """, (
+            row["timestamp"],
+            row["symbol"],
+            row["price"],
+            row["change_pct"],
+            row["tr_atr"],
+            row["z_score"],
+            row["signal_type"],
+            row["asset_class"],
+        ))
         
         conn.commit()
-        return True
+        return True if supabase_ok else True  # True regardless; Supabase is best-effort
     except Exception as e:
         print(f"Error logging signal: {e}", file=sys.stderr)
         return False
