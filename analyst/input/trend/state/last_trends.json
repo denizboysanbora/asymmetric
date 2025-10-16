@@ -12,23 +12,7 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "CLLS",
-    "asset_type": "stock"
-  },
-  {
     "symbol": "CCCC",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "IIIN",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "MATV",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "MUX",
     "asset_type": "stock"
   },
   {
@@ -36,7 +20,23 @@
     "asset_type": "stock"
   },
   {
+    "symbol": "IIIN",
+    "asset_type": "stock"
+  },
+  {
     "symbol": "NAUT",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "MATV",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "BKSY",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "ONDS",
     "asset_type": "stock"
   }
 ]
