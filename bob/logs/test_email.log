@@ -1,0 +1,11 @@
+[2025-10-16 16:10:53,475] INFO 🧪 Testing email functionality...
+[2025-10-16 16:10:53,477] INFO 📧 Sending test email with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:10:53,477] ERROR ❌ Test email failed: send_email() missing 2 required positional arguments: 'subject' and 'body'
+[2025-10-16 16:11:17,850] INFO 🧪 Testing email functionality...
+[2025-10-16 16:11:17,851] INFO 📧 Sending test email with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:11:17,855] INFO file_cache is only supported with oauth2client<4.0.0
+[2025-10-16 16:11:18,562] INFO ✅ Test email sent successfully!
+[2025-10-16 16:14:05,115] INFO 🧪 Testing email functionality...
+[2025-10-16 16:14:05,116] INFO 📧 Sending test email with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:14:05,119] INFO file_cache is only supported with oauth2client<4.0.0
+[2025-10-16 16:14:05,759] INFO ✅ Test email sent successfully!

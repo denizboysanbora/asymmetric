@@ -136,7 +136,9 @@ def send_notifications(signal_line):
     
     try:
         # Send email
-        send_email(signal_line)
+        recipient = os.getenv('GMAIL_RECIPIENT', 'deniz@bora.box')
+        subject = "Breakout" if "Breakout" in signal_line else "Trend"
+        send_email(recipient, subject, signal_line)
         logger.info(f"📧 Email sent: {signal_line}")
     except Exception as e:
         logger.error(f"❌ Email failed: {e}")
