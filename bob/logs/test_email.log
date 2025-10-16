@@ -15,3 +15,9 @@
 [2025-10-16 16:15:50,901] INFO ✅ Test email sent successfully!
 [2025-10-16 16:15:50,901] INFO 🐦 Sending test tweet with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
 [2025-10-16 16:15:51,004] INFO ✅ Test tweet sent successfully!
+[2025-10-16 16:16:37,309] INFO 🧪 Testing email functionality...
+[2025-10-16 16:16:37,310] INFO 📧 Sending test email with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:16:37,312] INFO file_cache is only supported with oauth2client<4.0.0
+[2025-10-16 16:16:38,004] INFO ✅ Test email sent successfully!
+[2025-10-16 16:16:38,004] INFO 🐦 Sending test tweet with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:16:38,096] INFO ✅ Test tweet sent successfully!
