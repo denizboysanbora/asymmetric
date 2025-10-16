@@ -1,0 +1,25 @@
+# Bob Market Analyst Dependencies
+# Core dependencies
+numpy>=1.24.0
+pandas>=2.0.0
+requests>=2.31.0
+python-dotenv>=1.0.0
+
+# Alpaca API
+alpaca-py>=0.42.0
+
+# Supabase
+supabase>=2.0.0
+
+# Gmail API
+google-auth>=2.17.0
+google-auth-oauthlib>=1.0.0
+google-auth-httplib2>=0.1.0
+google-api-python-client>=2.88.0
+
+# Twitter API
+tweepy>=4.14.0
+
+# Additional utilities
+python-dateutil>=2.8.0
+pytz>=2023.3
