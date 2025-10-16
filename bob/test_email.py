@@ -14,7 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import analyst modules
 from output.gmail.send_email import send_email
-from output.tweet.post_text_oauth1 import post_tweet
+import subprocess
 
 # Set up logging
 logging.basicConfig(
@@ -49,10 +49,17 @@ def test_email():
         send_email(recipient, subject, body)
         logger.info("✅ Test email sent successfully!")
         
-        # Also send as tweet
+        # Also send as tweet using same approach as analyst (subprocess call)
         logger.info(f"🐦 Sending test tweet with signal: {test_signal}")
-        post_tweet(test_signal)
-        logger.info("✅ Test tweet sent successfully!")
+        tweet_script = os.path.join(os.path.dirname(__file__), 'output', 'tweet', 'tweet_with_limit.py')
+        result = subprocess.run(['python3', tweet_script, test_signal], 
+                              capture_output=True, text=True, cwd=os.path.dirname(__file__))
+        if result.returncode == 0:
+            logger.info("✅ Test tweet sent successfully!")
+            if result.stdout.strip():
+                logger.info(f"   ↳ {result.stdout.strip()}")
+        else:
+            logger.error(f"❌ Tweet failed: {result.stderr}")
         
     except Exception as e:
         logger.error(f"❌ Test failed: {e}")

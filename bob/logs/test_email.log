@@ -21,3 +21,15 @@
 [2025-10-16 16:16:38,004] INFO ✅ Test email sent successfully!
 [2025-10-16 16:16:38,004] INFO 🐦 Sending test tweet with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
 [2025-10-16 16:16:38,096] INFO ✅ Test tweet sent successfully!
+[2025-10-16 16:19:00,319] INFO 🧪 Testing email functionality...
+[2025-10-16 16:19:00,320] INFO 📧 Sending test email with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:19:00,323] INFO file_cache is only supported with oauth2client<4.0.0
+[2025-10-16 16:19:00,917] INFO ✅ Test email sent successfully!
+[2025-10-16 16:19:00,918] INFO 🐦 Sending test tweet with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:19:00,918] ERROR ❌ Test failed: main() takes 0 positional arguments but 1 was given
+[2025-10-16 16:19:20,315] INFO 🧪 Testing email functionality...
+[2025-10-16 16:19:20,317] INFO 📧 Sending test email with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:19:20,320] INFO file_cache is only supported with oauth2client<4.0.0
+[2025-10-16 16:19:20,925] INFO ✅ Test email sent successfully!
+[2025-10-16 16:19:20,926] INFO 🐦 Sending test tweet with signal: $AAPL $150.25 +2.45% | 65 RSI | 2.25x ATR | Z 1.85 | Breakout
+[2025-10-16 16:19:21,501] INFO ✅ Test tweet sent successfully!

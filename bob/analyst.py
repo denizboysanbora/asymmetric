@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 from input.alpaca.compute_spike_params_stocks import main as run_scanner
 from output.database.log_signal import log_signal
 from output.gmail.send_email import send_email
-from output.tweet.post_text_oauth1 import post_tweet
+import subprocess
 
 # Set up logging
 logging.basicConfig(
@@ -148,9 +148,16 @@ def send_notifications(signal_line):
         logger.info("🧪 Twitter notifications disabled during testing")
     else:
         try:
-            # Send tweet
-            post_tweet(signal_line)
-            logger.info(f"🐦 Tweet sent: {signal_line}")
+            # Send tweet using same approach as analyst (subprocess call)
+            tweet_script = os.path.join(os.path.dirname(__file__), 'output', 'tweet', 'tweet_with_limit.py')
+            result = subprocess.run(['python3', tweet_script, signal_line], 
+                                  capture_output=True, text=True, cwd=os.path.dirname(__file__))
+            if result.returncode == 0:
+                logger.info(f"🐦 Tweet sent: {signal_line}")
+                if result.stdout.strip():
+                    logger.info(f"   ↳ {result.stdout.strip()}")
+            else:
+                logger.error(f"❌ Tweet failed: {result.stderr}")
         except Exception as e:
             logger.error(f"❌ Tweet failed: {e}")
 
