@@ -14,6 +14,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 
 # Import analyst modules
 from output.gmail.send_email import send_email
+from output.tweet.post_text_oauth1 import post_tweet
 
 # Set up logging
 logging.basicConfig(
@@ -48,8 +49,13 @@ def test_email():
         send_email(recipient, subject, body)
         logger.info("✅ Test email sent successfully!")
         
+        # Also send as tweet
+        logger.info(f"🐦 Sending test tweet with signal: {test_signal}")
+        post_tweet(test_signal)
+        logger.info("✅ Test tweet sent successfully!")
+        
     except Exception as e:
-        logger.error(f"❌ Test email failed: {e}")
+        logger.error(f"❌ Test failed: {e}")
         raise
 
 if __name__ == "__main__":

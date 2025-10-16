@@ -132,7 +132,7 @@ def parse_scanner_output(output):
 def send_notifications(signal_line):
     """Send email and tweet notifications"""
     # Testing mode - disable Twitter notifications
-    TESTING_MODE = os.getenv('BOB_TESTING_MODE', 'true').lower() == 'true'
+    TESTING_MODE = os.getenv('BOB_TESTING_MODE', 'false').lower() == 'true'
     
     try:
         # Send email
