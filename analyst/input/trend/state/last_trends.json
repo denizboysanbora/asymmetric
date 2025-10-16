@@ -1,0 +1,42 @@
+[
+  {
+    "symbol": "ARDX",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "DOCN",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "QSI",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "CPNG",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "DNA",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "CLSK",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "TRUE",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "EU",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "EVLV",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "CGC",
+    "asset_type": "stock"
+  }
+]

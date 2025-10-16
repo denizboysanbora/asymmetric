@@ -139,12 +139,8 @@ if [ -n "$TREND_SIGNALS" ]; then
     echo "[$TIMESTAMP] 📊 Trend signals detected!" | tee -a "$LOG_FILE"
     echo "$TREND_SIGNALS" | while IFS= read -r signal; do
         if [ -n "$signal" ]; then
-            # Determine asset class for trend: check against crypto majors
-            SYMBOL_ONLY=$(echo "$signal" | awk '{print $1}' | sed 's/^\$//')
-            case ",BTC,ETH,SOL,XRP,DOGE,ADA,AVAX,LTC,DOT,LINK,UNI,ATOM,BNB,TON,SHIB,TRX,NEAR,ICP,XLM,XMR,APT,SUI,ARB,OP," in
-              *",${SYMBOL_ONLY},"*) asset_class="crypto" ;;
-              *) asset_class="stock" ;;
-            esac
+            # Stock-only system: asset class is always stock
+            asset_class="stock"
             # Send email
             if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Trend" "$signal" 2>/dev/null; then
                 echo "[$TIMESTAMP] 📧 Trend email sent: $signal" | tee -a "$LOG_FILE"
