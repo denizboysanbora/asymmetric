@@ -57,14 +57,17 @@ def analyze(
     
     try:
         # Load configuration
-        if config_path:
+        try:
             cfg = load_config(config_path)
-        else:
+        except (FileNotFoundError, ValueError) as e:
+            logger.warning(f"Could not load config file: {e}")
+            logger.info("Using default configuration")
             cfg = get_default_config()
         
         logger.info("🚀 Starting Qullamaggie analysis...")
         
         # Get universe
+        logger.info(f"Universe mode: {cfg.universe.mode}")
         if cfg.universe.mode == "dynamic":
             logger.info("Fetching dynamic universe from Alpaca...")
             symbols = get_dynamic_universe(

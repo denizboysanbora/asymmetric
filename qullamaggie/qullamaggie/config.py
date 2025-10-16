@@ -134,16 +134,14 @@ def load_config(config_path: Optional[str] = None) -> Config:
     # Load environment variables first
     load_dotenv()
     
-    # Check for API keys
+    # Check for API keys (only required for dynamic universe)
     api_key = os.getenv('ALPACA_API_KEY')
     secret_key = os.getenv('ALPACA_SECRET_KEY')
     
-    if not api_key or not secret_key:
-        raise ValueError(
-            "Missing Alpaca API credentials. Please set ALPACA_API_KEY and ALPACA_SECRET_KEY "
-            "in your .env file or environment variables.\n"
-            "Get your free API keys at: https://alpaca.markets/"
-        )
+    # We'll check if API keys are actually needed after loading config
+    api_keys_available = bool(api_key and secret_key and 
+                             api_key != 'your_alpaca_api_key_here' and 
+                             secret_key != 'your_alpaca_secret_key_here')
     
     # Determine config file path
     if config_path is None:
@@ -163,7 +161,18 @@ def load_config(config_path: Optional[str] = None) -> Config:
     
     # Create config object with validation
     try:
-        return Config(**config_data)
+        config = Config(**config_data)
+        
+        # Check API keys only if dynamic universe mode is used
+        if config.universe.mode == "dynamic" and not api_keys_available:
+            raise ValueError(
+                "Missing Alpaca API credentials for dynamic universe. Please set ALPACA_API_KEY and ALPACA_SECRET_KEY "
+                "in your .env file or environment variables.\n"
+                "Get your free API keys at: https://alpaca.markets/\n"
+                "Or switch to static universe mode in config.yaml"
+            )
+        
+        return config
     except Exception as e:
         raise ValueError(f"Config validation failed: {e}")
 
