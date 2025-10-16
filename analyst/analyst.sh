@@ -23,6 +23,11 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 # Repo root (two levels up from analyst/): .../asymmetric
 ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
+# Load environment variables
+if [ -f "$SCRIPT_DIR/config/api_keys.env" ]; then
+    source "$SCRIPT_DIR/config/api_keys.env"
+fi
+
 # Directories
 INPUT_DIR="$SCRIPT_DIR/input"
 OUTPUT_DIR="$SCRIPT_DIR/output"
@@ -100,12 +105,8 @@ if [ -n "$BREAKOUT_SIGNALS" ]; then
     SIGNAL_TO_SEND="$TOP_BREAKOUT"
     SIGNAL_TYPE="Breakout"
     
-    # Determine asset class for the top breakout
-    if echo "$TOP_BREAKOUT" | grep -q "BTC\|ETH\|SOL\|XRP\|DOGE\|ADA\|AVAX\|LTC\|DOT\|LINK\|UNI\|ATOM"; then
-        SIGNAL_ASSET_CLASS="crypto"
-    else
-        SIGNAL_ASSET_CLASS="stock"
-    fi
+    # All signals are now stock-only
+    SIGNAL_ASSET_CLASS="stock"
     
     echo "[$TIMESTAMP] Selected breakout signal: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
 else
@@ -154,8 +155,13 @@ fi
 if [ -n "$SIGNAL_TO_SEND" ]; then
     echo "[$TIMESTAMP] 📤 Sending notifications for selected signal..." | tee -a "$LOG_FILE"
     
-    # Send email
-    if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Signal" "$SIGNAL_TO_SEND" 2>/dev/null; then
+    # Send email with appropriate subject based on signal type
+    EMAIL_SUBJECT="Breakout"
+    if [[ "$SIGNAL_TYPE" == "Trend" ]]; then
+        EMAIL_SUBJECT="Trend"
+    fi
+    
+    if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "$EMAIL_SUBJECT" "$SIGNAL_TO_SEND" 2>/dev/null; then
         echo "[$TIMESTAMP] 📧 Email sent: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
     else
         echo "[$TIMESTAMP] ❌ Email failed: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"

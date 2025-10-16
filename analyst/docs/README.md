@@ -6,14 +6,14 @@ A comprehensive automated trading system with two distinct modes: **Analyst** (m
 
 ### **Analyst Mode** - Market Analysis & Signal Generation
 - **Purpose**: Scan markets and generate trading signals
-- **Schedule**: 8 AM - 5 PM Eastern Time
+- **Schedule**: 10 AM - 4 PM Eastern Time
 - **Assets**: Both stocks and crypto
 - **Outputs**: Email alerts + Twitter posts
 - **No Trading**: Pure analysis and signal generation
 
 ### **Investor Mode** - Trading Execution & Portfolio Management  
 - **Purpose**: Execute trades based on analyst signals
-- **Schedule**: 8 AM - 5 PM Eastern Time
+- **Schedule**: 10 AM - 4 PM Eastern Time
 - **Function**: Uses Alpaca API for actual market transactions
 - **Trading Logic**: Buy/sell decisions based on analyst signals
 
@@ -112,14 +112,14 @@ Examples:
    - Rate limited: 17 tweets per 24 hours
    - Individual tweets for each signal
 
-3. **Database Logging** (SQLite)
+3. **Database Logging** (Supabase)
    - Stores all signals with timestamps
-   - Tracks: symbol, price, change%, TR/ATR, Z-score, signal type, asset class
+   - Tracks: symbol, price, change%, RSI, TR/ATR, Z-score, signal type, asset class
 
 ## ⏰ Schedule & Automation
 
 ### Operating Hours
-- **Schedule**: 8 AM - 5 PM Eastern Time
+- **Schedule**: 10 AM - 4 PM Eastern Time
 - **Both modes**: Analyst and Investor run during these hours
 - **Market awareness**: Only processes stocks during market hours
 
@@ -145,8 +145,9 @@ Examples:
 
 ### Database Setup
 ```bash
-cd analyst/database
-python3 init_db.py
+# Set Supabase environment variables
+export SUPABASE_URL="your_supabase_url"
+export SUPABASE_SERVICE_KEY="your_supabase_service_key"
 ```
 
 ## 📈 Monitoring
@@ -162,11 +163,11 @@ tail -f investor/logs/investor.log
 
 ### Database Queries
 ```bash
-# View recent signals
-sqlite3 analyst/database/signals.db "SELECT * FROM signals ORDER BY timestamp DESC LIMIT 10;"
+# View recent signals (via Supabase dashboard or API)
+# Access your Supabase dashboard to query the signals table
 
 # Count signals by asset class
-sqlite3 analyst/database/signals.db "SELECT asset_class, COUNT(*) FROM signals GROUP BY asset_class;"
+# Use Supabase SQL editor or API to run queries
 ```
 
 ### Rate Limiting

@@ -66,45 +66,6 @@ THRESHOLDS = {
         "exit_score_min": 2,              # require at least 2 conditions to fire exit
     },
 
-    "crypto": {
-        # Same base gates for 5m crypto
-        "breakout_tr_atr": 2.0,
-        "breakout_z": 2.5,
-        "breakout_dp": 0.03,
-        "use_geq": False,
-
-        # No exchange "cash open"
-        "mute_first_minutes": 0,
-
-        # Intrabar confirmations (slightly looser retrace for noise)
-        "persistence_bars": 2,
-        "follow_through_dp": 0.006,   # +0.60%
-        "retrace_cap_dp": 0.003,      # 0.30%
-
-        # VWAP confirmation
-        "vwap_disp_dp": 0.005,        # +0.50%
-        "vwap_slope_min_dp": 0.000,   # disabled
-
-        # Gap-like (only if you emulate sessions)
-        "gap_threshold": 0.04,
-        "gap_follow_through_dp": 0.008,
-        "gap_retrace_cap_dp": 0.003,
-
-        # Exit (slightly looser for crypto noise)
-        "exit_min_vwap_disp_dp": 0.0025,
-        "exit_backslide_dp": 0.004,
-        "exit_retrace_breach_dp": 0.005,
-        "exit_persist_window": 3,
-        "exit_neg_bars": 2,
-        "exit_z_floor": 1.0,
-        "exit_tratr_floor": None,
-        "exit_score_min": 2,
-
-        "early_minutes": 0,
-        "early_breakout_tr_atr": None,
-        "early_breakout_z": None,
-        "early_breakout_dp": None,
-    },
 }
 
 def _cmp(x: float, thresh: float, geq: bool) -> bool:
@@ -212,20 +173,45 @@ def classify_long_entry(
         return "Breakout"
 
 # === QUANT FORMATTER (L/E) ===
+def calculate_rsi(prices: np.ndarray, period: int = 14) -> float:
+    """Calculate RSI (Relative Strength Index) for given price array."""
+    if len(prices) < period + 1:
+        return 50.0  # Default neutral RSI if not enough data
+    
+    deltas = np.diff(prices)
+    gains = np.where(deltas > 0, deltas, 0)
+    losses = np.where(deltas < 0, -deltas, 0)
+    
+    # Calculate average gains and losses using Wilder's smoothing
+    avg_gains = np.mean(gains[:period])
+    avg_losses = np.mean(losses[:period])
+    
+    for i in range(period, len(gains)):
+        avg_gains = (avg_gains * (period - 1) + gains[i]) / period
+        avg_losses = (avg_losses * (period - 1) + losses[i]) / period
+    
+    if avg_losses == 0:
+        return 100.0
+    
+    rs = avg_gains / avg_losses
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
 def format_signal_line(
     symbol: str,
     price: float,
     dpp: float,
     tr_atr: float,
     z: float,
+    rsi: float,
     code: str | None,
     *,
     vwap_disp: float | None = None,
 ) -> str:
-    """Quant-style compact format: $SYMBOL $PRICE ±X.XX% | 4.73x ATR | Z 8.82 | VW+0.45 | Breakout"""
+    """Updated format: $SYMBOL $PRICE ±X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend/Breakout"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
-    line = f"${symbol} {price_str} {dpp:+.2f}% | {tr_atr:.2f}x ATR | Z {z:.2f}"
+    line = f"${symbol} {price_str} {dpp:+.2f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | Z {z:.2f}"
     if vwap_disp is not None:
         line += f" | VW{vwap_disp:+.2f}"
     if code is not None:
@@ -331,11 +317,17 @@ def main():
         # Price change
         dpp = ((closes[-1] - closes[0]) / closes[0]) * 100.0
         
+        # Calculate RSI
+        rsi = calculate_rsi(closes)
+        
         # Classify
         sig = classify_long_entry(tr_atr, z, dpp, "stocks")
         
-        # Always show data in requested format: $SYMBOL $PRICE +X.XX% | X.XXx ATR | Z X.XX
-        signal_line = format_signal_line(sym, closes[-1], dpp, tr_atr, z, None)  # No "| Breakout" suffix
+        # Determine signal type
+        signal_type = "Breakout" if sig == "Breakout" else "Trend"
+        
+        # Updated format: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend/Breakout
+        signal_line = format_signal_line(sym, closes[-1], dpp, tr_atr, z, rsi, signal_type)
         signals.append(signal_line)
     
     for s in signals:

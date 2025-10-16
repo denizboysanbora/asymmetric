@@ -105,7 +105,6 @@ def format_time_label(dt: datetime) -> str:
 def compose_summary(
     period_start: datetime,
     period_end: datetime,
-    crypto_lines: List[str],
     stock_lines: List[str],
     *,
     overflow_total: int = 0,
@@ -113,10 +112,7 @@ def compose_summary(
     tz_abbr = period_end.tzname() or "ET"
     window_label = f"{format_time_label(period_start)}–{format_time_label(period_end)} {tz_abbr} signals"
     sections = []
-    crypto_summary = summarise_lines(crypto_lines)
     stock_summary = summarise_lines(stock_lines)
-    if crypto_summary:
-        sections.append(f"Crypto: {crypto_summary}")
     if stock_summary:
         sections.append(f"Stocks: {stock_summary}")
 
@@ -133,7 +129,6 @@ def compose_summary(
     # Fallback to counts if the text is too long.
     return (
         f"{window_label}\n"
-        f"Crypto: {len(crypto_lines)} signal(s)\n"
         f"Stocks: {len(stock_lines)} signal(s)"
     )
 
@@ -234,7 +229,7 @@ def flush_if_ready(state: QueueState) -> None:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Queue signals for hourly tweet summaries.")
-    parser.add_argument("--asset", choices=["crypto", "stock"], help="Asset class of signals being added.")
+    parser.add_argument("--asset", choices=["stock"], help="Asset class of signals being added.")
     parser.add_argument("--add", nargs="+", help="Signal lines to add to the queue.")
     parser.add_argument("--flush", action="store_true", help="Force a flush attempt regardless of timing (respects window).")
     args = parser.parse_args()

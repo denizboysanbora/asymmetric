@@ -1,5 +1,13 @@
 [
   {
+    "symbol": "PRAX",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "WHWK",
+    "asset_type": "stock"
+  },
+  {
     "symbol": "FOSL",
     "asset_type": "stock"
   },
@@ -8,35 +16,27 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "VFC",
+    "symbol": "CCCC",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "IIIN",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "MATV",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "MUX",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "ZBIO",
     "asset_type": "stock"
   },
   {
     "symbol": "NAUT",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "REPL",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "EU",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "AXTI",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "RGP",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "DOCN",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "OPFI",
     "asset_type": "stock"
   }
 ]

@@ -60,14 +60,12 @@ echo ""
 # Check database
 echo "🗄️ DATABASE"
 echo "-----------"
-if [ -f "analyst/output/database/signals.db" ]; then
-    echo "✅ Database: analyst/output/database/signals.db"
-    
-    # Count recent signals
-    RECENT_SIGNALS=$(sqlite3 analyst/output/database/signals.db "SELECT COUNT(*) FROM signals WHERE timestamp > datetime('now', '-1 hour');" 2>/dev/null || echo "0")
-    echo "📊 Signals in last hour: $RECENT_SIGNALS"
+if [ -n "$SUPABASE_URL" ] && [ -n "$SUPABASE_SERVICE_KEY" ]; then
+    echo "✅ Database: Supabase configured"
+    echo "📊 Signals stored in cloud database"
 else
-    echo "❌ Database not found"
+    echo "❌ Supabase configuration missing"
+    echo "   Set SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables"
 fi
 echo ""
 

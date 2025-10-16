@@ -56,3 +56,4 @@ if __name__ == "__main__":
     tweet_text = sys.argv[1]
     success = post_tweet(tweet_text)
     sys.exit(0 if success else 1)
+

@@ -40,8 +40,8 @@ Comprehensive automated trading signal system that scans markets, tweets signals
    - Subject: "Trading Signal - STOCK" or "Trading Signal - CRYPTO"
 
 5. **Save to Database**
-   - SQLite: `/Users/deniz/Code/asymmetric/database/signals.db`
-   - Stores: timestamp, symbol, price, change%, TR/ATR, Z-score, signal type, asset class
+   - Supabase: Cloud database with real-time capabilities
+   - Stores: timestamp, symbol, price, change%, RSI, TR/ATR, Z-score, signal type, asset class
 
 ## 📊 Signal Criteria
 
@@ -77,16 +77,17 @@ Components:
 
 ## 🗄️ Database Schema
 
-Table: `signals`
+Table: `signals` (Supabase)
 ```sql
 CREATE TABLE signals (
-    id INTEGER PRIMARY KEY AUTOINCREMENT,
-    timestamp TEXT,
+    id BIGSERIAL PRIMARY KEY,
+    timestamp TIMESTAMPTZ DEFAULT NOW(),
     symbol TEXT,
-    price REAL,
-    change_pct REAL,
-    tr_atr REAL,
-    z_score REAL,
+    price DECIMAL,
+    change_pct DECIMAL,
+    rsi DECIMAL,
+    tr_atr DECIMAL,
+    z_score DECIMAL,
     signal_type TEXT,
     asset_class TEXT
 );
@@ -109,8 +110,7 @@ CREATE TABLE signals (
 │   ├── scripts/send_email.py        ← Email sender
 │   └── config/token.json            ← Gmail credentials
 ├── database/
-│   ├── log_signal.py                ← Database logger
-│   └── signals.db                   ← SQLite database
+│   └── log_signal.py                ← Supabase database logger
 ├── start_auto_trader.sh             ← Start bot
 ├── stop_auto_trader.sh              ← Stop bot
 ├── status.sh                        ← Check status
@@ -179,20 +179,19 @@ python3 gmail_auth.py
 
 ## 💾 Database Queries
 
-View all signals:
-```bash
-cd /Users/deniz/Code/asymmetric/database
-sqlite3 signals.db "SELECT * FROM signals ORDER BY timestamp DESC LIMIT 10;"
+View all signals (via Supabase dashboard):
+```sql
+SELECT * FROM signals ORDER BY timestamp DESC LIMIT 10;
 ```
 
 Count by asset class:
-```bash
-sqlite3 signals.db "SELECT asset_class, COUNT(*) FROM signals GROUP BY asset_class;"
+```sql
+SELECT asset_class, COUNT(*) FROM signals GROUP BY asset_class;
 ```
 
 Best signals of the day:
-```bash
-sqlite3 signals.db "SELECT * FROM signals WHERE date(timestamp) = date('now') ORDER BY tr_atr DESC;"
+```sql
+SELECT * FROM signals WHERE date(timestamp) = CURRENT_DATE ORDER BY tr_atr DESC;
 ```
 
 ## 🎯 Current Status

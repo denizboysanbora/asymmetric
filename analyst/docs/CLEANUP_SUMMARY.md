@@ -119,7 +119,7 @@ analyst/
 ⏰ TIME & SCHEDULE
 ------------------
 Current time: 2025-10-16 07:49:05 EDT
-❌ Outside operating hours (8 AM - 5 PM ET)
+❌ Outside operating hours (10 AM - 4 PM ET)
 
 🗄️ DATABASE
 -----------

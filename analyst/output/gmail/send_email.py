@@ -19,14 +19,14 @@ SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
 def _extract_signal_line(text: str) -> str | None:
     """Return the first line that matches the signal format."""
-    # Pattern for breakout: $SYMBOL $PRICE +X.XX% | X.XXx ATR | Z X.XX | Breakout
+    # Pattern for breakout: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Breakout
     breakout_pattern = re.compile(
-        r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%\s+\|\s+[0-9]+\.[0-9]{2}x\s+ATR\s+\|\s+Z\s+[+\-]?[0-9]+\.[0-9]{2}\s+\|\s+Breakout$"
+        r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%\s+\|\s+[0-9]+\s+RSI\s+\|\s+[0-9]+\.[0-9]{2}x\s+ATR\s+\|\s+Z\s+[+\-]?[0-9]+\.[0-9]{2}\s+\|\s+Breakout$"
     )
     
-    # Pattern for trend: $SYMBOL $PRICE +X.XX%
+    # Pattern for trend: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend
     trend_pattern = re.compile(
-        r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%$"
+        r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%\s+\|\s+[0-9]+\s+RSI\s+\|\s+[0-9]+\.[0-9]{2}x\s+ATR\s+\|\s+Z\s+[+\-]?[0-9]+\.[0-9]{2}\s+\|\s+Trend$"
     )
 
     for raw_line in text.splitlines():

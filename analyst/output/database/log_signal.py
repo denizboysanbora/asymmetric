@@ -1,10 +1,9 @@
 #!/usr/bin/env python3
 """
 Log trading signals to database.
-Usage: log_signal.py "$BTC $67,450 +2.45% | 2.25x ATR | Z 2.24 | Breakout" "crypto" "Breakout"
-Usage: log_signal.py "$NVDA $183.15 +2.52%" "stock" "Trending"
+Usage: log_signal.py "$NVDA $183.15 +2.52% | 45 RSI | 2.18x ATR | Z 2.45 | Breakout" "stock" "Breakout"
+Usage: log_signal.py "$AAPL $150.25 +1.85% | 42 RSI | 1.95x ATR | Z 1.82 | Trend" "stock" "Trend"
 """
-import sqlite3
 import os
 import sys
 import re
@@ -12,22 +11,36 @@ from datetime import datetime
 import json
 import requests
 
-DB_PATH = os.path.join(os.path.dirname(__file__), 'signals.db')
-
 def parse_signal(signal_text):
     """
-    Parse signal format: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout
-    or: $SYMBOL $PRICE ±X.XX%
-    Returns: (symbol, price, change_pct, tr_atr, z_score, signal_type)
+    Parse signal format: $SYMBOL $PRICE ±X.XX% | ## RSI | X.XXx ATR | Z ±X.XX | Breakout/Trend
+    Returns: (symbol, price, change_pct, rsi, tr_atr, z_score, signal_type)
     """
-    # Pattern for breakout: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout
-    breakout_pattern = r'\$(\w+)\s+\$([0-9,]+(?:\.[0-9]+)?)\s+([\+\-][0-9\.]+)%\s+\|\s+([0-9\.]+)x\s+ATR\s+\|\s+Z\s+([\+\-]?[0-9\.]+)(?:\s+\|\s+([^|]+))?'
+    # Pattern for new format: $SYMBOL $PRICE ±X.XX% | ## RSI | X.XXx ATR | Z ±X.XX | Breakout/Trend
+    new_pattern = r'\$(\w+)\s+\$([0-9,]+(?:\.[0-9]+)?)\s+([\+\-][0-9\.]+)%\s+\|\s+([0-9]+)\s+RSI\s+\|\s+([0-9\.]+)x\s+ATR\s+\|\s+Z\s+([\+\-]?[0-9\.]+)\s+\|\s+(Breakout|Trend)'
     
-    # Pattern for trend: $SYMBOL $PRICE ±X.XX%
-    trend_pattern = r'\$(\w+)\s+\$([0-9,]+(?:\.[0-9]+)?)\s+([\+\-][0-9\.]+)%'
+    # Try new pattern first
+    match = re.search(new_pattern, signal_text)
+    if match:
+        symbol = match.group(1)
+        price_str = match.group(2).replace(',', '')
+        price = float(price_str)
+        change_pct = float(match.group(3))
+        rsi = float(match.group(4))
+        tr_atr = float(match.group(5))
+        z_score = float(match.group(6))
+        signal_type = match.group(7)
+        return (symbol, price, change_pct, rsi, tr_atr, z_score, signal_type)
     
-    # Try breakout pattern first
-    match = re.search(breakout_pattern, signal_text)
+    # Fallback to old patterns for backward compatibility
+    # Pattern for old breakout: $SYMBOL $PRICE ±X.XX% | X.XXx ATR | Z ±X.XX | Breakout
+    old_breakout_pattern = r'\$(\w+)\s+\$([0-9,]+(?:\.[0-9]+)?)\s+([\+\-][0-9\.]+)%\s+\|\s+([0-9\.]+)x\s+ATR\s+\|\s+Z\s+([\+\-]?[0-9\.]+)(?:\s+\|\s+([^|]+))?'
+    
+    # Pattern for old trend: $SYMBOL $PRICE ±X.XX%
+    old_trend_pattern = r'\$(\w+)\s+\$([0-9,]+(?:\.[0-9]+)?)\s+([\+\-][0-9\.]+)%'
+    
+    # Try old breakout pattern
+    match = re.search(old_breakout_pattern, signal_text)
     if match:
         symbol = match.group(1)
         price_str = match.group(2).replace(',', '')
@@ -36,20 +49,22 @@ def parse_signal(signal_text):
         tr_atr = float(match.group(4))
         z_score = float(match.group(5))
         signal_type = match.group(6) if match.group(6) else 'Breakout'
-        return (symbol, price, change_pct, tr_atr, z_score, signal_type)
+        rsi = 50.0  # Default RSI for old format
+        return (symbol, price, change_pct, rsi, tr_atr, z_score, signal_type)
     
-    # Try trend pattern
-    match = re.search(trend_pattern, signal_text)
+    # Try old trend pattern
+    match = re.search(old_trend_pattern, signal_text)
     if match:
         symbol = match.group(1)
         price_str = match.group(2).replace(',', '')
         price = float(price_str)
         change_pct = float(match.group(3))
-        # For trend signals, set tr_atr and z_score to 0
+        # For old trend signals, set defaults
         tr_atr = 0.0
         z_score = 0.0
-        signal_type = 'Trending'
-        return (symbol, price, change_pct, tr_atr, z_score, signal_type)
+        rsi = 50.0
+        signal_type = 'Trend'
+        return (symbol, price, change_pct, rsi, tr_atr, z_score, signal_type)
     
     return None
 
@@ -60,7 +75,7 @@ def log_signal(signal_text, asset_class, signal_type_override=None):
         print(f"Error: Could not parse signal: {signal_text}", file=sys.stderr)
         return False
     
-    symbol, price, change_pct, tr_atr, z_score, signal_type = parsed
+    symbol, price, change_pct, rsi, tr_atr, z_score, signal_type = parsed
     
     # Use override if provided
     if signal_type_override:
@@ -73,68 +88,46 @@ def log_signal(signal_text, asset_class, signal_type_override=None):
         "symbol": symbol,
         "price": float(price),
         "change_pct": float(change_pct),
+        "rsi": float(rsi),
         "tr_atr": float(tr_atr),
         "z_score": float(z_score),
         "signal_type": str(signal_type),
         "asset_class": str(asset_class),
     }
 
-    # Try Supabase first (if configured)
+    # Use Supabase as primary database
     supabase_url = os.getenv("SUPABASE_URL")
     supabase_key = (
         os.getenv("SUPABASE_SERVICE_KEY")
         or os.getenv("SUPABASE_ANON_KEY")
         or os.getenv("SUPABASE_KEY")
     )
-    supabase_ok = False
-    if supabase_url and supabase_key:
-        try:
-            endpoint = supabase_url.rstrip('/') + "/rest/v1/signals"
-            headers = {
-                "apikey": supabase_key,
-                "Authorization": f"Bearer {supabase_key}",
-                "Content-Type": "application/json",
-                "Prefer": "return=representation",
-            }
-            resp = requests.post(endpoint, headers=headers, data=json.dumps(row), timeout=10)
-            if 200 <= resp.status_code < 300:
-                supabase_ok = True
-            else:
-                print(f"Supabase insert failed: {resp.status_code} {resp.text}", file=sys.stderr)
-        except Exception as e:
-            print(f"Supabase insert error: {e}", file=sys.stderr)
-
-    # Always write to local SQLite as well (fallback + local history)
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+    
+    if not supabase_url or not supabase_key:
+        print("Error: Supabase configuration missing. Set SUPABASE_URL and SUPABASE_SERVICE_KEY environment variables.", file=sys.stderr)
+        return False
     
     try:
-        cursor.execute("""
-            INSERT INTO signals 
-            (timestamp, symbol, price, change_pct, tr_atr, z_score, signal_type, asset_class)
-            VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-        """, (
-            row["timestamp"],
-            row["symbol"],
-            row["price"],
-            row["change_pct"],
-            row["tr_atr"],
-            row["z_score"],
-            row["signal_type"],
-            row["asset_class"],
-        ))
-        
-        conn.commit()
-        return True if supabase_ok else True  # True regardless; Supabase is best-effort
+        endpoint = supabase_url.rstrip('/') + "/rest/v1/signals"
+        headers = {
+            "apikey": supabase_key,
+            "Authorization": f"Bearer {supabase_key}",
+            "Content-Type": "application/json",
+            "Prefer": "return=representation",
+        }
+        resp = requests.post(endpoint, headers=headers, data=json.dumps(row), timeout=10)
+        if 200 <= resp.status_code < 300:
+            return True
+        else:
+            print(f"Supabase insert failed: {resp.status_code} {resp.text}", file=sys.stderr)
+            return False
     except Exception as e:
-        print(f"Error logging signal: {e}", file=sys.stderr)
+        print(f"Supabase insert error: {e}", file=sys.stderr)
         return False
-    finally:
-        conn.close()
 
 if __name__ == "__main__":
     if len(sys.argv) < 3:
-        print("Usage: log_signal.py \"$SYMBOL $PRICE ...\" \"crypto|stock\" [signal_type]", file=sys.stderr)
+        print("Usage: log_signal.py \"$SYMBOL $PRICE ...\" \"stock\" [signal_type]", file=sys.stderr)
         sys.exit(1)
     
     signal_text = sys.argv[1]
