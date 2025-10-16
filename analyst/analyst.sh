@@ -1,6 +1,6 @@
 #!/bin/bash
 # Analyst - Market Analysis & Signal Generation
-# Schedule: 8 AM - 5 PM Eastern Time
+# Schedule: 10 AM - 4 PM Eastern Time, weekdays, every 25 minutes
 # Runs both breakout and trend scanners
 
 set -euo pipefail
@@ -63,10 +63,11 @@ TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
 echo "[$TIMESTAMP] Analyst starting market analysis..." | tee -a "$LOG_FILE"
 
-# Check if we're within operating hours (8 AM - 5 PM Eastern)
+# Check if we're within operating hours (10 AM - 4 PM Eastern, weekdays)
 CURRENT_HOUR=$(TZ='America/New_York' date '+%H')
-if [ "$CURRENT_HOUR" -lt 8 ] || [ "$CURRENT_HOUR" -ge 17 ]; then
-    echo "[$TIMESTAMP] Outside operating hours (8 AM - 5 PM ET). Current hour: $CURRENT_HOUR" | tee -a "$LOG_FILE"
+CURRENT_DOW=$(TZ='America/New_York' date '+%u')  # 1=Monday, 7=Sunday
+if [ "$CURRENT_HOUR" -lt 10 ] || [ "$CURRENT_HOUR" -ge 16 ] || [ "$CURRENT_DOW" -gt 5 ]; then
+    echo "[$TIMESTAMP] Outside operating hours (10 AM - 4 PM ET, weekdays). Current hour: $CURRENT_HOUR, day: $CURRENT_DOW" | tee -a "$LOG_FILE"
     exit 0
 fi
 
