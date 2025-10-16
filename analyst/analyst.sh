@@ -1,7 +1,7 @@
 #!/bin/bash
 # Analyst - Market Analysis & Signal Generation
 # Schedule: 8 AM - 5 PM Eastern Time
-# Scans stocks and crypto, generates signals, sends notifications
+# Runs both breakout and trend scanners
 
 set -euo pipefail
 
@@ -20,25 +20,35 @@ echo $$ > "$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Repo root (one level up from analyst/): .../asymmetric
-ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
+# Repo root (two levels up from analyst/): .../asymmetric
+ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
-# Directories (relative to repo root)
-SCANNER_DIR="$ASYMMETRIC_DIR/analyst/scanner"
-NOTIFICATIONS_DIR="$ASYMMETRIC_DIR/analyst/notifications"
-DATABASE_DIR="$ASYMMETRIC_DIR/analyst/database"
+# Directories
+INPUT_DIR="$SCRIPT_DIR/input"
+OUTPUT_DIR="$SCRIPT_DIR/output"
+ALPACA_DIR="$INPUT_DIR/alpaca"
+BREAKOUT_DIR="$INPUT_DIR/breakout"
+TREND_DIR="$INPUT_DIR/trend"
+GMAIL_DIR="$OUTPUT_DIR/gmail"
+TWEET_DIR="$OUTPUT_DIR/tweet"
+DATABASE_DIR="$OUTPUT_DIR/database"
+CONFIG_DIR="$SCRIPT_DIR/config"
 
 # Python executables
-SCANNER_PY="$SCANNER_DIR/venv/bin/python3"
-NOTIFICATIONS_PY="$NOTIFICATIONS_DIR/venv/bin/python3"
+ALPACA_PY="$ALPACA_DIR/venv/bin/python3"
+BREAKOUT_PY="$ALPACA_PY"
+TREND_PY="$ALPACA_PY"
+GMAIL_PY="$ALPACA_PY"
+TWEET_PY="$ALPACA_PY"
+DATABASE_PY="$ALPACA_PY"
 
 # Scripts
-CRYPTO_SCRIPT="$SCANNER_DIR/compute_spike_params.py"
-STOCKS_SCRIPT="$SCANNER_DIR/compute_spike_params_stocks.py"
-EMAIL_SCRIPT="$NOTIFICATIONS_DIR/scripts/send_email.py"
-TWEET_SCRIPT="$NOTIFICATIONS_DIR/scripts/tweet_with_limit.py"
+BREAKOUT_SCRIPT="$BREAKOUT_DIR/breakout_scanner.py"
+TREND_SCRIPT="$TREND_DIR/trend_scanner.py"
+EMAIL_SCRIPT="$GMAIL_DIR/send_email.py"
+TWEET_SCRIPT="$TWEET_DIR/tweet_with_limit.py"
 LOG_SIGNAL_SCRIPT="$DATABASE_DIR/log_signal.py"
-MARKET_STATUS_SCRIPT="$SCANNER_DIR/check_market_open.py"
+MARKET_STATUS_SCRIPT="$ALPACA_DIR/check_market_open.py"
 
 # Recipient
 RECIPIENT="deniz@bora.box"
@@ -61,94 +71,88 @@ if [ "$CURRENT_HOUR" -lt 8 ] || [ "$CURRENT_HOUR" -ge 17 ]; then
 fi
 
 # ========================================
-# CRYPTO SIGNALS
+# BREAKOUT SCANNER
 # ========================================
-echo "[$TIMESTAMP] 🔍 Scanning crypto markets..." | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] 🔍 Running breakout scanner..." | tee -a "$LOG_FILE"
 
-CRYPTO_OUTPUT=$($SCANNER_PY $CRYPTO_SCRIPT 2>&1) || {
-    echo "[$TIMESTAMP] ❌ Crypto scan failed: $CRYPTO_OUTPUT" | tee -a "$LOG_FILE"
-    CRYPTO_OUTPUT=""
+BREAKOUT_OUTPUT=$($BREAKOUT_PY $BREAKOUT_SCRIPT 2>&1) || {
+    echo "[$TIMESTAMP] ❌ Breakout scan failed: $BREAKOUT_OUTPUT" | tee -a "$LOG_FILE"
+    BREAKOUT_OUTPUT=""
 }
 
-CRYPTO_SIGNALS=$(echo "$CRYPTO_OUTPUT" | grep -v "Scanning" | grep -v "Warning" | grep ' | Breakout$' || true)
-CRYPTO_COUNT=$(echo "$CRYPTO_OUTPUT" | grep -v "Scanning" | grep -v "Warning" | wc -l)
+BREAKOUT_SIGNALS=$(echo "$BREAKOUT_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep ' | Breakout$' || true)
+BREAKOUT_COUNT=$(echo "$BREAKOUT_SIGNALS" | wc -l)
 
-if [ -n "$CRYPTO_SIGNALS" ]; then
-    echo "[$TIMESTAMP] 🚨 Crypto breakout detected!" | tee -a "$LOG_FILE"
-    echo "$CRYPTO_SIGNALS" | while IFS= read -r signal; do
-        if $NOTIFICATIONS_PY $EMAIL_SCRIPT "$RECIPIENT" "Signal" "$signal" 2>/dev/null; then
-            echo "[$TIMESTAMP] 📧 Crypto email sent: $signal" | tee -a "$LOG_FILE"
-        else
-            echo "[$TIMESTAMP] ❌ Crypto email failed: $signal" | tee -a "$LOG_FILE"
+if [ -n "$BREAKOUT_SIGNALS" ]; then
+    echo "[$TIMESTAMP] 🚨 Breakout signals detected!" | tee -a "$LOG_FILE"
+    echo "$BREAKOUT_SIGNALS" | while IFS= read -r signal; do
+        if [ -n "$signal" ]; then
+            # Determine asset class
+            if echo "$signal" | grep -q "BTC\|ETH\|SOL\|XRP\|DOGE\|ADA\|AVAX\|LTC\|DOT\|LINK\|UNI\|ATOM"; then
+                asset_class="crypto"
+            else
+                asset_class="stock"
+            fi
+            
+            # Send email
+            if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Signal" "$signal" 2>/dev/null; then
+                echo "[$TIMESTAMP] 📧 Breakout email sent: $signal" | tee -a "$LOG_FILE"
+            else
+                echo "[$TIMESTAMP] ❌ Breakout email failed: $signal" | tee -a "$LOG_FILE"
+            fi
+            
+            # Send tweet
+            if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
+                echo "[$TIMESTAMP] 🐦 Breakout tweet sent: $signal" | tee -a "$LOG_FILE"
+            else
+                echo "[$TIMESTAMP] ❌ Breakout tweet failed: $signal" | tee -a "$LOG_FILE"
+            fi
+            
+            # Log to database
+            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "$asset_class" "Breakout" 2>/dev/null || true
         fi
-        
-        # Tweet the signal
-        if $NOTIFICATIONS_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
-            echo "[$TIMESTAMP] 🐦 Crypto tweet sent: $signal" | tee -a "$LOG_FILE"
-        else
-            echo "[$TIMESTAMP] ❌ Crypto tweet failed: $signal" | tee -a "$LOG_FILE"
-        fi
-        
-        # Log to database
-        $SCANNER_PY $LOG_SIGNAL_SCRIPT "$signal" "crypto" 2>/dev/null || true
     done
 else
-    echo "[$TIMESTAMP] Crypto: No breakouts (scanned $CRYPTO_COUNT assets)" | tee -a "$LOG_FILE"
+    echo "[$TIMESTAMP] Breakout: No signals found" | tee -a "$LOG_FILE"
 fi
 
 # ========================================
-# STOCK SIGNALS
+# TREND SCANNER
 # ========================================
-echo "[$TIMESTAMP] 🔍 Scanning stock markets..." | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] 📈 Running trend scanner..." | tee -a "$LOG_FILE"
 
-STOCKS_OUTPUT=$($SCANNER_PY $STOCKS_SCRIPT 2>&1) || {
-    echo "[$TIMESTAMP] ❌ Stock scan failed: $STOCKS_OUTPUT" | tee -a "$LOG_FILE"
-    STOCKS_OUTPUT=""
+TREND_OUTPUT=$($TREND_PY $TREND_SCRIPT 2>&1) || {
+    echo "[$TIMESTAMP] ❌ Trend scan failed: $TREND_OUTPUT" | tee -a "$LOG_FILE"
+    TREND_OUTPUT=""
 }
 
-STOCKS_SIGNALS=$(echo "$STOCKS_OUTPUT" | grep -v "Scanning" | grep -v "Warning" | grep ' | Breakout$' || true)
-STOCKS_COUNT=$(echo "$STOCKS_OUTPUT" | grep -v "Scanning" | grep -v "Warning" | wc -l)
+TREND_SIGNALS=$(echo "$TREND_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep '^$[A-Z]' || true)
+TREND_COUNT=$(echo "$TREND_SIGNALS" | wc -l)
 
-STOCK_EMAILS_ENABLED=0
-MARKET_STATUS=""
-if MARKET_STATUS=$($SCANNER_PY $MARKET_STATUS_SCRIPT 2>&1); then
-    if [ "$MARKET_STATUS" = "open" ]; then
-        STOCK_EMAILS_ENABLED=1
-        echo "[$TIMESTAMP] 📈 Market is open - emails enabled" | tee -a "$LOG_FILE"
-    elif [ "$MARKET_STATUS" = "closed" ]; then
-        echo "[$TIMESTAMP] 📉 Market is closed - emails disabled" | tee -a "$LOG_FILE"
-    else
-        echo "[$TIMESTAMP] ⚠️ Unexpected market status '$MARKET_STATUS' - emails disabled" | tee -a "$LOG_FILE"
-    fi
-else
-    echo "[$TIMESTAMP] ⚠️ Could not check market status - emails disabled" | tee -a "$LOG_FILE"
-fi
-
-if [ -n "$STOCKS_SIGNALS" ] && [ "$STOCK_EMAILS_ENABLED" -eq 1 ]; then
-    echo "[$TIMESTAMP] 🚨 Stock breakout detected!" | tee -a "$LOG_FILE"
-    echo "$STOCKS_SIGNALS" | while IFS= read -r signal; do
-        if $NOTIFICATIONS_PY $EMAIL_SCRIPT "$RECIPIENT" "Signal" "$signal" 2>/dev/null; then
-            echo "[$TIMESTAMP] 📧 Stock email sent: $signal" | tee -a "$LOG_FILE"
-        else
-            echo "[$TIMESTAMP] ❌ Stock email failed: $signal" | tee -a "$LOG_FILE"
+if [ -n "$TREND_SIGNALS" ]; then
+    echo "[$TIMESTAMP] 📊 Trend signals detected!" | tee -a "$LOG_FILE"
+    echo "$TREND_SIGNALS" | while IFS= read -r signal; do
+        if [ -n "$signal" ]; then
+            # Send email
+            if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Trend" "$signal" 2>/dev/null; then
+                echo "[$TIMESTAMP] 📧 Trend email sent: $signal" | tee -a "$LOG_FILE"
+            else
+                echo "[$TIMESTAMP] ❌ Trend email failed: $signal" | tee -a "$LOG_FILE"
+            fi
+            
+            # Send tweet
+            if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
+                echo "[$TIMESTAMP] 🐦 Trend tweet sent: $signal" | tee -a "$LOG_FILE"
+            else
+                echo "[$TIMESTAMP] ❌ Trend tweet failed: $signal" | tee -a "$LOG_FILE"
+            fi
+            
+            # Log to database
+            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "stock" "Trending" 2>/dev/null || true
         fi
-        
-        # Tweet the signal
-        if $NOTIFICATIONS_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
-            echo "[$TIMESTAMP] 🐦 Stock tweet sent: $signal" | tee -a "$LOG_FILE"
-        else
-            echo "[$TIMESTAMP] ❌ Stock tweet failed: $signal" | tee -a "$LOG_FILE"
-        fi
-        
-        # Log to database
-        $SCANNER_PY $LOG_SIGNAL_SCRIPT "$signal" "stock" 2>/dev/null || true
     done
 else
-    if [ "$STOCK_EMAILS_ENABLED" -eq 0 ]; then
-        echo "[$TIMESTAMP] Stock: Market closed - no signals processed" | tee -a "$LOG_FILE"
-    else
-        echo "[$TIMESTAMP] Stock: No breakouts (scanned $STOCKS_COUNT assets)" | tee -a "$LOG_FILE"
-    fi
+    echo "[$TIMESTAMP] Trend: No signals found" | tee -a "$LOG_FILE"
 fi
 
-echo "[$TIMESTAMP] Analyst analysis complete" | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] Analyst analysis complete - Breakouts: $BREAKOUT_COUNT, Trends: $TREND_COUNT" | tee -a "$LOG_FILE"

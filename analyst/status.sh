@@ -60,11 +60,11 @@ echo ""
 # Check database
 echo "🗄️ DATABASE"
 echo "-----------"
-if [ -f "analyst/database/signals.db" ]; then
-    echo "✅ Database: analyst/database/signals.db"
+if [ -f "analyst/output/database/signals.db" ]; then
+    echo "✅ Database: analyst/output/database/signals.db"
     
     # Count recent signals
-    RECENT_SIGNALS=$(sqlite3 analyst/database/signals.db "SELECT COUNT(*) FROM signals WHERE timestamp > datetime('now', '-1 hour');" 2>/dev/null || echo "0")
+    RECENT_SIGNALS=$(sqlite3 analyst/output/database/signals.db "SELECT COUNT(*) FROM signals WHERE timestamp > datetime('now', '-1 hour');" 2>/dev/null || echo "0")
     echo "📊 Signals in last hour: $RECENT_SIGNALS"
 else
     echo "❌ Database not found"
@@ -74,19 +74,19 @@ echo ""
 # Check API credentials
 echo "🔑 API CREDENTIALS"
 echo "-----------------"
-if [ -f "analyst/scanner/.env" ]; then
+if [ -f "analyst/input/alpaca/.env" ]; then
     echo "✅ Alpaca API: Configured"
 else
     echo "❌ Alpaca API: Not configured"
 fi
 
-if [ -f "analyst/notifications/config/token.json" ]; then
+if [ -f "analyst/output/gmail/token.json" ]; then
     echo "✅ Gmail API: Configured"
 else
     echo "❌ Gmail API: Not configured"
 fi
 
-if [ -d "analyst/notifications/config" ] && [ "$(ls -A analyst/notifications/config 2>/dev/null)" ]; then
+if [ -d "analyst/output/tweet" ] && [ "$(ls -A analyst/output/tweet 2>/dev/null)" ]; then
     echo "✅ Twitter API: Configured"
 else
     echo "❌ Twitter API: Not configured"
