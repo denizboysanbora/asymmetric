@@ -1,0 +1,41 @@
+name: Qullamaggie
+gate:
+  proxy: QQQ
+  ema_short: 10
+  ema_long: 20
+  rising_lookback: 3
+scan:
+  adr_min_pct: 5.0
+  rs_top_percentile: 0.9
+  explosive_leg_pct: 25.0
+  flag:
+    min_days: 5
+    max_days: 20
+    atr_contract_ratio: 0.7
+    require_higher_lows: true
+catalyst:
+  premkt_gap_min_pct: 4.0
+  premkt_notional_min: 1000000
+entry:
+  or_minutes: 5
+outputs:
+  dir: artifacts
+  save: true
+tz: America/New_York
+universe:
+  mode: dynamic
+  static_symbols:
+  - NVDA
+  - TSLA
+  - ROKU
+  - COIN
+  - ENPH
+  - SHOP
+  - SQ
+  - CRWD
+  min_price: 10.0
+  min_avg_volume: 100000
+  require_options: true
+  exchanges:
+  - NYSE
+  - NASDAQ
