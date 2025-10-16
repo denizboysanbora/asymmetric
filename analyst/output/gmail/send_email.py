@@ -5,6 +5,7 @@ Email sender for analyst signals
 import base64
 import os
 import re
+from email.mime.text import MIMEText
 from pathlib import Path
 from typing import Optional
 

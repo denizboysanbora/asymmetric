@@ -13,7 +13,7 @@ import subprocess
 BASE_DIR = Path(__file__).parent
 STATE_DIR = BASE_DIR / "state"
 STATE_FILE = STATE_DIR / "tweet_rate_limit.json"
-TWEET_SCRIPT = BASE_DIR / "post_text_oauth1.py"
+TWEET_SCRIPT = BASE_DIR / "post_text_v2_oauth1.py"
 
 # Rate limit
 MAX_TWEETS_PER_24H = 17

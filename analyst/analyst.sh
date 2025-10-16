@@ -1,7 +1,7 @@
 #!/bin/bash
 # Analyst - Market Analysis & Signal Generation
-# Schedule: 10 AM - 4 PM Eastern Time, weekdays, every 25 minutes
-# Runs both breakout and trend scanners
+# Schedule: 10 AM - 4 PM Eastern Time, weekdays, every 30 minutes
+# Sends one signal per cycle: breakout preferred, highest mover fallback
 
 set -euo pipefail
 
@@ -83,40 +83,31 @@ BREAKOUT_OUTPUT=$($BREAKOUT_PY $BREAKOUT_SCRIPT 2>&1) || {
 
 BREAKOUT_SIGNALS=$(echo "$BREAKOUT_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep ' | Breakout$' || true)
 # Pick top breakout by absolute % move
-TOP_BREAKOUT=$(echo "$BREAKOUT_SIGNALS" | awk 'match($0, /([+-][0-9]+(\.[0-9]+)?)%/, m){v=m[1]; gsub("\\+","",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
+TOP_BREAKOUT=$(echo "$BREAKOUT_SIGNALS" | awk '{match($0, /([+-][0-9]+(\.[0-9]+)?)%/); v=substr($0, RSTART, RLENGTH-1); gsub(/\+/,"",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
 BREAKOUT_COUNT=$(echo "$BREAKOUT_SIGNALS" | wc -l)
+
+# ========================================
+# SIGNAL SELECTION & NOTIFICATION LOGIC
+# ========================================
+SIGNAL_TO_SEND=""
+SIGNAL_TYPE=""
+SIGNAL_ASSET_CLASS=""
 
 if [ -n "$BREAKOUT_SIGNALS" ]; then
     echo "[$TIMESTAMP] 🚨 Breakout signals detected!" | tee -a "$LOG_FILE"
-    echo "$BREAKOUT_SIGNALS" | while IFS= read -r signal; do
-        if [ -n "$signal" ]; then
-            # Determine asset class
-            if echo "$signal" | grep -q "BTC\|ETH\|SOL\|XRP\|DOGE\|ADA\|AVAX\|LTC\|DOT\|LINK\|UNI\|ATOM"; then
-                asset_class="crypto"
-            else
-                asset_class="stock"
-            fi
-            
-            # Send email
-            if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Signal" "$signal" 2>/dev/null; then
-                echo "[$TIMESTAMP] 📧 Breakout email sent: $signal" | tee -a "$LOG_FILE"
-            else
-                echo "[$TIMESTAMP] ❌ Breakout email failed: $signal" | tee -a "$LOG_FILE"
-            fi
-            
-            # Tweet only the TOP breakout
-            if [ "$signal" = "$TOP_BREAKOUT" ]; then
-                if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
-                    echo "[$TIMESTAMP] 🐦 Breakout tweet sent (top): $signal" | tee -a "$LOG_FILE"
-                else
-                    echo "[$TIMESTAMP] ❌ Breakout tweet failed (top): $signal" | tee -a "$LOG_FILE"
-                fi
-            fi
-            
-            # Log to database
-            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "$asset_class" "Breakout" 2>/dev/null || true
-        fi
-    done
+    
+    # Use the top breakout signal
+    SIGNAL_TO_SEND="$TOP_BREAKOUT"
+    SIGNAL_TYPE="Breakout"
+    
+    # Determine asset class for the top breakout
+    if echo "$TOP_BREAKOUT" | grep -q "BTC\|ETH\|SOL\|XRP\|DOGE\|ADA\|AVAX\|LTC\|DOT\|LINK\|UNI\|ATOM"; then
+        SIGNAL_ASSET_CLASS="crypto"
+    else
+        SIGNAL_ASSET_CLASS="stock"
+    fi
+    
+    echo "[$TIMESTAMP] Selected breakout signal: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
 else
     echo "[$TIMESTAMP] Breakout: No signals found" | tee -a "$LOG_FILE"
 fi
@@ -133,37 +124,64 @@ TREND_OUTPUT=$($TREND_PY $TREND_SCRIPT 2>&1) || {
 
 TREND_SIGNALS=$(echo "$TREND_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep '^\$[A-Z0-9]' || true)
 # Pick top trend by absolute % move
-TOP_TREND=$(echo "$TREND_SIGNALS" | awk 'match($0, /([+-][0-9]+(\.[0-9]+)?)%/, m){v=m[1]; gsub("\\+","",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
+TOP_TREND=$(echo "$TREND_SIGNALS" | awk '{match($0, /([+-][0-9]+(\.[0-9]+)?)%/); v=substr($0, RSTART, RLENGTH-1); gsub(/\+/,"",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
 TREND_COUNT=$(echo "$TREND_SIGNALS" | wc -l)
 
 if [ -n "$TREND_SIGNALS" ]; then
     echo "[$TIMESTAMP] 📊 Trend signals detected!" | tee -a "$LOG_FILE"
+    
+    # If no breakout was found, use the top trend as fallback
+    if [ -z "$SIGNAL_TO_SEND" ]; then
+        SIGNAL_TO_SEND="$TOP_TREND"
+        SIGNAL_TYPE="Trending"
+        SIGNAL_ASSET_CLASS="stock"  # Stock-only system
+        echo "[$TIMESTAMP] Selected trend signal (fallback): $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    fi
+    
+    # Log all trend signals to database (for tracking purposes)
     echo "$TREND_SIGNALS" | while IFS= read -r signal; do
         if [ -n "$signal" ]; then
-            # Stock-only system: asset class is always stock
-            asset_class="stock"
-            # Send email
-            if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Trend" "$signal" 2>/dev/null; then
-                echo "[$TIMESTAMP] 📧 Trend email sent: $signal" | tee -a "$LOG_FILE"
-            else
-                echo "[$TIMESTAMP] ❌ Trend email failed: $signal" | tee -a "$LOG_FILE"
-            fi
-            
-            # Tweet logic: only tweet trend if there were NO breakouts, and only the TOP trend
-            if [ -z "$TOP_BREAKOUT" ] && [ "$signal" = "$TOP_TREND" ]; then
-                if $TWEET_PY $TWEET_SCRIPT "$signal" 2>/dev/null; then
-                    echo "[$TIMESTAMP] 🐦 Trend tweet sent (top, fallback): $signal" | tee -a "$LOG_FILE"
-                else
-                    echo "[$TIMESTAMP] ❌ Trend tweet failed (top, fallback): $signal" | tee -a "$LOG_FILE"
-                fi
-            fi
-            
-            # Log to database
-            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "$asset_class" "Trending" 2>/dev/null || true
+            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "stock" "Trending" 2>/dev/null || true
         fi
     done
 else
     echo "[$TIMESTAMP] Trend: No signals found" | tee -a "$LOG_FILE"
 fi
 
-echo "[$TIMESTAMP] Analyst analysis complete - Breakouts: $BREAKOUT_COUNT, Trends: $TREND_COUNT" | tee -a "$LOG_FILE"
+# ========================================
+# SEND NOTIFICATIONS (ONE SIGNAL ONLY)
+# ========================================
+if [ -n "$SIGNAL_TO_SEND" ]; then
+    echo "[$TIMESTAMP] 📤 Sending notifications for selected signal..." | tee -a "$LOG_FILE"
+    
+    # Send email
+    if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "Signal" "$SIGNAL_TO_SEND" 2>/dev/null; then
+        echo "[$TIMESTAMP] 📧 Email sent: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    else
+        echo "[$TIMESTAMP] ❌ Email failed: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    fi
+    
+    # Send tweet
+    if tweet_output=$($TWEET_PY "$TWEET_SCRIPT" "$SIGNAL_TO_SEND" 2>&1); then
+        echo "[$TIMESTAMP] 🐦 Tweet sent: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+        if [ -n "$tweet_output" ]; then
+            while IFS= read -r line; do
+                echo "[$TIMESTAMP]    ↳ $line" | tee -a "$LOG_FILE"
+            done <<< "$tweet_output"
+        fi
+    else
+        echo "[$TIMESTAMP] ❌ Tweet failed: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+        if [ -n "$tweet_output" ]; then
+            while IFS= read -r line; do
+                echo "[$TIMESTAMP]    ↳ $line" | tee -a "$LOG_FILE"
+            done <<< "$tweet_output"
+        fi
+    fi
+    
+    # Log the selected signal to database
+    $DATABASE_PY $LOG_SIGNAL_SCRIPT "$SIGNAL_TO_SEND" "$SIGNAL_ASSET_CLASS" "$SIGNAL_TYPE" 2>/dev/null || true
+else
+    echo "[$TIMESTAMP] No signal selected - no notifications sent" | tee -a "$LOG_FILE"
+fi
+
+echo "[$TIMESTAMP] Analyst analysis complete - Breakouts: $BREAKOUT_COUNT, Trends: $TREND_COUNT, Signal Sent: $SIGNAL_TYPE" | tee -a "$LOG_FILE"

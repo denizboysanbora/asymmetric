@@ -9,14 +9,14 @@ Comprehensive automated trading signal system that scans markets, tweets signals
 ### Weekdays (Monday - Friday)
 - **Asset**: Stocks
 - **Hours**: 10:00 AM - 4:00 PM ET
-- **Interval**: Every 25 minutes
+- **Interval**: Every 30 minutes
 - **Scans per day**: 14
 - **Tweet limit**: 17/day (3 buffer remaining)
 
 ### Weekends (Saturday - Sunday)
 - **Asset**: Cryptocurrency
 - **Hours**: 24/7 (crypto markets never close)
-- **Interval**: Every 25 minutes
+- **Interval**: Every 30 minutes
 - **Scans per day**: 57 (but we use best judgment for tweeting)
 
 ## 🔄 Workflow (Every 25 Minutes)
@@ -154,7 +154,7 @@ tail -f /Users/deniz/Code/asymmetric/auto_scan_tweet.log
 
 ### Typical Weekend Day
 ```
-Scans every 25 minutes continuously
+Scans every 30 minutes continuously
 Tweets when significant crypto moves detected
 Less activity than weekdays (crypto less volatile than stocks)
 ```

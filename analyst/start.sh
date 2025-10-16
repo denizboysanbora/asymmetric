@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-ANALYST_SCRIPT="$SCRIPT_DIR/analyst/analyst.sh"
+ANALYST_SCRIPT="$SCRIPT_DIR/analyst.sh"
 
 echo "🚀 Starting Analyst Mode..."
 echo "📊 Market Analysis & Signal Generation"
@@ -26,7 +26,7 @@ nohup "$ANALYST_SCRIPT" > /dev/null 2>&1 &
 ANALYST_PID=$!
 
 echo "✅ Analyst started (PID: $ANALYST_PID)"
-echo "📝 Logs: $SCRIPT_DIR/analyst/logs/analyst.log"
+echo "📝 Logs: $SCRIPT_DIR/logs/analyst.log"
 echo ""
 echo "To check status: ./status.sh"
 echo "To stop: ./stop_analyst.sh"

@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-INVESTOR_SCRIPT="$SCRIPT_DIR/investor/investor.sh"
+INVESTOR_SCRIPT="$SCRIPT_DIR/investor.sh"
 
 echo "🚀 Starting Investor Mode..."
 echo "💰 Trading Execution & Portfolio Management"
@@ -26,7 +26,7 @@ nohup "$INVESTOR_SCRIPT" > /dev/null 2>&1 &
 INVESTOR_PID=$!
 
 echo "✅ Investor started (PID: $INVESTOR_PID)"
-echo "📝 Logs: $SCRIPT_DIR/investor/logs/investor.log"
+echo "📝 Logs: $SCRIPT_DIR/logs/investor.log"
 echo ""
 echo "To check status: ./status.sh"
 echo "To stop: ./stop_investor.sh"
