@@ -9,8 +9,9 @@ QULLAMAGGIE_SCRIPT="$SCRIPT_DIR/qullamaggie.sh"
 
 echo "🚀 Starting Qullamaggie Mode..."
 echo "📊 Momentum Pattern Analysis & Watchlist Generation"
-echo "⏰ Schedule: 8 AM - 4 PM Eastern Time"
+echo "⏰ Schedule: 8 AM - 4 PM Eastern Time (every 30 minutes)"
 echo "📧 Email notifications only (no tweets)"
+echo "🔄 Automatic cron scheduling enabled"
 echo ""
 
 # Make sure the qullamaggie script is executable
