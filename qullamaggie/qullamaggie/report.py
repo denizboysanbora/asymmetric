@@ -413,7 +413,7 @@ def format_email_content(
         
         for setup in candidate.setups:
             # Format: $SYMBOL $PRICE +X.XX% | RS X.XX | ADR X.X% | SetupType
-            setup_type = setup.setup.replace("Qullamaggie ", "")
+            setup_type = setup.setup  # Keep full name: "Qullamaggie Breakout", etc.
             signal_line = f"${candidate.symbol} ${price:.2f} {price_change:+.2f}% | RS {rs:.2f} | ADR {adr:.1f}% | {setup_type}"
             signals.append(signal_line)
     
