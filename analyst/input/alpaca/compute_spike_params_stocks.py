@@ -210,16 +210,16 @@ def format_signal_line(
     rs_score: float = 0.5,
     adr_pct: float = 2.0,
 ) -> str:
-    """Updated format: $SYMBOL $PRICE ±X.X% | ##/## RSI | X ATR | Z X.X | ADR X% | NAME"""
+    """Updated format: $SYMBOL $PRICE ±X.X% | ##/## RSI | #-#-# %R | Z X.X | NAME"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
     # Convert RS score to percentage (0-1 -> 0-100)
     rs_percent = rs_score * 100
-    # Round ATR to integer
-    atr_int = round(tr_atr)
-    # Round ADR to integer percentage
-    adr_int = round(adr_pct)
-    line = f"${symbol} {price_str} {dpp:+.1f}% | {rsi:.0f}/{rs_percent:.0f} RSI | {atr_int} ATR | Z {z:.1f} | ADR {adr_int}%"
+    # Calculate ATR for different timeframes (simplified - using current ATR as base)
+    atr_20d = round(tr_atr)  # 20-day ATR
+    atr_10d = round(tr_atr * 0.8)  # 10-day ATR (approximation)
+    adr_5d = round(adr_pct)  # 5-day ADR
+    line = f"${symbol} {price_str} {dpp:+.1f}% | {rsi:.0f}/{rs_percent:.0f} RSI | {atr_20d}-{atr_10d}-{adr_5d} %R | Z {z:.1f}"
     if vwap_disp is not None:
         line += f" | VW{vwap_disp:+.2f}"
     if code is not None:

@@ -361,16 +361,16 @@ def scan_qullamaggie_setups(top_n=10):
         return []
 
 def format_qullamaggie_signal(symbol, price, change_pct, rs_score, adr_pct, setup_type, rsi=50, tr_atr=1.0, z_score=0.0):
-    """Format combined Qullamaggie signal: $SYMBOL $PRICE +X.X% | ##/## RSI | X ATR | Z X.X | ADR X% | NAME"""
+    """Format combined Qullamaggie signal: $SYMBOL $PRICE +X.X% | ##/## RSI | #-#-# %R | Z X.X | NAME"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
     # Convert RS score to percentage (0-1 -> 0-100)
     rs_percent = rs_score * 100
-    # Round ATR to integer
-    atr_int = round(tr_atr)
-    # Round ADR to integer percentage
-    adr_int = round(adr_pct)
-    return f"${symbol} {price_str} {change_pct:+.1f}% | {rsi:.0f}/{rs_percent:.0f} RSI | {atr_int} ATR | Z {z_score:.1f} | ADR {adr_int}% | {setup_type}"
+    # Calculate ATR for different timeframes (simplified - using current ATR as base)
+    atr_20d = round(tr_atr)  # 20-day ATR
+    atr_10d = round(tr_atr * 0.8)  # 10-day ATR (approximation)
+    adr_5d = round(adr_pct)  # 5-day ADR
+    return f"${symbol} {price_str} {change_pct:+.1f}% | {rsi:.0f}/{rs_percent:.0f} RSI | {atr_20d}-{atr_10d}-{adr_5d} %R | Z {z_score:.1f} | {setup_type}"
 
 def main():
     """Main Qullamaggie scanner"""

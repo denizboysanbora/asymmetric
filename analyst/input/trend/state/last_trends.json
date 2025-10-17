@@ -4,11 +4,11 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "CCBG",
+    "symbol": "PRAX",
     "asset_type": "stock"
   },
   {
-    "symbol": "PRAX",
+    "symbol": "CCBG",
     "asset_type": "stock"
   },
   {
@@ -20,23 +20,23 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "ONDS",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "WHWK",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "INTR",
-    "asset_type": "stock"
-  },
-  {
     "symbol": "FLNC",
     "asset_type": "stock"
   },
   {
-    "symbol": "NEXT",
+    "symbol": "HIVE",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "ALEC",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "ONDS",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "ESPR",
     "asset_type": "stock"
   }
 ]
