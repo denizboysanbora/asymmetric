@@ -217,3 +217,14 @@
 [2025-10-17 12:00:00] 🐦 Tweet sent: $WHWK $2.56 +14.81%
 [2025-10-17 12:00:00]    ↳ Tweet sent successfully. Count: 10/17 in last 24h
 [2025-10-17 12:00:00] Analyst analysis complete - Breakouts:        1, Trends:       10, Signal Sent: Trending
+[2025-10-17 12:30:00] Analyst starting market analysis...
+[2025-10-17 12:30:00] 🔍 Running breakout scanner...
+[2025-10-17 12:30:00] Breakout: No signals found
+[2025-10-17 12:30:00] 📈 Running trend scanner...
+[2025-10-17 12:30:00] 📊 Trend signals detected!
+[2025-10-17 12:30:00] Selected trend signal (fallback): $ONDS $8.22 +14.64% | 46 RSI | 0.06x ATR | Z -0.56 | Trend
+[2025-10-17 12:30:00] 📤 Sending notifications for selected signal...
+[2025-10-17 12:30:00] 📧 Email sent: $ONDS $8.22 +14.64% | 46 RSI | 0.06x ATR | Z -0.56 | Trend
+[2025-10-17 12:30:00] 🐦 Tweet sent: $ONDS $8.22 +14.64% | 46 RSI | 0.06x ATR | Z -0.56 | Trend
+[2025-10-17 12:30:00]    ↳ Tweet sent successfully. Count: 11/17 in last 24h
+[2025-10-17 12:30:00] Analyst analysis complete - Breakouts:        1, Trends:       10, Signal Sent: Trending
