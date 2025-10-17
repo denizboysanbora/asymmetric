@@ -29,7 +29,8 @@ def build_candidates(
     daily_df: pd.DataFrame, 
     premarket_df: pd.DataFrame, 
     minute_df: Optional[pd.DataFrame],
-    cfg: Config
+    cfg: Config,
+    gate_open: bool = True
 ) -> List[Candidate]:
     """
     Build candidate list by detecting the three timeless momentum setups.
@@ -52,6 +53,9 @@ def build_candidates(
     
     logger.info(f"Screening {len(symbols)} symbols for momentum setups")
     
+    if not gate_open:
+        logger.info("Market gate is CLOSED (QQQ 10/20 EMA). Listing candidates as FYI only.")
+    
     # Calculate base features for all symbols
     adr_values = adr_pct(daily_df, window=20)
     rs_values = rs_score(daily_df, periods=[21, 63, 126])
@@ -65,6 +69,10 @@ def build_candidates(
         try:
             # Get symbol data
             symbol_daily = daily_df.xs(symbol, level=0)
+            
+            # Add gate status note
+            if not gate_open:
+                notes.append("Gate CLOSED")
             
             # Check ADR requirement
             adr = adr_values.get(symbol, 0)
@@ -145,7 +153,7 @@ def rank_candidates(candidates: List[Candidate]) -> List[Candidate]:
     def get_priority_score(candidate):
         """Calculate priority score for ranking."""
         priority_score = 0
-        setup_priorities = {"Episodic Pivot": 3, "Breakout": 2, "Parabolic Long": 1}
+        setup_priorities = {"Qullamaggie Episodic Pivot": 3, "Qullamaggie Breakout": 2, "Qullamaggie Parabolic Long": 1}
         
         # Get highest priority setup
         if candidate.setups:
@@ -165,7 +173,7 @@ def rank_candidates(candidates: List[Candidate]) -> List[Candidate]:
         reverse=True
     )
     
-    logger.info(f"Ranked {len(ranked)} candidates (EP > Breakout > Parabolic Long > RS > ADR)")
+    logger.info(f"Ranked {len(ranked)} candidates (Qullamaggie Episodic Pivot > Qullamaggie Breakout > Qullamaggie Parabolic Long > RS > ADR)")
     return ranked
 
 
@@ -232,9 +240,9 @@ def summarize_screening_results(candidates: List[Candidate]) -> Dict:
         }
     
     # Count setups
-    breakout_count = sum(1 for c in candidates for s in c.setups if s.setup == "Breakout")
-    ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Episodic Pivot")
-    parabolic_long_count = sum(1 for c in candidates for s in c.setups if s.setup == "Parabolic Long")
+    breakout_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Breakout")
+    ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Episodic Pivot")
+    parabolic_long_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Parabolic Long")
     
     avg_adr = sum(c.adr_pct for c in candidates) / len(candidates)
     avg_rs = sum(c.rs_score for c in candidates) / len(candidates)

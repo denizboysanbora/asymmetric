@@ -17,7 +17,11 @@ from .config import Config
 
 class SetupTag(BaseModel):
     """Setup tag model."""
-    setup: Literal["Breakout", "Episodic Pivot", "Parabolic Long"] = Field(..., description="Setup type")
+    setup: Literal[
+        "Qullamaggie Breakout",
+        "Qullamaggie Episodic Pivot", 
+        "Qullamaggie Parabolic Long"
+    ] = Field(..., description="Setup type")
     triggered: bool = Field(..., description="Whether setup is triggered")
     score: float = Field(..., description="Setup strength score (0-1)")
     meta: Dict = Field(default_factory=dict, description="Setup-specific metadata")
@@ -161,7 +165,7 @@ def detect_breakout(
         }
         
         return SetupTag(
-            setup="Breakout",
+            setup="Qullamaggie Breakout",
             triggered=False,  # Will be updated by opening range analysis
             score=score,
             meta=meta
@@ -268,7 +272,7 @@ def detect_ep(
         }
         
         return SetupTag(
-            setup="Episodic Pivot",
+            setup="Qullamaggie Episodic Pivot",
             triggered=False,  # Will be updated by opening range analysis
             score=score,
             meta=meta
@@ -358,6 +362,11 @@ def detect_parabolic_long(
         
         current_atr = atr.iloc[-1]
         
+        # Check ADR requirement (≥10% for Parabolic Long)
+        overall_adr = adr_pct(daily_df, window=20).get(symbol, np.nan)
+        if np.isnan(overall_adr) or overall_adr < 10.0:
+            return None
+        
         # Check oversold condition
         ema_band_low = min(ema_10.iloc[-1], ema_20.iloc[-1])
         atr_distance = (ema_band_low - current_price) / current_atr if current_atr > 0 else 0
@@ -393,7 +402,7 @@ def detect_parabolic_long(
         }
         
         return SetupTag(
-            setup="Parabolic Long",
+            setup="Qullamaggie Parabolic Long",
             triggered=rebound_signal,
             score=score,
             meta=meta
@@ -455,9 +464,9 @@ def rank_setups(setups: List[SetupTag]) -> List[SetupTag]:
         Ranked list of SetupTag objects
     """
     priority_order = {
-        "Episodic Pivot": 1,
-        "Breakout": 2,
-        "Parabolic Long": 3
+        "Qullamaggie Episodic Pivot": 1,
+        "Qullamaggie Breakout": 2,
+        "Qullamaggie Parabolic Long": 3
     }
     
     return sorted(setups, key=lambda s: (priority_order.get(s.setup, 999), -s.score))

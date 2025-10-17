@@ -321,14 +321,14 @@ def print_dashboard(
         # Show top 15 candidates
         top_candidates = candidates[:15]
         
-        print(f"{'Rank':<4} {'Symbol':<8} {'RS':<6} {'ADR':<6} {'Breakout':<8} {'EP':<8} {'Parabolic':<10} {'Price':<8} {'Notes'}")
+        print(f"{'Rank':<4} {'Symbol':<8} {'RS':<6} {'ADR':<7} {'Q-Breakout':<11} {'Q-EP':<6} {'Q-ParaLong':<12} {'Price':<8} {'Notes'}")
         print("-" * 80)
         
         for i, candidate in enumerate(top_candidates, 1):
             # Get setup indicators
-            breakout_icon = "✓" if any(s.setup == "Breakout" for s in candidate.setups) else "✗"
-            ep_icon = "🚀" if any(s.setup == "Episodic Pivot" for s in candidate.setups) else "  "
-            parabolic_icon = "📉" if any(s.setup == "Parabolic Long" for s in candidate.setups) else "  "
+            breakout_icon = "✓" if any(s.setup == "Qullamaggie Breakout" for s in candidate.setups) else "✗"
+            ep_icon = "🚀" if any(s.setup == "Qullamaggie Episodic Pivot" for s in candidate.setups) else "  "
+            parabolic_icon = "🔁" if any(s.setup == "Qullamaggie Parabolic Long" for s in candidate.setups) else "  "
             
             price = candidate.meta.get('latest_price', 0)
             notes = candidate.notes[0] if candidate.notes else ""
@@ -341,9 +341,9 @@ def print_dashboard(
         print(f"Total candidates: {len(candidates)}")
         
         # Summary stats
-        breakout_count = sum(1 for c in candidates for s in c.setups if s.setup == "Breakout")
-        ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Episodic Pivot")
-        parabolic_count = sum(1 for c in candidates for s in c.setups if s.setup == "Parabolic Long")
+        breakout_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Breakout")
+        ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Episodic Pivot")
+        parabolic_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Parabolic Long")
         
         avg_adr = sum(c.adr_pct for c in candidates) / len(candidates)
         avg_rs = sum(c.rs_score for c in candidates) / len(candidates)

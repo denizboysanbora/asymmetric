@@ -122,7 +122,7 @@ def analyze(
         # Get premarket stats (placeholder for now)
         premarket_df = get_premarket_stats(symbols, {})
         
-        candidates = build_candidates(daily_df, premarket_df, None, cfg)
+        candidates = build_candidates(daily_df, premarket_df, None, cfg, gate_open)
         
         if not candidates:
             logger.warning("No candidates found - market conditions may not be suitable")
