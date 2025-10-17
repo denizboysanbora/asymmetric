@@ -38,7 +38,7 @@ def adr_pct(daily_df: pd.DataFrame, window: int = 20) -> pd.Series:
     daily_range_pct = daily_range * 100
     
     # Calculate rolling mean ADR
-    adr = daily_range_pct.groupby(level='symbol').rolling(window=window, min_periods=window//2).mean()
+    adr = daily_range_pct.groupby(level=0).rolling(window=window, min_periods=window//2).mean()
     
     # Get latest ADR for each symbol
     latest_adr = adr.groupby(level=0).tail(1).droplevel('date')
@@ -80,7 +80,7 @@ def rs_score(daily_df: pd.DataFrame, periods: List[int] = [21, 63, 126]) -> pd.S
     # Calculate returns for each period
     returns = {}
     for period in periods:
-        period_returns = daily_df['close'].groupby(level='symbol').apply(
+        period_returns = daily_df['close'].groupby(level=0).apply(
             lambda x: rolling_return(x, period)
         )
         returns[f'{period}d'] = period_returns
@@ -128,7 +128,7 @@ def detect_explosive_leg(daily_df: pd.DataFrame, window: int = 30, thresh: float
         
         return impulse_pct >= thresh
     
-    explosive_legs = daily_df.groupby(level='symbol').apply(_has_explosive_leg)
+    explosive_legs = daily_df.groupby(level=0).apply(_has_explosive_leg)
     return explosive_legs
 
 
@@ -192,7 +192,7 @@ def detect_flag_tightening(
         
         return True
     
-    tight_flags = daily_df.groupby(level='symbol').apply(_has_tight_flag)
+    tight_flags = daily_df.groupby(level=0).apply(_has_tight_flag)
     return tight_flags
 
 
@@ -287,7 +287,7 @@ def calculate_atr(daily_df: pd.DataFrame, window: int = 14) -> pd.Series:
     
     # Check if DataFrame has MultiIndex (multiple symbols) or single index
     if isinstance(daily_df.index, pd.MultiIndex):
-        atr_values = daily_df.groupby(level='symbol').apply(_calc_atr)
+        atr_values = daily_df.groupby(level=0).apply(_calc_atr)
         return atr_values
     else:
         # Single symbol DataFrame
@@ -306,9 +306,9 @@ def calculate_volume_profile(daily_df: pd.DataFrame, window: int = 20) -> pd.Ser
     Returns:
         Series with average volume per symbol
     """
-    avg_volume = daily_df['volume'].groupby(level='symbol').rolling(
+    avg_volume = daily_df['volume'].groupby(level=0).rolling(
         window=window, min_periods=window//2
-    ).mean().groupby(level='symbol').tail(1).droplevel('date')
+    ).mean().groupby(level=0).tail(1).droplevel(1)
     
     return avg_volume
 
@@ -334,7 +334,7 @@ def detect_gap(daily_df: pd.DataFrame, gap_min_pct: float = 10.0) -> pd.Series:
         gap_pct = (current_open - prev_close) / prev_close * 100
         return gap_pct if gap_pct >= gap_min_pct else 0.0
     
-    gaps = daily_df.groupby(level='symbol').apply(_detect_gap)
+    gaps = daily_df.groupby(level=0).apply(_detect_gap)
     return gaps
 
 
@@ -370,7 +370,7 @@ def detect_volume_spike(
         
         return 0.0
     
-    volume_spikes = minute_df.groupby(level='symbol').apply(_detect_volume_spike)
+    volume_spikes = minute_df.groupby(level=0).apply(_detect_volume_spike)
     return volume_spikes
 
 
@@ -402,7 +402,7 @@ def detect_impulse(daily_df: pd.DataFrame, window: int = 60, min_pct: float = 30
         
         return 0.0
     
-    impulses = daily_df.groupby(level='symbol').apply(_detect_impulse)
+    impulses = daily_df.groupby(level=0).apply(_detect_impulse)
     return impulses
 
 
@@ -437,5 +437,5 @@ def calculate_flatness_score(daily_df: pd.DataFrame, periods: List[int] = [63, 1
         
         return sum(flatness_scores) / len(flatness_scores) if flatness_scores else 0.0
     
-    flatness = daily_df.groupby(level='symbol').apply(_calculate_flatness)
+    flatness = daily_df.groupby(level=0).apply(_calculate_flatness)
     return flatness

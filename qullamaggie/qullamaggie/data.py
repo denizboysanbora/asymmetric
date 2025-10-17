@@ -58,17 +58,32 @@ def get_daily_bars(symbols: List[str], lookback_days: int = 252) -> pd.DataFrame
         
         # Convert to DataFrame
         data = []
-        for symbol, symbol_bars in bars.items():
-            for bar in symbol_bars:
-                data.append({
-                    'symbol': symbol,
-                    'date': bar.timestamp.date(),
-                    'open': float(bar.open),
-                    'high': float(bar.high),
-                    'low': float(bar.low),
-                    'close': float(bar.close),
-                    'volume': int(bar.volume)
-                })
+        if hasattr(bars, 'data'):
+            # BarSet has a data attribute
+            for symbol, symbol_bars in bars.data.items():
+                for bar in symbol_bars:
+                    data.append({
+                        'symbol': symbol,
+                        'date': bar.timestamp.date(),
+                        'open': float(bar.open),
+                        'high': float(bar.high),
+                        'low': float(bar.low),
+                        'close': float(bar.close),
+                        'volume': int(bar.volume)
+                    })
+        else:
+            # Try direct iteration
+            for symbol, symbol_bars in bars.items():
+                for bar in symbol_bars:
+                    data.append({
+                        'symbol': symbol,
+                        'date': bar.timestamp.date(),
+                        'open': float(bar.open),
+                        'high': float(bar.high),
+                        'low': float(bar.low),
+                        'close': float(bar.close),
+                        'volume': int(bar.volume)
+                    })
         
         if not data:
             logger.warning(f"No daily data found for symbols: {symbols}")

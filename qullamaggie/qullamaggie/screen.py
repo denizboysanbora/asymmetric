@@ -64,7 +64,7 @@ def build_candidates(
         
         try:
             # Get symbol data
-            symbol_daily = daily_df.xs(symbol, level='symbol')
+            symbol_daily = daily_df.xs(symbol, level=0)
             
             # Check ADR requirement
             adr = adr_values.get(symbol, 0)

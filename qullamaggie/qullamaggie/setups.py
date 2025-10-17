@@ -49,7 +49,7 @@ def detect_breakout(
         SetupTag if breakout detected, None otherwise
     """
     try:
-        symbol_data = daily_df.xs(symbol, level='symbol')
+        symbol_data = daily_df.xs(symbol, level=0)
         
         if len(symbol_data) < cfg.setups.breakout.lookback_impulse_days:
             return None
@@ -199,7 +199,7 @@ def detect_ep(
         SetupTag if EP detected, None otherwise
     """
     try:
-        symbol_data = daily_df.xs(symbol, level='symbol')
+        symbol_data = daily_df.xs(symbol, level=0)
         
         if len(symbol_data) < 126:  # Need 6 months of data
             return None
@@ -301,7 +301,7 @@ def detect_parabolic_long(
         SetupTag if parabolic long detected, None otherwise
     """
     try:
-        symbol_data = daily_df.xs(symbol, level='symbol')
+        symbol_data = daily_df.xs(symbol, level=0)
         
         if len(symbol_data) < cfg.setups.parabolic_long.lookback_days + 20:
             return None
