@@ -80,19 +80,19 @@ if [ "$CURRENT_HOUR" -lt 10 ] || [ "$CURRENT_HOUR" -ge 16 ] || [ "$CURRENT_DOW" 
 fi
 
 # ========================================
-# BREAKOUT SCANNER
+# MOMENTUM SCANNER
 # ========================================
-echo "[$TIMESTAMP] 🔍 Running breakout scanner..." | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] 🔍 Running momentum scanner..." | tee -a "$LOG_FILE"
 
-BREAKOUT_OUTPUT=$($BREAKOUT_PY $BREAKOUT_SCRIPT 2>&1) || {
-    echo "[$TIMESTAMP] ❌ Breakout scan failed: $BREAKOUT_OUTPUT" | tee -a "$LOG_FILE"
-    BREAKOUT_OUTPUT=""
+MOMENTUM_OUTPUT=$($BREAKOUT_PY $BREAKOUT_SCRIPT 2>&1) || {
+    echo "[$TIMESTAMP] ❌ Momentum scan failed: $MOMENTUM_OUTPUT" | tee -a "$LOG_FILE"
+    MOMENTUM_OUTPUT=""
 }
 
-BREAKOUT_SIGNALS=$(echo "$BREAKOUT_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep ' | Breakout$' || true)
-# Pick top breakout by absolute % move
-TOP_BREAKOUT=$(echo "$BREAKOUT_SIGNALS" | awk '{match($0, /([+-][0-9]+(\.[0-9]+)?)%/); v=substr($0, RSTART, RLENGTH-1); gsub(/\+/,"",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
-BREAKOUT_COUNT=$(echo "$BREAKOUT_SIGNALS" | wc -l)
+MOMENTUM_SIGNALS=$(echo "$MOMENTUM_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep ' | Momentum$' || true)
+# Pick top momentum by absolute % move
+TOP_MOMENTUM=$(echo "$MOMENTUM_SIGNALS" | awk '{match($0, /([+-][0-9]+(\.[0-9]+)?)%/); v=substr($0, RSTART, RLENGTH-1); gsub(/\+/,"",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
+MOMENTUM_COUNT=$(echo "$MOMENTUM_SIGNALS" | wc -l)
 
 # ========================================
 # SIGNAL SELECTION & NOTIFICATION LOGIC
@@ -101,19 +101,19 @@ SIGNAL_TO_SEND=""
 SIGNAL_TYPE=""
 SIGNAL_ASSET_CLASS=""
 
-if [ -n "$BREAKOUT_SIGNALS" ]; then
-    echo "[$TIMESTAMP] 🚨 Breakout signals detected!" | tee -a "$LOG_FILE"
+if [ -n "$MOMENTUM_SIGNALS" ]; then
+    echo "[$TIMESTAMP] 🚨 Momentum signals detected!" | tee -a "$LOG_FILE"
     
-    # Use the top breakout signal
-    SIGNAL_TO_SEND="$TOP_BREAKOUT"
-    SIGNAL_TYPE="Breakout"
+    # Use the top momentum signal
+    SIGNAL_TO_SEND="$TOP_MOMENTUM"
+    SIGNAL_TYPE="Momentum"
     
     # All signals are now stock-only
     SIGNAL_ASSET_CLASS="stock"
     
-    echo "[$TIMESTAMP] Selected breakout signal: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    echo "[$TIMESTAMP] Selected momentum signal: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
 else
-    echo "[$TIMESTAMP] Breakout: No signals found" | tee -a "$LOG_FILE"
+    echo "[$TIMESTAMP] Momentum: No signals found" | tee -a "$LOG_FILE"
 fi
 
 # ========================================
@@ -134,7 +134,7 @@ TREND_COUNT=$(echo "$TREND_SIGNALS" | wc -l)
 if [ -n "$TREND_SIGNALS" ]; then
     echo "[$TIMESTAMP] 📊 Trend signals detected!" | tee -a "$LOG_FILE"
     
-    # If no breakout was found, use the top trend as fallback
+    # If no momentum was found, use the top trend as fallback
     if [ -z "$SIGNAL_TO_SEND" ]; then
         SIGNAL_TO_SEND="$TOP_TREND"
         SIGNAL_TYPE="Trending"
@@ -170,7 +170,7 @@ QULLAMAGGIE_COUNT=$(echo "$QULLAMAGGIE_SIGNALS" | wc -l)
 if [ -n "$QULLAMAGGIE_SIGNALS" ]; then
     echo "[$TIMESTAMP] 🎯 Qullamaggie setups detected!" | tee -a "$LOG_FILE"
     
-    # If no breakout or trend was found, use the top Qullamaggie setup as fallback
+    # If no momentum or trend was found, use the top Qullamaggie setup as fallback
     if [ -z "$SIGNAL_TO_SEND" ]; then
         SIGNAL_TO_SEND="$TOP_QULLAMAGGIE"
         SIGNAL_TYPE="Qullamaggie"
@@ -195,7 +195,7 @@ if [ -n "$SIGNAL_TO_SEND" ]; then
     echo "[$TIMESTAMP] 📤 Sending notifications for selected signal..." | tee -a "$LOG_FILE"
     
     # Send email with appropriate subject based on signal type
-    EMAIL_SUBJECT="Breakout"
+    EMAIL_SUBJECT="Momentum"
     if [[ "$SIGNAL_TYPE" == "Trending" ]]; then
         EMAIL_SUBJECT="Trend"
     elif [[ "$SIGNAL_TYPE" == "Qullamaggie" ]]; then
@@ -231,4 +231,4 @@ else
     echo "[$TIMESTAMP] No signal selected - no notifications sent" | tee -a "$LOG_FILE"
 fi
 
-echo "[$TIMESTAMP] Analyst analysis complete - Breakouts: $BREAKOUT_COUNT, Trends: $TREND_COUNT, Qullamaggie: $QULLAMAGGIE_COUNT, Signal Sent: $SIGNAL_TYPE" | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] Analyst analysis complete - Momentum: $MOMENTUM_COUNT, Trends: $TREND_COUNT, Qullamaggie: $QULLAMAGGIE_COUNT, Signal Sent: $SIGNAL_TYPE" | tee -a "$LOG_FILE"

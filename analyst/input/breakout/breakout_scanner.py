@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """
-Breakout Scanner - Detects volatility breakouts using technical analysis
-Output format: $SYMBOL $PRICE +X.XX% | X.XXx ATR | Z X.XX | Breakout
+Momentum Scanner - Detects volatility breakouts using technical analysis
+Output format: $SYMBOL $PRICE +X.XX% | X.XXx ATR | Z X.XX | Momentum
 """
 import os
 import sys
@@ -34,15 +34,15 @@ def run_stock_breakout_scan():
         return []
 
 def main():
-    """Main breakout scanner"""
-    print("🔍 Scanning for stock breakouts...", file=sys.stderr)
+    """Main momentum scanner"""
+    print("🔍 Scanning for stock momentum...", file=sys.stderr)
 
     stock_signals = run_stock_breakout_scan()
 
     for signal in stock_signals:
         print(signal)
 
-    print(f"Found {len(stock_signals)} breakout signals", file=sys.stderr)
+    print(f"Found {len(stock_signals)} momentum signals", file=sys.stderr)
 
 if __name__ == "__main__":
     main()

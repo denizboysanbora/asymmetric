@@ -170,7 +170,7 @@ def classify_long_entry(
         if not (vws > 0 and abs(vws) >= vws_min):
             return None
 
-        return "Breakout"
+        return "Momentum"
 
 # === QUANT FORMATTER (L/E) ===
 def calculate_rsi(prices: np.ndarray, period: int = 14) -> float:
@@ -208,7 +208,7 @@ def format_signal_line(
     *,
     vwap_disp: float | None = None,
 ) -> str:
-    """Updated format: $SYMBOL $PRICE ±X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend/Breakout"""
+    """Updated format: $SYMBOL $PRICE ±X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend/Momentum"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
     line = f"${symbol} {price_str} {dpp:+.2f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | Z {z:.2f}"
@@ -324,9 +324,9 @@ def main():
         sig = classify_long_entry(tr_atr, z, dpp, "stocks")
         
         # Determine signal type
-        signal_type = "Breakout" if sig == "Breakout" else "Trend"
+        signal_type = "Momentum" if sig == "Momentum" else "Trend"
         
-        # Updated format: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend/Breakout
+        # Updated format: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend/Momentum
         signal_line = format_signal_line(sym, closes[-1], dpp, tr_atr, z, rsi, signal_type)
         signals.append(signal_line)
     

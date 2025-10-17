@@ -4,10 +4,6 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "NMG",
-    "asset_type": "stock"
-  },
-  {
     "symbol": "FLNC",
     "asset_type": "stock"
   },
@@ -20,7 +16,11 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "QBTS",
+    "symbol": "NMG",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "TE",
     "asset_type": "stock"
   },
   {
@@ -36,7 +36,7 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "CMTL",
+    "symbol": "QBTS",
     "asset_type": "stock"
   }
 ]
