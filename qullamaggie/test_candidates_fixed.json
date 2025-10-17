@@ -1,0 +1,18 @@
+[
+  {
+    "symbol": "NVDA",
+    "adr_pct": 3.2,
+    "rs_score": 0.85,
+    "setups": ["Breakout"],
+    "notes": ["Strong momentum", "High volume"],
+    "meta": {"price": 450.25, "change_pct": 3.2, "volume_ratio": 2.1, "rsi": 65.5, "atr": 12.3}
+  },
+  {
+    "symbol": "TSLA", 
+    "adr_pct": 5.8,
+    "rs_score": 0.78,
+    "setups": ["Episodic"],
+    "notes": ["Gap up", "High volume"],
+    "meta": {"price": 245.80, "change_pct": 5.8, "volume_ratio": 1.8, "rsi": 72.1, "atr": 8.9}
+  }
+]

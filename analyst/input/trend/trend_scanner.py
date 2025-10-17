@@ -99,8 +99,8 @@ def get_stock_movers(top_n=5):
         # Calculate intraday change
         intraday_change = ((current_price - today_open) / today_open) * 100.0
         
-        # Only include significant moves (>1%)
-        if abs(intraday_change) >= 1.0:
+        # Only include significant upward moves (>1%)
+        if intraday_change >= 1.0:
             movers.append({
                 'symbol': sym,
                 'price': current_price,
@@ -108,8 +108,8 @@ def get_stock_movers(top_n=5):
                 'asset_type': 'stock'
             })
     
-    # Sort by absolute change (biggest movers first)
-    movers.sort(key=lambda x: abs(x['change_pct']), reverse=True)
+    # Sort by change percentage (biggest upward movers first)
+    movers.sort(key=lambda x: x['change_pct'], reverse=True)
     
     return movers[:top_n]
 

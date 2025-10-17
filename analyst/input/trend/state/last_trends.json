@@ -1,42 +1,42 @@
 [
   {
-    "symbol": "PRAX",
-    "asset_type": "stock"
-  },
-  {
     "symbol": "WHWK",
     "asset_type": "stock"
   },
   {
-    "symbol": "FOSL",
+    "symbol": "FLNC",
     "asset_type": "stock"
   },
   {
-    "symbol": "CCCC",
+    "symbol": "DBRG",
     "asset_type": "stock"
   },
   {
-    "symbol": "ZBIO",
+    "symbol": "SEI",
     "asset_type": "stock"
   },
   {
-    "symbol": "IIIN",
+    "symbol": "SVV",
     "asset_type": "stock"
   },
   {
-    "symbol": "NAUT",
+    "symbol": "QBTS",
     "asset_type": "stock"
   },
   {
-    "symbol": "MATV",
+    "symbol": "PRCH",
     "asset_type": "stock"
   },
   {
-    "symbol": "BKSY",
+    "symbol": "TE",
     "asset_type": "stock"
   },
   {
-    "symbol": "ONDS",
+    "symbol": "FITB",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "RGTI",
     "asset_type": "stock"
   }
 ]
