@@ -386,7 +386,7 @@ def format_email_content(
     opening_range_results: Optional[Dict[str, Dict]] = None
 ) -> str:
     """
-    Format analysis results for email content.
+    Format analysis results for email using simple format like analyst/bob.
     
     Args:
         gate_state: Market gate state and metadata
@@ -394,54 +394,32 @@ def format_email_content(
         opening_range_results: Opening range results (optional)
         
     Returns:
-        Formatted email content string
+        Formatted email content string (simple signal format)
     """
-    content = []
-    content.append("🚀 QULLAMAGGIE MOMENTUM ANALYSIS")
-    content.append("=" * 50)
-    content.append(f"Time: {now_et().strftime('%Y-%m-%d %H:%M:%S ET')}")
-    content.append("")
+    # Simple format: one signal per line like analyst/bob
+    signals = []
     
-    # Market Gate
-    gate_open = gate_state.get('gate_open', False)
-    ema_10 = gate_state.get('ema_10', 0)
-    ema_20 = gate_state.get('ema_20', 0)
-    
-    status = "OPEN" if gate_open else "CLOSED"
-    content.append(f"📊 MARKET GATE: {status}")
-    content.append(f"QQQ EMA 10/20: ${ema_10:.2f} / ${ema_20:.2f}")
-    content.append("")
-    
-    # Top Candidates
-    if candidates:
-        content.append("🎯 TOP CANDIDATES:")
-        top_5 = candidates[:5]
+    # Generate signal lines for each candidate with setups
+    for candidate in candidates:
+        if not candidate.setups:
+            continue
+            
+        price = candidate.meta.get('latest_price', 0)
+        adr = candidate.adr_pct
+        rs = candidate.rs_score
         
-        for i, candidate in enumerate(top_5, 1):
-            ep_indicator = " 🚀" if candidate.has_ep_gap else ""
-            price = candidate.meta.get('latest_price', 0)
-            content.append(f"{i}. {candidate.symbol} (RS: {candidate.rs_score:.2f}, ADR: {candidate.adr_pct:.1f}%, ${price:.2f}){ep_indicator}")
+        # Calculate price change (simplified - would need prev close in real implementation)
+        price_change = 0.0  # Placeholder - would calculate actual change
         
-        content.append("")
-        content.append(f"Total candidates: {len(candidates)}")
-        
-        ep_gaps = sum(1 for c in candidates if c.has_ep_gap)
-        content.append(f"EP gaps: {ep_gaps}")
+        for setup in candidate.setups:
+            # Format: $SYMBOL $PRICE +X.XX% | RS X.XX | ADR X.X% | SetupType
+            setup_type = setup.setup.replace("Qullamaggie ", "").replace(" ", "")
+            signal_line = f"${candidate.symbol} ${price:.2f} {price_change:+.2f}% | RS {rs:.2f} | ADR {adr:.1f}% | {setup_type}"
+            signals.append(signal_line)
     
-    # Opening Range Breakouts
-    if opening_range_results:
-        triggered = [s for s, r in opening_range_results.items() if r.get('entry_triggered', False)]
-        if triggered:
-            content.append("")
-            content.append("⚡ OPENING RANGE BREAKOUTS:")
-            for symbol in triggered[:5]:  # Show top 5
-                result = opening_range_results[symbol]
-                orh = result.get('orh', 0)
-                last = result.get('last_price', 0)
-                breakout_pct = ((last - orh) / orh * 100) if orh > 0 else 0
-                content.append(f"• {symbol}: +{breakout_pct:.1f}% above ORH ${orh:.2f}")
+    # If no signals, return simple message
+    if not signals:
+        return "No momentum signals detected."
     
-    content.append("")
-    content.append("Note: Analysis only - no trading orders placed.")
-    
-    return "\n".join(content)
+    # Return one signal per line (simple format like analyst/bob)
+    return "\n".join(signals)

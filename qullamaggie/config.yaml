@@ -30,7 +30,7 @@ outputs:
   save: true
 tz: America/New_York
 universe:
-  mode: static
+  mode: dynamic
   static_symbols:
     - NVDA
     - TSLA
