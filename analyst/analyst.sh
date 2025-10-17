@@ -104,14 +104,13 @@ SIGNAL_ASSET_CLASS=""
 if [ -n "$VOLATILITY_SIGNALS" ]; then
     echo "[$TIMESTAMP] 🚨 Volatility signals detected!" | tee -a "$LOG_FILE"
     
-    # Use the top volatility signal
-    SIGNAL_TO_SEND="$TOP_VOLATILITY"
-    SIGNAL_TYPE="Volatility"
-    
-    # All signals are now stock-only
-    SIGNAL_ASSET_CLASS="stock"
-    
-    echo "[$TIMESTAMP] Selected volatility signal: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    # Use volatility as fallback only if no other signals found
+    if [ -z "$SIGNAL_TO_SEND" ] && [ -n "$TOP_VOLATILITY" ]; then
+        SIGNAL_TO_SEND="$TOP_VOLATILITY"
+        SIGNAL_TYPE="Volatility"
+        SIGNAL_ASSET_CLASS="stock"
+        echo "[$TIMESTAMP] Selected volatility signal (fallback): $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    fi
 else
     echo "[$TIMESTAMP] Volatility: No signals found" | tee -a "$LOG_FILE"
 fi
@@ -134,8 +133,8 @@ MOMENTUM_COUNT=$(echo "$MOMENTUM_SIGNALS" | wc -l)
 if [ -n "$MOMENTUM_SIGNALS" ]; then
     echo "[$TIMESTAMP] 📊 Momentum signals detected!" | tee -a "$LOG_FILE"
     
-    # If no volatility was found, use the top momentum as fallback
-    if [ -z "$SIGNAL_TO_SEND" ]; then
+    # Use momentum as fallback only if no Qullamaggie signals found
+    if [ -z "$SIGNAL_TO_SEND" ] && [ -n "$TOP_MOMENTUM" ]; then
         SIGNAL_TO_SEND="$TOP_MOMENTUM"
         SIGNAL_TYPE="Momentum"
         SIGNAL_ASSET_CLASS="stock"  # Stock-only system
@@ -170,12 +169,12 @@ QULLAMAGGIE_COUNT=$(echo "$QULLAMAGGIE_SIGNALS" | wc -l)
 if [ -n "$QULLAMAGGIE_SIGNALS" ]; then
     echo "[$TIMESTAMP] 🎯 Qullamaggie setups detected!" | tee -a "$LOG_FILE"
     
-    # If no volatility or momentum was found, use the top Qullamaggie setup as fallback
-    if [ -z "$SIGNAL_TO_SEND" ]; then
+    # Prioritize Qullamaggie setups - use as primary signal
+    if [ -n "$TOP_QULLAMAGGIE" ]; then
         SIGNAL_TO_SEND="$TOP_QULLAMAGGIE"
         SIGNAL_TYPE="Qullamaggie"
         SIGNAL_ASSET_CLASS="stock"  # Stock-only system
-        echo "[$TIMESTAMP] Selected Qullamaggie setup (fallback): $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+        echo "[$TIMESTAMP] Selected Qullamaggie setup (primary): $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
     fi
     
     # Log all Qullamaggie signals to database (for tracking purposes)
@@ -208,22 +207,23 @@ if [ -n "$SIGNAL_TO_SEND" ]; then
         echo "[$TIMESTAMP] ❌ Email failed: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
     fi
     
-    # Send tweet
-    if tweet_output=$($TWEET_PY "$TWEET_SCRIPT" "$SIGNAL_TO_SEND" 2>&1); then
-        echo "[$TIMESTAMP] 🐦 Tweet sent: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
-        if [ -n "$tweet_output" ]; then
-            while IFS= read -r line; do
-                echo "[$TIMESTAMP]    ↳ $line" | tee -a "$LOG_FILE"
-            done <<< "$tweet_output"
-        fi
-    else
-        echo "[$TIMESTAMP] ❌ Tweet failed: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
-        if [ -n "$tweet_output" ]; then
-            while IFS= read -r line; do
-                echo "[$TIMESTAMP]    ↳ $line" | tee -a "$LOG_FILE"
-            done <<< "$tweet_output"
-        fi
-    fi
+    # Send tweet (DISABLED)
+    # if tweet_output=$($TWEET_PY "$TWEET_SCRIPT" "$SIGNAL_TO_SEND" 2>&1); then
+    #     echo "[$TIMESTAMP] 🐦 Tweet sent: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    #     if [ -n "$tweet_output" ]; then
+    #         while IFS= read -r line; do
+    #             echo "[$TIMESTAMP]    ↳ $line" | tee -a "$LOG_FILE"
+    #         done <<< "$tweet_output"
+    #     fi
+    # else
+    #     echo "[$TIMESTAMP] ❌ Tweet failed: $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    #     if [ -n "$tweet_output" ]; then
+    #         while IFS= read -r line; do
+    #             echo "[$TIMESTAMP]    ↳ $line" | tee -a "$LOG_FILE"
+    #         done <<< "$tweet_output"
+    #     fi
+    # fi
+    echo "[$TIMESTAMP] 🐦 Tweet function disabled" | tee -a "$LOG_FILE"
     
     # Log the selected signal to database
     $DATABASE_PY $LOG_SIGNAL_SCRIPT "$SIGNAL_TO_SEND" "$SIGNAL_ASSET_CLASS" "$SIGNAL_TYPE" 2>/dev/null || true

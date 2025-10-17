@@ -207,11 +207,19 @@ def format_signal_line(
     code: str | None,
     *,
     vwap_disp: float | None = None,
+    rs_score: float = 0.5,
+    adr_pct: float = 2.0,
 ) -> str:
-    """Updated format: $SYMBOL $PRICE ±X.XX% | ## RSI | X.XXx ATR | Z X.XX | Momentum/Volatility"""
+    """Updated format: $SYMBOL $PRICE ±X.X% | ##/## RSI | X ATR | Z X.X | ADR X% | NAME"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
-    line = f"${symbol} {price_str} {dpp:+.2f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | Z {z:.2f}"
+    # Convert RS score to percentage (0-1 -> 0-100)
+    rs_percent = rs_score * 100
+    # Round ATR to integer
+    atr_int = round(tr_atr)
+    # Round ADR to integer percentage
+    adr_int = round(adr_pct)
+    line = f"${symbol} {price_str} {dpp:+.1f}% | {rsi:.0f}/{rs_percent:.0f} RSI | {atr_int} ATR | Z {z:.1f} | ADR {adr_int}%"
     if vwap_disp is not None:
         line += f" | VW{vwap_disp:+.2f}"
     if code is not None:
@@ -320,14 +328,31 @@ def main():
         # Calculate RSI
         rsi = calculate_rsi(closes)
         
+        # Calculate RS score (simplified - using price momentum vs SPY)
+        rs_score = 0.5  # Default neutral RS
+        if len(closes) >= 20:
+            # Simple RS calculation: stock performance vs market
+            stock_return = (closes[-1] - closes[-20]) / closes[-20]
+            rs_score = max(0.0, min(1.0, (stock_return + 0.1) / 0.2))  # Normalize to 0-1
+        
+        # Calculate ADR (Average Daily Range)
+        adr_pct = 2.0  # Default ADR
+        if len(closes) >= 20:
+            daily_ranges = []
+            for i in range(1, min(20, len(closes))):
+                daily_range = abs(closes[i] - closes[i-1]) / closes[i-1]
+                daily_ranges.append(daily_range)
+            if daily_ranges:
+                adr_pct = np.mean(daily_ranges) * 100
+        
         # Classify
         sig = classify_long_entry(tr_atr, z, dpp, "stocks")
         
         # Determine signal type
         signal_type = "Volatility" if sig == "Volatility" else "Momentum"
         
-        # Updated format: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Momentum/Volatility
-        signal_line = format_signal_line(sym, closes[-1], dpp, tr_atr, z, rsi, signal_type)
+        # Updated format: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | ## RS | ADR X.X% | NAME
+        signal_line = format_signal_line(sym, closes[-1], dpp, tr_atr, z, rsi, signal_type, rs_score=rs_score, adr_pct=adr_pct)
         signals.append(signal_line)
     
     for s in signals:
