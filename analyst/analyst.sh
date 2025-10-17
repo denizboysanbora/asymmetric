@@ -34,6 +34,7 @@ OUTPUT_DIR="$SCRIPT_DIR/output"
 ALPACA_DIR="$INPUT_DIR/alpaca"
 BREAKOUT_DIR="$INPUT_DIR/breakout"
 TREND_DIR="$INPUT_DIR/trend"
+QULLAMAGGIE_DIR="$INPUT_DIR/qullamaggie"
 GMAIL_DIR="$OUTPUT_DIR/gmail"
 TWEET_DIR="$OUTPUT_DIR/tweet"
 DATABASE_DIR="$OUTPUT_DIR/database"
@@ -43,6 +44,7 @@ CONFIG_DIR="$SCRIPT_DIR/config"
 ALPACA_PY="$ALPACA_DIR/venv/bin/python3"
 BREAKOUT_PY="$ALPACA_PY"
 TREND_PY="$ALPACA_PY"
+QULLAMAGGIE_PY="$ALPACA_PY"
 GMAIL_PY="$ALPACA_PY"
 TWEET_PY="$ALPACA_PY"
 DATABASE_PY="$ALPACA_PY"
@@ -50,6 +52,7 @@ DATABASE_PY="$ALPACA_PY"
 # Scripts
 BREAKOUT_SCRIPT="$BREAKOUT_DIR/breakout_scanner.py"
 TREND_SCRIPT="$TREND_DIR/trend_scanner.py"
+QULLAMAGGIE_SCRIPT="$QULLAMAGGIE_DIR/qullamaggie_scanner.py"
 EMAIL_SCRIPT="$GMAIL_DIR/send_email.py"
 TWEET_SCRIPT="$TWEET_DIR/tweet_with_limit.py"
 LOG_SIGNAL_SCRIPT="$DATABASE_DIR/log_signal.py"
@@ -150,6 +153,42 @@ else
 fi
 
 # ========================================
+# QULLAMAGGIE SETUP SCANNER
+# ========================================
+echo "[$TIMESTAMP] 🎯 Running Qullamaggie setup scanner..." | tee -a "$LOG_FILE"
+
+QULLAMAGGIE_OUTPUT=$($QULLAMAGGIE_PY $QULLAMAGGIE_SCRIPT 2>&1) || {
+    echo "[$TIMESTAMP] ❌ Qullamaggie scan failed: $QULLAMAGGIE_OUTPUT" | tee -a "$LOG_FILE"
+    QULLAMAGGIE_OUTPUT=""
+}
+
+QULLAMAGGIE_SIGNALS=$(echo "$QULLAMAGGIE_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep '^\$[A-Z0-9]' || true)
+# Pick top Qullamaggie setup by score (highest first)
+TOP_QULLAMAGGIE=$(echo "$QULLAMAGGIE_SIGNALS" | head -1)
+QULLAMAGGIE_COUNT=$(echo "$QULLAMAGGIE_SIGNALS" | wc -l)
+
+if [ -n "$QULLAMAGGIE_SIGNALS" ]; then
+    echo "[$TIMESTAMP] 🎯 Qullamaggie setups detected!" | tee -a "$LOG_FILE"
+    
+    # If no breakout or trend was found, use the top Qullamaggie setup as fallback
+    if [ -z "$SIGNAL_TO_SEND" ]; then
+        SIGNAL_TO_SEND="$TOP_QULLAMAGGIE"
+        SIGNAL_TYPE="Qullamaggie"
+        SIGNAL_ASSET_CLASS="stock"  # Stock-only system
+        echo "[$TIMESTAMP] Selected Qullamaggie setup (fallback): $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+    fi
+    
+    # Log all Qullamaggie signals to database (for tracking purposes)
+    echo "$QULLAMAGGIE_SIGNALS" | while IFS= read -r signal; do
+        if [ -n "$signal" ]; then
+            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "stock" "Qullamaggie" 2>/dev/null || true
+        fi
+    done
+else
+    echo "[$TIMESTAMP] Qullamaggie: No setups found" | tee -a "$LOG_FILE"
+fi
+
+# ========================================
 # SEND NOTIFICATIONS (ONE SIGNAL ONLY)
 # ========================================
 if [ -n "$SIGNAL_TO_SEND" ]; then
@@ -157,8 +196,10 @@ if [ -n "$SIGNAL_TO_SEND" ]; then
     
     # Send email with appropriate subject based on signal type
     EMAIL_SUBJECT="Breakout"
-    if [[ "$SIGNAL_TYPE" == "Trend" ]]; then
+    if [[ "$SIGNAL_TYPE" == "Trending" ]]; then
         EMAIL_SUBJECT="Trend"
+    elif [[ "$SIGNAL_TYPE" == "Qullamaggie" ]]; then
+        EMAIL_SUBJECT="Qullamaggie"
     fi
     
     if $GMAIL_PY $EMAIL_SCRIPT "$RECIPIENT" "$EMAIL_SUBJECT" "$SIGNAL_TO_SEND" 2>/dev/null; then
@@ -190,4 +231,4 @@ else
     echo "[$TIMESTAMP] No signal selected - no notifications sent" | tee -a "$LOG_FILE"
 fi
 
-echo "[$TIMESTAMP] Analyst analysis complete - Breakouts: $BREAKOUT_COUNT, Trends: $TREND_COUNT, Signal Sent: $SIGNAL_TYPE" | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] Analyst analysis complete - Breakouts: $BREAKOUT_COUNT, Trends: $TREND_COUNT, Qullamaggie: $QULLAMAGGIE_COUNT, Signal Sent: $SIGNAL_TYPE" | tee -a "$LOG_FILE"
