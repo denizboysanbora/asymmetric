@@ -1,42 +1,34 @@
 [
   {
-    "symbol": "WHWK",
+    "symbol": "AMD",
     "asset_type": "stock"
   },
   {
-    "symbol": "FLNC",
+    "symbol": "INTC",
     "asset_type": "stock"
   },
   {
-    "symbol": "DBRG",
+    "symbol": "GOOGL",
     "asset_type": "stock"
   },
   {
-    "symbol": "SEI",
+    "symbol": "NVDA",
     "asset_type": "stock"
   },
   {
-    "symbol": "SVV",
+    "symbol": "META",
     "asset_type": "stock"
   },
   {
-    "symbol": "QBTS",
+    "symbol": "TSLA",
     "asset_type": "stock"
   },
   {
-    "symbol": "PRCH",
+    "symbol": "NFLX",
     "asset_type": "stock"
   },
   {
-    "symbol": "TE",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "FITB",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "RGTI",
+    "symbol": "QQQ",
     "asset_type": "stock"
   }
 ]

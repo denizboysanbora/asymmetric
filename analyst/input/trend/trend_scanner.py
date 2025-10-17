@@ -6,6 +6,7 @@ Output format: $SYMBOL $PRICE +X.XX%
 import os
 import sys
 import numpy as np
+import pandas as pd
 from datetime import datetime, timedelta
 import json
 from pathlib import Path
@@ -101,11 +102,23 @@ def get_stock_movers(top_n=5):
         
         # Only include significant upward moves (>1%)
         if intraday_change >= 1.0:
+            # Calculate technical indicators
+            closes = [float(bar.close) for bar in bars]
+            highs = [float(bar.high) for bar in bars]
+            lows = [float(bar.low) for bar in bars]
+            
+            rsi = calculate_rsi(closes)
+            atr = calculate_atr(highs, lows, closes)
+            z_score = calculate_z_score(closes)
+            
             movers.append({
                 'symbol': sym,
                 'price': current_price,
                 'change_pct': intraday_change,
-                'asset_type': 'stock'
+                'asset_type': 'stock',
+                'rsi': rsi,
+                'atr': atr,
+                'z_score': z_score
             })
     
     # Sort by change percentage (biggest upward movers first)
@@ -114,15 +127,71 @@ def get_stock_movers(top_n=5):
     return movers[:top_n]
 
 
+def calculate_rsi(prices, period=14):
+    """Calculate RSI for a series of prices"""
+    if len(prices) < period + 1:
+        return 50.0  # Default RSI if not enough data
+    
+    deltas = np.diff(prices)
+    gains = np.where(deltas > 0, deltas, 0)
+    losses = np.where(deltas < 0, -deltas, 0)
+    
+    avg_gain = np.mean(gains[:period])
+    avg_loss = np.mean(losses[:period])
+    
+    if avg_loss == 0:
+        return 100.0
+    
+    rs = avg_gain / avg_loss
+    rsi = 100 - (100 / (1 + rs))
+    return rsi
+
+def calculate_atr(high, low, close, period=14):
+    """Calculate Average True Range"""
+    if len(high) < period:
+        return 1.0  # Default ATR if not enough data
+    
+    high = np.array(high)
+    low = np.array(low)
+    close = np.array(close)
+    
+    tr1 = high[1:] - low[1:]
+    tr2 = np.abs(high[1:] - close[:-1])
+    tr3 = np.abs(low[1:] - close[:-1])
+    
+    tr = np.maximum(tr1, np.maximum(tr2, tr3))
+    atr = np.mean(tr[-period:])
+    return atr
+
+def calculate_z_score(prices, period=20):
+    """Calculate Z-score for price changes"""
+    if len(prices) < period + 1:
+        return 0.0  # Default Z-score if not enough data
+    
+    changes = np.diff(prices) / prices[:-1] * 100  # Percentage changes
+    if len(changes) < period:
+        return 0.0
+    
+    recent_changes = changes[-period:]
+    mean_change = np.mean(recent_changes)
+    std_change = np.std(recent_changes)
+    
+    if std_change == 0:
+        return 0.0
+    
+    current_change = changes[-1]
+    z_score = (current_change - mean_change) / std_change
+    return z_score
+
 def get_intraday_movers(top_n=10):
     """Get top N stock intraday movers"""
     return get_stock_movers(top_n)
 
-def format_trend_signal(symbol, price, change_pct):
-    """Format trend signal: $SYMBOL $PRICE +X.XX%"""
+def format_trend_signal(symbol, price, change_pct, rsi=50, atr=1.0, z_score=0.0):
+    """Format trend signal: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
-    return f"${symbol} {price_str} {change_pct:+.2f}%"
+    return f"${symbol} {price_str} {change_pct:+.2f}% | {rsi:.0f} RSI | {atr:.2f}x ATR | Z {z_score:.2f} | Trend"
 
 def main():
     """Main trend scanner"""
@@ -155,7 +224,10 @@ def main():
             signal = format_trend_signal(
                 mover['symbol'], 
                 mover['price'], 
-                mover['change_pct']
+                mover['change_pct'],
+                mover.get('rsi', 50),
+                mover.get('atr', 1.0),
+                mover.get('z_score', 0.0)
             )
             print(signal)
             
