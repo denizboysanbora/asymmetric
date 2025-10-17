@@ -1,8 +1,0 @@
-google-api-python-client==2.147.0
-google-auth==2.35.0
-google-auth-oauthlib==1.2.1
-alpaca-py==0.42.2
-python-dotenv==1.0.1
-PyYAML==6.0.2
-APScheduler==3.10.4
-requests==2.32.3

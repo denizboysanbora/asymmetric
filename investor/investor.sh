@@ -1,6 +1,6 @@
 #!/bin/bash
-# Investor - Trading Execution & Portfolio Management
-# Executes trades based on analyst signals using Alpaca API
+# Investor - Paper Trading Execution
+# Monitors breakout signals and executes paper trades
 
 set -euo pipefail
 
@@ -19,127 +19,66 @@ echo $$ > "$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Repo root (one level up from investor/): .../asymmetric
 ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
-# Directories
-TRADING_DIR="$ASYMMETRIC_DIR/investor/trading"
-PORTFOLIO_DIR="$ASYMMETRIC_DIR/investor/portfolio"
-EXECUTION_DIR="$ASYMMETRIC_DIR/investor/execution"
-DATABASE_DIR="$ASYMMETRIC_DIR/analyst/database"
+# Load environment variables
+if [ -f "$ASYMMETRIC_DIR/analysts/config/api_keys.env" ]; then
+    source "$ASYMMETRIC_DIR/analysts/config/api_keys.env"
+fi
 
-# Python executables (reuse analyst scanner venv for now)
-SCANNER_PY="$ASYMMETRIC_DIR/analyst/scanner/venv/bin/python3"
+# Directories
+ALPACA_DIR="$ASYMMETRIC_DIR/analysts/input/alpaca"
+INVESTOR_DIR="$SCRIPT_DIR"
+
+# Python executables
+INVESTOR_PY="$ALPACA_DIR/venv/bin/python3"
 
 # Scripts
-EXECUTOR_SCRIPT="$TRADING_DIR/executor.py"
-LOG_SIGNAL_SCRIPT="$DATABASE_DIR/log_signal.py"
+PAPER_TRADER_SCRIPT="$INVESTOR_DIR/paper_trader.py"
 
 # Log files
-LOG_DIR="$SCRIPT_DIR/logs"
+LOG_DIR="$INVESTOR_DIR/logs"
 mkdir -p "$LOG_DIR"
 LOG_FILE="$LOG_DIR/investor.log"
 
 # Timestamp
 TIMESTAMP=$(date '+%Y-%m-%d %H:%M:%S')
 
-echo "[$TIMESTAMP] Investor starting trading execution..." | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] Investor starting paper trading execution..." | tee -a "$LOG_FILE"
 
-# Check if we're within trading hours (8 AM - 5 PM Eastern)
+# Check if we're within operating hours (10 AM - 4 PM Eastern, weekdays)
 CURRENT_HOUR=$(TZ='America/New_York' date '+%H')
-if [ "$CURRENT_HOUR" -lt 8 ] || [ "$CURRENT_HOUR" -ge 17 ]; then
-    echo "[$TIMESTAMP] Outside trading hours (8 AM - 5 PM ET). Current hour: $CURRENT_HOUR" | tee -a "$LOG_FILE"
+CURRENT_DOW=$(TZ='America/New_York' date '+%u')  # 1=Monday, 7=Sunday
+if [ "$CURRENT_HOUR" -lt 10 ] || [ "$CURRENT_HOUR" -ge 16 ] || [ "$CURRENT_DOW" -gt 5 ]; then
+    echo "[$TIMESTAMP] Outside operating hours (10 AM - 4 PM ET, weekdays). Current hour: $CURRENT_HOUR, day: $CURRENT_DOW" | tee -a "$LOG_FILE"
     exit 0
 fi
 
 # ========================================
-# PORTFOLIO MANAGEMENT
+# PAPER TRADING EXECUTION
 # ========================================
-echo "[$TIMESTAMP] 📊 Checking portfolio status..." | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] 💰 Running paper trading execution..." | tee -a "$LOG_FILE"
 
-# Get current positions
-if [ -f "$EXECUTOR_SCRIPT" ]; then
-    PORTFOLIO_OUTPUT=$($SCANNER_PY $EXECUTOR_SCRIPT --portfolio 2>&1) || {
-        echo "[$TIMESTAMP] ❌ Portfolio check failed: $PORTFOLIO_OUTPUT" | tee -a "$LOG_FILE"
-        PORTFOLIO_OUTPUT=""
-    }
-    echo "[$TIMESTAMP] Portfolio status: $PORTFOLIO_OUTPUT" | tee -a "$LOG_FILE"
-else
-    echo "[$TIMESTAMP] ⚠️ Portfolio executor not found" | tee -a "$LOG_FILE"
-fi
-
-# ========================================
-# SIGNAL PROCESSING & TRADING
-# ========================================
-echo "[$TIMESTAMP] 🔄 Processing signals for trading..." | tee -a "$LOG_FILE"
-
-# Check for recent signals in database
-if [ -f "$LOG_SIGNAL_SCRIPT" ]; then
-    # Get recent signals (last 5 minutes)
-    RECENT_SIGNALS=$($SCANNER_PY -c "
-import sqlite3
-import os
-from datetime import datetime, timedelta
-
-db_path = '$DATABASE_DIR/signals.db'
-if os.path.exists(db_path):
-    conn = sqlite3.connect(db_path)
-    cursor = conn.cursor()
+# Check for recent breakout signals from analysts logs
+ANALYSTS_LOG="$ASYMMETRIC_DIR/analysts/breakout/logs/breakout_analyst.log"
+if [ -f "$ANALYSTS_LOG" ]; then
+    # Get the most recent breakout signal from analysts logs
+    RECENT_SIGNAL=$(tail -50 "$ANALYSTS_LOG" | grep -E '\$[A-Z0-9]+.*Breakout' | tail -1)
     
-    # Get signals from last 5 minutes
-    cutoff = datetime.now() - timedelta(minutes=5)
-    cursor.execute('''
-        SELECT symbol, price, change_pct, tr_atr, z_score, signal_type, asset_class 
-        FROM signals 
-        WHERE timestamp > ? AND signal_type = 'Breakout'
-        ORDER BY timestamp DESC
-    ''', (cutoff.strftime('%Y-%m-%d %H:%M:%S'),))
-    
-    signals = cursor.fetchall()
-    for signal in signals:
-        print(f'{signal[0]}|{signal[1]}|{signal[2]}|{signal[3]}|{signal[4]}|{signal[5]}|{signal[6]}')
-    conn.close()
-" 2>/dev/null || true)
-    
-    if [ -n "$RECENT_SIGNALS" ]; then
-        echo "[$TIMESTAMP] 🚨 Found recent signals for trading:" | tee -a "$LOG_FILE"
-        echo "$RECENT_SIGNALS" | while IFS= read -r signal_line; do
-            if [ -n "$signal_line" ]; then
-                IFS='|' read -r symbol price change_pct tr_atr z_score signal_type asset_class <<< "$signal_line"
-                echo "[$TIMESTAMP] Processing signal: $symbol at $price (${change_pct}%)" | tee -a "$LOG_FILE"
-                
-                # Execute trade based on signal
-                if [ -f "$EXECUTOR_SCRIPT" ]; then
-                    TRADE_OUTPUT=$($SCANNER_PY $EXECUTOR_SCRIPT --trade "$symbol" "$price" "$change_pct" "$asset_class" 2>&1) || {
-                        echo "[$TIMESTAMP] ❌ Trade execution failed for $symbol: $TRADE_OUTPUT" | tee -a "$LOG_FILE"
-                    }
-                    echo "[$TIMESTAMP] Trade result for $symbol: $TRADE_OUTPUT" | tee -a "$LOG_FILE"
-                else
-                    echo "[$TIMESTAMP] ⚠️ Trade executor not found for $symbol" | tee -a "$LOG_FILE"
-                fi
-            fi
-        done
+    if [ -n "$RECENT_SIGNAL" ]; then
+        echo "[$TIMESTAMP] 📊 Found recent breakout signal: $RECENT_SIGNAL" | tee -a "$LOG_FILE"
+        
+        # Execute paper trade
+        if $INVESTOR_PY $PAPER_TRADER_SCRIPT "$RECENT_SIGNAL" 2>&1 | tee -a "$LOG_FILE"; then
+            echo "[$TIMESTAMP] ✅ Paper trading execution completed" | tee -a "$LOG_FILE"
+        else
+            echo "[$TIMESTAMP] ❌ Paper trading execution failed" | tee -a "$LOG_FILE"
+        fi
     else
-        echo "[$TIMESTAMP] No recent signals found for trading" | tee -a "$LOG_FILE"
+        echo "[$TIMESTAMP] No recent breakout signals found" | tee -a "$LOG_FILE"
     fi
 else
-    echo "[$TIMESTAMP] ⚠️ Signal database not found" | tee -a "$LOG_FILE"
+    echo "[$TIMESTAMP] Analysts log file not found: $ANALYSTS_LOG" | tee -a "$LOG_FILE"
 fi
 
-# ========================================
-# RISK MANAGEMENT
-# ========================================
-echo "[$TIMESTAMP] 🛡️ Running risk management checks..." | tee -a "$LOG_FILE"
-
-# Check position sizes, stop losses, etc.
-if [ -f "$EXECUTOR_SCRIPT" ]; then
-    RISK_OUTPUT=$($SCANNER_PY $EXECUTOR_SCRIPT --risk-check 2>&1) || {
-        echo "[$TIMESTAMP] ❌ Risk check failed: $RISK_OUTPUT" | tee -a "$LOG_FILE"
-        RISK_OUTPUT=""
-    }
-    echo "[$TIMESTAMP] Risk management: $RISK_OUTPUT" | tee -a "$LOG_FILE"
-else
-    echo "[$TIMESTAMP] ⚠️ Risk management executor not found" | tee -a "$LOG_FILE"
-fi
-
-echo "[$TIMESTAMP] Investor trading execution complete" | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] Investor execution complete" | tee -a "$LOG_FILE"
