@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Trend Scanner - Detects biggest intraday movers
+Momentum Scanner - Detects biggest intraday movers
 Output format: $SYMBOL $PRICE +X.XX%
 """
 import os
@@ -187,15 +187,15 @@ def get_intraday_movers(top_n=10):
     """Get top N stock intraday movers"""
     return get_stock_movers(top_n)
 
-def format_trend_signal(symbol, price, change_pct, rsi=50, atr=1.0, z_score=0.0):
-    """Format trend signal: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Trend"""
+def format_momentum_signal(symbol, price, change_pct, rsi=50, atr=1.0, z_score=0.0):
+    """Format momentum signal: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Momentum"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
-    return f"${symbol} {price_str} {change_pct:+.2f}% | {rsi:.0f} RSI | {atr:.2f}x ATR | Z {z_score:.2f} | Trend"
+    return f"${symbol} {price_str} {change_pct:+.2f}% | {rsi:.0f} RSI | {atr:.2f}x ATR | Z {z_score:.2f} | Momentum"
 
 def main():
-    """Main trend scanner"""
-    print("📈 Scanning for trending stocks...", file=sys.stderr)
+    """Main momentum scanner"""
+    print("📈 Scanning for momentum stocks...", file=sys.stderr)
     
     try:
         movers = get_intraday_movers(top_n=10)
@@ -204,7 +204,7 @@ def main():
             print("No significant intraday movers found", file=sys.stderr)
             return
         
-        print(f"Found {len(movers)} trending stocks", file=sys.stderr)
+        print(f"Found {len(movers)} momentum stocks", file=sys.stderr)
         
         # Persist asset classifications for orchestrator use
         state_dir = Path(__file__).parent / "state"
@@ -221,7 +221,7 @@ def main():
         
         # Output formatted signals
         for mover in movers:
-            signal = format_trend_signal(
+            signal = format_momentum_signal(
                 mover['symbol'], 
                 mover['price'], 
                 mover['change_pct'],
@@ -232,7 +232,7 @@ def main():
             print(signal)
             
     except Exception as e:
-        print(f"Trend scan failed: {e}", file=sys.stderr)
+        print(f"Momentum scan failed: {e}", file=sys.stderr)
 
 if __name__ == "__main__":
     main()

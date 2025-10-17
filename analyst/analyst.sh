@@ -117,39 +117,39 @@ else
 fi
 
 # ========================================
-# TREND SCANNER
+# MOMENTUM SCANNER
 # ========================================
-echo "[$TIMESTAMP] 📈 Running trend scanner..." | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] 📈 Running momentum scanner..." | tee -a "$LOG_FILE"
 
-TREND_OUTPUT=$($TREND_PY $TREND_SCRIPT 2>&1) || {
-    echo "[$TIMESTAMP] ❌ Trend scan failed: $TREND_OUTPUT" | tee -a "$LOG_FILE"
-    TREND_OUTPUT=""
+MOMENTUM_OUTPUT=$($TREND_PY $TREND_SCRIPT 2>&1) || {
+    echo "[$TIMESTAMP] ❌ Momentum scan failed: $MOMENTUM_OUTPUT" | tee -a "$LOG_FILE"
+    MOMENTUM_OUTPUT=""
 }
 
-TREND_SIGNALS=$(echo "$TREND_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep '^\$[A-Z0-9]' || true)
-# Pick top trend by absolute % move
-TOP_TREND=$(echo "$TREND_SIGNALS" | awk '{match($0, /([+-][0-9]+(\.[0-9]+)?)%/); v=substr($0, RSTART, RLENGTH-1); gsub(/\+/,"",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
-TREND_COUNT=$(echo "$TREND_SIGNALS" | wc -l)
+MOMENTUM_SIGNALS=$(echo "$MOMENTUM_OUTPUT" | grep -v "Scanning" | grep -v "Found" | grep '^\$[A-Z0-9]' || true)
+# Pick top momentum by absolute % move
+TOP_MOMENTUM=$(echo "$MOMENTUM_SIGNALS" | awk '{match($0, /([+-][0-9]+(\.[0-9]+)?)%/); v=substr($0, RSTART, RLENGTH-1); gsub(/\+/,"",v); if (v<0) v=-v; printf "%012.6f\t%s\n", v, $0}' | sort -r | head -1 | cut -f2-)
+MOMENTUM_COUNT=$(echo "$MOMENTUM_SIGNALS" | wc -l)
 
-if [ -n "$TREND_SIGNALS" ]; then
-    echo "[$TIMESTAMP] 📊 Trend signals detected!" | tee -a "$LOG_FILE"
+if [ -n "$MOMENTUM_SIGNALS" ]; then
+    echo "[$TIMESTAMP] 📊 Momentum signals detected!" | tee -a "$LOG_FILE"
     
-    # If no volatility was found, use the top trend as fallback
+    # If no volatility was found, use the top momentum as fallback
     if [ -z "$SIGNAL_TO_SEND" ]; then
-        SIGNAL_TO_SEND="$TOP_TREND"
-        SIGNAL_TYPE="Trending"
+        SIGNAL_TO_SEND="$TOP_MOMENTUM"
+        SIGNAL_TYPE="Momentum"
         SIGNAL_ASSET_CLASS="stock"  # Stock-only system
-        echo "[$TIMESTAMP] Selected trend signal (fallback): $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
+        echo "[$TIMESTAMP] Selected momentum signal (fallback): $SIGNAL_TO_SEND" | tee -a "$LOG_FILE"
     fi
     
-    # Log all trend signals to database (for tracking purposes)
-    echo "$TREND_SIGNALS" | while IFS= read -r signal; do
+    # Log all momentum signals to database (for tracking purposes)
+    echo "$MOMENTUM_SIGNALS" | while IFS= read -r signal; do
         if [ -n "$signal" ]; then
-            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "stock" "Trending" 2>/dev/null || true
+            $DATABASE_PY $LOG_SIGNAL_SCRIPT "$signal" "stock" "Momentum" 2>/dev/null || true
         fi
     done
 else
-    echo "[$TIMESTAMP] Trend: No signals found" | tee -a "$LOG_FILE"
+    echo "[$TIMESTAMP] Momentum: No signals found" | tee -a "$LOG_FILE"
 fi
 
 # ========================================
@@ -170,7 +170,7 @@ QULLAMAGGIE_COUNT=$(echo "$QULLAMAGGIE_SIGNALS" | wc -l)
 if [ -n "$QULLAMAGGIE_SIGNALS" ]; then
     echo "[$TIMESTAMP] 🎯 Qullamaggie setups detected!" | tee -a "$LOG_FILE"
     
-    # If no volatility or trend was found, use the top Qullamaggie setup as fallback
+    # If no volatility or momentum was found, use the top Qullamaggie setup as fallback
     if [ -z "$SIGNAL_TO_SEND" ]; then
         SIGNAL_TO_SEND="$TOP_QULLAMAGGIE"
         SIGNAL_TYPE="Qullamaggie"
@@ -196,8 +196,8 @@ if [ -n "$SIGNAL_TO_SEND" ]; then
     
     # Send email with appropriate subject based on signal type
     EMAIL_SUBJECT="Volatility"
-    if [[ "$SIGNAL_TYPE" == "Trending" ]]; then
-        EMAIL_SUBJECT="Trend"
+    if [[ "$SIGNAL_TYPE" == "Momentum" ]]; then
+        EMAIL_SUBJECT="Momentum"
     elif [[ "$SIGNAL_TYPE" == "Qullamaggie" ]]; then
         EMAIL_SUBJECT="Qullamaggie"
     fi
@@ -231,4 +231,4 @@ else
     echo "[$TIMESTAMP] No signal selected - no notifications sent" | tee -a "$LOG_FILE"
 fi
 
-echo "[$TIMESTAMP] Analyst analysis complete - Volatility: $VOLATILITY_COUNT, Trends: $TREND_COUNT, Qullamaggie: $QULLAMAGGIE_COUNT, Signal Sent: $SIGNAL_TYPE" | tee -a "$LOG_FILE"
+echo "[$TIMESTAMP] Analyst analysis complete - Volatility: $VOLATILITY_COUNT, Momentum: $MOMENTUM_COUNT, Qullamaggie: $QULLAMAGGIE_COUNT, Signal Sent: $SIGNAL_TYPE" | tee -a "$LOG_FILE"
