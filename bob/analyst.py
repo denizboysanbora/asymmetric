@@ -44,6 +44,8 @@ def main():
             logger.info("⏰ Outside market hours, skipping analysis")
             return
         
+        logger.info("✅ Market hours confirmed, proceeding with analysis")
+        
         # Run the market scanner
         logger.info("🔍 Running market scanner...")
         scanner_output = run_scanner()
@@ -80,19 +82,24 @@ def main():
 
 def is_market_hours():
     """Check if current time is within market hours (10 AM - 4 PM ET)"""
-    now_et = datetime.now(timezone.utc).astimezone()
+    import pytz
+    
+    # Get current UTC time
+    now_utc = datetime.now(timezone.utc)
+    
+    # Convert to Eastern Time
+    et_tz = pytz.timezone('US/Eastern')
+    now_et = now_utc.astimezone(et_tz)
+    
     hour = now_et.hour
-    minute = now_et.minute
+    logger.info(f"Current ET time: {now_et.strftime('%Y-%m-%d %H:%M:%S %Z')}")
+    logger.info(f"Hour: {hour}")
     
-    # Market hours: 10 AM - 4 PM ET
-    if hour < 10 or hour >= 16:
-        return False
+    # Market hours: 10 AM - 4 PM ET (inclusive)
+    is_market_time = hour >= 10 and hour < 16
+    logger.info(f"Market hours check: {is_market_time}")
     
-    # Only run every 30 minutes
-    if minute not in [0, 30]:
-        return False
-    
-    return True
+    return is_market_time
 
 def parse_scanner_output(output):
     """Parse scanner output to find the best signal"""
@@ -132,7 +139,8 @@ def parse_scanner_output(output):
 def send_notifications(signal_line):
     """Send email and tweet notifications"""
     # Testing mode - disable Twitter notifications
-    TESTING_MODE = os.getenv('BOB_TESTING_MODE', 'false').lower() == 'true'
+    TESTING_MODE = os.getenv('BOB_TESTING_MODE', 'true').lower() == 'true'
+    logger.info(f"🧪 Testing mode: {'ON' if TESTING_MODE else 'OFF'}")
     
     try:
         # Send email
