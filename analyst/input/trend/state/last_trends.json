@@ -1,10 +1,10 @@
 [
   {
-    "symbol": "REFR",
+    "symbol": "LBRT",
     "asset_type": "stock"
   },
   {
-    "symbol": "PRAX",
+    "symbol": "REFR",
     "asset_type": "stock"
   },
   {
@@ -12,7 +12,15 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "OKUR",
+    "symbol": "PRAX",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "NMG",
+    "asset_type": "stock"
+  },
+  {
+    "symbol": "INVE",
     "asset_type": "stock"
   },
   {
@@ -20,23 +28,15 @@
     "asset_type": "stock"
   },
   {
-    "symbol": "FLNC",
-    "asset_type": "stock"
-  },
-  {
     "symbol": "HIVE",
     "asset_type": "stock"
   },
   {
-    "symbol": "ALEC",
+    "symbol": "OKUR",
     "asset_type": "stock"
   },
   {
-    "symbol": "ONDS",
-    "asset_type": "stock"
-  },
-  {
-    "symbol": "ESPR",
+    "symbol": "INTR",
     "asset_type": "stock"
   }
 ]
