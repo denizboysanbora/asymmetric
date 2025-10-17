@@ -19,8 +19,8 @@ class SetupTag(BaseModel):
     """Setup tag model."""
     setup: Literal[
         "Qullamaggie Breakout",
-        "Qullamaggie Episodic Pivot", 
-        "Qullamaggie Parabolic Long"
+        "Qullamaggie Episodic", 
+        "Qullamaggie Parabolic"
     ] = Field(..., description="Setup type")
     triggered: bool = Field(..., description="Whether setup is triggered")
     score: float = Field(..., description="Setup strength score (0-1)")
@@ -272,7 +272,7 @@ def detect_ep(
         }
         
         return SetupTag(
-            setup="Qullamaggie Episodic Pivot",
+            setup="Qullamaggie Episodic",
             triggered=False,  # Will be updated by opening range analysis
             score=score,
             meta=meta
@@ -402,7 +402,7 @@ def detect_parabolic_long(
         }
         
         return SetupTag(
-            setup="Qullamaggie Parabolic Long",
+            setup="Qullamaggie Parabolic",
             triggered=rebound_signal,
             score=score,
             meta=meta
@@ -464,9 +464,9 @@ def rank_setups(setups: List[SetupTag]) -> List[SetupTag]:
         Ranked list of SetupTag objects
     """
     priority_order = {
-        "Qullamaggie Episodic Pivot": 1,
+        "Qullamaggie Episodic": 1,
         "Qullamaggie Breakout": 2,
-        "Qullamaggie Parabolic Long": 3
+        "Qullamaggie Parabolic": 3
     }
     
     return sorted(setups, key=lambda s: (priority_order.get(s.setup, 999), -s.score))

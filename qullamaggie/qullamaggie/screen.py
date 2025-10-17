@@ -153,7 +153,7 @@ def rank_candidates(candidates: List[Candidate]) -> List[Candidate]:
     def get_priority_score(candidate):
         """Calculate priority score for ranking."""
         priority_score = 0
-        setup_priorities = {"Qullamaggie Episodic Pivot": 3, "Qullamaggie Breakout": 2, "Qullamaggie Parabolic Long": 1}
+        setup_priorities = {"Qullamaggie Episodic": 3, "Qullamaggie Breakout": 2, "Qullamaggie Parabolic": 1}
         
         # Get highest priority setup
         if candidate.setups:
@@ -173,7 +173,7 @@ def rank_candidates(candidates: List[Candidate]) -> List[Candidate]:
         reverse=True
     )
     
-    logger.info(f"Ranked {len(ranked)} candidates (Qullamaggie Episodic Pivot > Qullamaggie Breakout > Qullamaggie Parabolic Long > RS > ADR)")
+    logger.info(f"Ranked {len(ranked)} candidates (Qullamaggie Episodic > Qullamaggie Breakout > Qullamaggie Parabolic > RS > ADR)")
     return ranked
 
 
@@ -241,8 +241,8 @@ def summarize_screening_results(candidates: List[Candidate]) -> Dict:
     
     # Count setups
     breakout_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Breakout")
-    ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Episodic Pivot")
-    parabolic_long_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Parabolic Long")
+    ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Episodic")
+    parabolic_long_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Parabolic")
     
     avg_adr = sum(c.adr_pct for c in candidates) / len(candidates)
     avg_rs = sum(c.rs_score for c in candidates) / len(candidates)

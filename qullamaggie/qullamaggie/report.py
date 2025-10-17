@@ -327,8 +327,8 @@ def print_dashboard(
         for i, candidate in enumerate(top_candidates, 1):
             # Get setup indicators
             breakout_icon = "✓" if any(s.setup == "Qullamaggie Breakout" for s in candidate.setups) else "✗"
-            ep_icon = "🚀" if any(s.setup == "Qullamaggie Episodic Pivot" for s in candidate.setups) else "  "
-            parabolic_icon = "🔁" if any(s.setup == "Qullamaggie Parabolic Long" for s in candidate.setups) else "  "
+            ep_icon = "🚀" if any(s.setup == "Qullamaggie Episodic" for s in candidate.setups) else "  "
+            parabolic_icon = "🔁" if any(s.setup == "Qullamaggie Parabolic" for s in candidate.setups) else "  "
             
             price = candidate.meta.get('latest_price', 0)
             notes = candidate.notes[0] if candidate.notes else ""
@@ -342,8 +342,8 @@ def print_dashboard(
         
         # Summary stats
         breakout_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Breakout")
-        ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Episodic Pivot")
-        parabolic_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Parabolic Long")
+        ep_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Episodic")
+        parabolic_count = sum(1 for c in candidates for s in c.setups if s.setup == "Qullamaggie Parabolic")
         
         avg_adr = sum(c.adr_pct for c in candidates) / len(candidates)
         avg_rs = sum(c.rs_score for c in candidates) / len(candidates)
@@ -413,7 +413,7 @@ def format_email_content(
         
         for setup in candidate.setups:
             # Format: $SYMBOL $PRICE +X.XX% | RS X.XX | ADR X.X% | SetupType
-            setup_type = setup.setup.replace("Qullamaggie ", "").replace(" ", "")
+            setup_type = setup.setup.replace("Qullamaggie ", "")
             signal_line = f"${candidate.symbol} ${price:.2f} {price_change:+.2f}% | RS {rs:.2f} | ADR {adr:.1f}% | {setup_type}"
             signals.append(signal_line)
     
