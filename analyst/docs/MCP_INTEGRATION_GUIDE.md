@@ -37,7 +37,7 @@ Use the enhanced scanner that integrates MCP server capabilities:
 
 ```bash
 cd /Users/deniz/Code/asymmetric
-python analysts/breakout/mcp_enhanced_scanner.py
+python analyst/breakout/mcp_enhanced_scanner.py
 ```
 
 This provides:
@@ -56,9 +56,9 @@ Configure Cursor to use the MCP server directly:
   "mcpServers": {
     "alpaca": {
       "type": "stdio",
-      "command": "/Users/deniz/Code/asymmetric/alpaca-mcp-server/venv/bin/python",
+      "command": "/Users/deniz/Code/asymmetric/analyst/alpaca/venv/bin/python",
       "args": [
-        "/Users/deniz/Code/asymmetric/alpaca-mcp-server/alpaca_mcp_server.py"
+        "/Users/deniz/Code/asymmetric/analyst/alpaca/alpaca_mcp_server.py"
       ],
       "env": {
         "ALPACA_API_KEY": "PK5KN56VW1TVTL7X2GSJ",
@@ -81,7 +81,7 @@ Configure Cursor to use the MCP server directly:
 For running the server on a remote machine:
 
 ```bash
-cd /Users/deniz/Code/asymmetric/alpaca-mcp-server
+cd /Users/deniz/Code/asymmetric/analyst/alpaca
 source venv/bin/activate
 python alpaca_mcp_server.py --transport http --host 0.0.0.0 --port 8000
 ```
@@ -107,7 +107,7 @@ The `mcp_enhanced_scanner.py` extends your existing breakout analysis with:
 
 ### Basic Account Check
 ```python
-from analysts.breakout.mcp_enhanced_scanner import MCPEnhancedScanner
+from analyst.breakout.mcp_enhanced_scanner import MCPEnhancedScanner
 
 scanner = MCPEnhancedScanner()
 account_info = await scanner.get_account_status()
@@ -140,7 +140,7 @@ Once configured, you can ask:
 ### Common Issues
 
 1. **"API keys not found"**
-   - Ensure `analysts/config/api_keys.env` exists and has correct keys
+   - Ensure `analyst/config/api_keys.env` exists and has correct keys
 
 2. **"MCP connection failed"**
    - Check that the virtual environment is properly set up
@@ -161,12 +161,11 @@ Enable debug mode by setting `DEBUG=True` in the MCP server configuration.
 
 ## Files Created
 
-- `alpaca-mcp-server/` - Official MCP server installation
+- `analyst/alpaca/` - Official Alpaca MCP server installation (relocated)
 - `alpaca_mcp_integration.py` - Full async integration module
 - `mcp_trader.py` - Simple MCP trader interface
-- `analysts/breakout/mcp_enhanced_scanner.py` - Enhanced scanner with MCP integration
+- `analyst/breakout/mcp_enhanced_scanner.py` - Enhanced scanner with MCP integration
 - `test_mcp_client.py` - Test script for MCP functionality
 - `MCP_INTEGRATION_GUIDE.md` - This guide
 
 The MCP server integration provides a powerful bridge between your automated trading system and natural language AI assistants, enabling both programmatic and conversational access to your Alpaca trading account.
-

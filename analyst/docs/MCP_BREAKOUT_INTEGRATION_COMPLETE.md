@@ -7,11 +7,11 @@ I've successfully adapted your breakout tool to work with the Alpaca MCP server,
 ## 🚀 What's Been Created
 
 ### Core Files
-- `analysts/breakout/mcp_breakout_scanner.py` - Main MCP-enhanced scanner
-- `analysts/breakout/mcp_breakout_analyst.sh` - Automated analyst script
-- `analysts/breakout/start_mcp.sh` - Start script
-- `analysts/breakout/stop_mcp.sh` - Stop script  
-- `analysts/breakout/status_mcp.sh` - Status checker
+- `analyst/breakout/mcp_breakout_scanner.py` - Main MCP-enhanced scanner
+- `analyst/breakout/mcp_breakout_analyst.sh` - Automated analyst script
+- `analyst/breakout/start_mcp.sh` - Start script
+- `analyst/breakout/stop_mcp.sh` - Stop script  
+- `analyst/breakout/status_mcp.sh` - Status checker
 
 ### Integration Features
 
@@ -38,19 +38,19 @@ I've successfully adapted your breakout tool to work with the Alpaca MCP server,
 ### Option 1: Manual Analysis (Safe)
 ```bash
 cd /Users/deniz/Code/asymmetric
-python analysts/breakout/mcp_breakout_scanner.py --top-n 5
+python analyst/breakout/mcp_breakout_scanner.py --top-n 5
 ```
 
 ### Option 2: Automated Analyst (Recommended)
 ```bash
-cd /Users/deniz/Code/asymmetric/analysts/breakout
+cd /Users/deniz/Code/asymmetric/analyst/breakout
 ./start_mcp.sh
 ```
 
 ### Option 3: Auto-Trading (Advanced)
 ```bash
 # Enable automatic trading (use with caution!)
-python analysts/breakout/mcp_breakout_scanner.py --auto-trade --position-size 5.0
+python analyst/breakout/mcp_breakout_scanner.py --auto-trade --position-size 5.0
 ```
 
 ## 🔧 Management Commands
@@ -144,12 +144,12 @@ The system sends email notifications to `deniz@bora.box` for:
 1. **Test the integration:**
    ```bash
    cd /Users/deniz/Code/asymmetric
-   python analysts/breakout/mcp_breakout_scanner.py --top-n 3
+   python analyst/breakout/mcp_breakout_scanner.py --top-n 3
    ```
 
 2. **Start the automated analyst:**
    ```bash
-   cd analysts/breakout
+   cd analyst/breakout
    ./start_mcp.sh
    ```
 

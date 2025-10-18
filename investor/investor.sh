@@ -22,12 +22,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/.." && pwd)"
 
 # Load environment variables
-if [ -f "$ASYMMETRIC_DIR/analysts/config/api_keys.env" ]; then
-    source "$ASYMMETRIC_DIR/analysts/config/api_keys.env"
+if [ -f "$ASYMMETRIC_DIR/analyst/config/api_keys.env" ]; then
+    source "$ASYMMETRIC_DIR/analyst/config/api_keys.env"
 fi
 
 # Directories
-ALPACA_DIR="$ASYMMETRIC_DIR/analysts/input/alpaca"
+ALPACA_DIR="$ASYMMETRIC_DIR/analyst/input/alpaca"
 INVESTOR_DIR="$SCRIPT_DIR"
 
 # Python executables
@@ -59,10 +59,10 @@ fi
 # ========================================
 echo "[$TIMESTAMP] 💰 Running paper trading execution..." | tee -a "$LOG_FILE"
 
-# Check for recent breakout signals from analysts logs
-ANALYSTS_LOG="$ASYMMETRIC_DIR/analysts/breakout/logs/breakout_analyst.log"
+# Check for recent breakout signals from analyst logs
+ANALYSTS_LOG="$ASYMMETRIC_DIR/analyst/breakout/logs/breakout_analyst.log"
 if [ -f "$ANALYSTS_LOG" ]; then
-    # Get the most recent breakout signal from analysts logs
+    # Get the most recent breakout signal from analyst logs
     RECENT_SIGNAL=$(tail -50 "$ANALYSTS_LOG" | grep -E '\$[A-Z0-9]+.*Breakout' | tail -1)
     
     if [ -n "$RECENT_SIGNAL" ]; then
@@ -78,7 +78,7 @@ if [ -f "$ANALYSTS_LOG" ]; then
         echo "[$TIMESTAMP] No recent breakout signals found" | tee -a "$LOG_FILE"
     fi
 else
-    echo "[$TIMESTAMP] Analysts log file not found: $ANALYSTS_LOG" | tee -a "$LOG_FILE"
+    echo "[$TIMESTAMP] Analyst log file not found: $ANALYSTS_LOG" | tee -a "$LOG_FILE"
 fi
 
 echo "[$TIMESTAMP] Investor execution complete" | tee -a "$LOG_FILE"

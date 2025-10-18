@@ -10,7 +10,7 @@ LOCK_FILE="/tmp/breakout_analyst.lock"
 if [ -f "$LOCK_FILE" ]; then
     PID=$(cat "$LOCK_FILE")
     if ps -p "$PID" > /dev/null 2>&1; then
-        echo "$(date '+%Y-%m-%d %H:%M:%S') Breakout analyst already running (PID: $PID), skipping..." >> /Users/deniz/Code/asymmetric/analysts/breakout/logs/breakout_analyst.log
+        echo "$(date '+%Y-%m-%d %H:%M:%S') Breakout analyst already running (PID: $PID), skipping..." >> /Users/deniz/Code/asymmetric/analyst/breakout/logs/breakout_analyst.log
         exit 0
     else
         rm -f "$LOCK_FILE"
@@ -20,17 +20,17 @@ echo $$ > "$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Repo root (three levels up from analysts/breakout/): .../asymmetric
+# Repo root (three levels up from analyst/breakout/): .../asymmetric
 ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Load environment variables
-if [ -f "$ASYMMETRIC_DIR/analysts/config/api_keys.env" ]; then
-    source "$ASYMMETRIC_DIR/analysts/config/api_keys.env"
+if [ -f "$ASYMMETRIC_DIR/analyst/config/api_keys.env" ]; then
+    source "$ASYMMETRIC_DIR/analyst/config/api_keys.env"
 fi
 
 # Directories
-OUTPUT_DIR="$ASYMMETRIC_DIR/analysts/output"
-ALPACA_DIR="$ASYMMETRIC_DIR/analysts/input/alpaca"
+OUTPUT_DIR="$ASYMMETRIC_DIR/analyst/output"
+ALPACA_DIR="$ASYMMETRIC_DIR/analyst/input/alpaca"
 GMAIL_DIR="$OUTPUT_DIR/gmail"
 
 # Python executables

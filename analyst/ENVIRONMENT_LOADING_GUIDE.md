@@ -10,7 +10,7 @@ Your Alpaca trading system has a robust environment variable loading and fallbac
 
 ```
 1. Check if ALPACA_API_KEY and ALPACA_SECRET_KEY are already in environment
-2. If not found, load from analysts/config/api_keys.env using load_dotenv()
+2. If not found, load from analyst/config/api_keys.env using load_dotenv()
 3. If still missing, fall back to static 79-symbol list
 4. If keys present but network fails, also fall back to static list
 ```
@@ -50,7 +50,7 @@ The system now provides detailed logging for:
 ### Running the Test Suite
 
 ```bash
-cd /Users/deniz/Code/asymmetric/analysts
+cd /Users/deniz/Code/asymmetric/analyst
 python test_env_loading.py
 ```
 
@@ -87,7 +87,7 @@ The system respects these environment variables:
 
 ### API Keys File
 
-Your API keys are stored in `analysts/config/api_keys.env`:
+Your API keys are stored in `analyst/config/api_keys.env`:
 ```
 ALPACA_API_KEY=PK5KN56VW1TVTL7X2GSJ
 ALPACA_SECRET_KEY=Ojsiz7lO4SgTHRLLHz2nYxEoitOaKL1sOmGXAcz3
@@ -98,7 +98,7 @@ ALPACA_SECRET_KEY=Ojsiz7lO4SgTHRLLHz2nYxEoitOaKL1sOmGXAcz3
 ### Common Issues
 
 1. **"No .env file found"**
-   - Ensure `analysts/config/api_keys.env` exists
+   - Ensure `analyst/config/api_keys.env` exists
    - Check file permissions
 
 2. **"DNS resolution failed"**

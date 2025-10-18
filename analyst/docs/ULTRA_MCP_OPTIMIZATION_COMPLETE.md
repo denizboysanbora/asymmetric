@@ -43,17 +43,17 @@ The MCP analyst has been fully optimized to utilize the Alpaca API directly for 
 
 ### Scan Entire Universe
 ```bash
-python analysts/breakout/ultra_mcp_analyst.py --max-stocks 0 --top-n 10
+python analyst/breakout/ultra_mcp_analyst.py --max-stocks 0 --top-n 10
 ```
 
 ### Scan Limited Universe
 ```bash
-python analysts/breakout/ultra_mcp_analyst.py --max-stocks 100 --top-n 5
+python analyst/breakout/ultra_mcp_analyst.py --max-stocks 100 --top-n 5
 ```
 
 ### Auto-Trading Mode
 ```bash
-python analysts/breakout/ultra_mcp_analyst.py --auto-trade --max-stocks 50 --top-n 3
+python analyst/breakout/ultra_mcp_analyst.py --auto-trade --max-stocks 50 --top-n 3
 ```
 
 ## 📈 Performance Metrics

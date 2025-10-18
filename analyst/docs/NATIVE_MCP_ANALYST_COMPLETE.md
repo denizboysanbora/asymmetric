@@ -7,8 +7,8 @@ I've created a native MCP analyst that uses the same breakout logic as your orig
 ## 🚀 What's Been Created
 
 ### Core Files
-- `analysts/breakout/mcp_analyst.py` - Native MCP analyst with breakout logic
-- `analysts/breakout/run_mcp_analyst.sh` - Simple runner script
+- `analyst/breakout/mcp_analyst.py` - Native MCP analyst with breakout logic
+- `analyst/breakout/run_mcp_analyst.sh` - Simple runner script
 
 ### Key Features
 
@@ -35,18 +35,18 @@ I've created a native MCP analyst that uses the same breakout logic as your orig
 ### Quick Analysis
 ```bash
 cd /Users/deniz/Code/asymmetric
-python analysts/breakout/mcp_analyst.py --max-stocks 30 --top-n 5
+python analyst/breakout/mcp_analyst.py --max-stocks 30 --top-n 5
 ```
 
 ### Simple Runner Script
 ```bash
-cd /Users/deniz/Code/asymmetric/analysts/breakout
+cd /Users/deniz/Code/asymmetric/analyst/breakout
 ./run_mcp_analyst.sh
 ```
 
 ### Auto-Trading (Advanced)
 ```bash
-python analysts/breakout/mcp_analyst.py --auto-trade --max-stocks 30
+python analyst/breakout/mcp_analyst.py --auto-trade --max-stocks 30
 ```
 
 ## 🔧 Performance Comparison
@@ -119,18 +119,18 @@ The analyst uses a curated list of 50 liquid stocks:
 1. **Test the analyst:**
    ```bash
    cd /Users/deniz/Code/asymmetric
-   python analysts/breakout/mcp_analyst.py --max-stocks 10 --top-n 3
+   python analyst/breakout/mcp_analyst.py --max-stocks 10 --top-n 3
    ```
 
 2. **Run full analysis:**
    ```bash
-   cd analysts/breakout
+   cd analyst/breakout
    ./run_mcp_analyst.sh
    ```
 
 3. **Enable auto-trading:**
    ```bash
-   python analysts/breakout/mcp_analyst.py --auto-trade
+   python analyst/breakout/mcp_analyst.py --auto-trade
    ```
 
 ## 📊 Test Results

@@ -113,7 +113,7 @@ def main():
     print(body)
     
     # Save to file for email sending
-    with open('/Users/deniz/Code/asymmetric/analysts/breakout/email_content.txt', 'w') as f:
+    with open('/Users/deniz/Code/asymmetric/analyst/breakout/email_content.txt', 'w') as f:
         f.write(f"Subject: {subject}\n\n{body}")
     
     print(f"\n💾 Email content saved to: email_content.txt")

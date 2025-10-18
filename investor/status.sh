@@ -10,7 +10,7 @@ echo ""
 # Check Investor Mode
 echo "💰 INVESTOR MODE (Paper Trading Execution)"
 echo "------------------------------------------"
-INVESTOR_PIDS=$(pgrep -f "investor.sh" || true)
+INVESTOR_PIDS=$(pgrep -f "investor.sh" 2>/dev/null || true)
 if [ -n "$INVESTOR_PIDS" ]; then
     echo "✅ Status: RUNNING (PID: $INVESTOR_PIDS)"
     echo "📝 Logs: $(pwd)/investor/logs/investor.log"
@@ -42,7 +42,7 @@ echo ""
 # Check API credentials
 echo "🔑 API CREDENTIALS"
 echo "-----------------"
-if [ -f "analysts/input/alpaca/.env" ]; then
+if [ -f "analyst/input/alpaca/.env" ]; then
     echo "✅ Alpaca API: Configured"
 else
     echo "❌ Alpaca API: Not configured"

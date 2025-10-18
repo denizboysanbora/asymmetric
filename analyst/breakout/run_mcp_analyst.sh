@@ -8,12 +8,12 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
 
 # Load environment variables
-if [ -f "$ASYMMETRIC_DIR/analysts/config/api_keys.env" ]; then
-    source "$ASYMMETRIC_DIR/analysts/config/api_keys.env"
+if [ -f "$ASYMMETRIC_DIR/analyst/config/api_keys.env" ]; then
+    source "$ASYMMETRIC_DIR/analyst/config/api_keys.env"
 fi
 
 # Python executable
-PYTHON_PATH="$ASYMMETRIC_DIR/analysts/input/alpaca/venv/bin/python3"
+PYTHON_PATH="$ASYMMETRIC_DIR/analyst/input/alpaca/venv/bin/python3"
 ANALYST_SCRIPT="$SCRIPT_DIR/mcp_analyst.py"
 
 # Check if we're within operating hours (10 AM - 4 PM Eastern, weekdays)

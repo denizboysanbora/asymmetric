@@ -4,7 +4,7 @@ A focused automated trading signal system that scans for breakout setups using t
 
 ## 🎯 System Overview
 
-### **Analysts Mode** - Breakout Detection
+### **Analyst Mode** - Breakout Detection
 - **Purpose**: Scan markets for breakout setups
 - **Schedule**: 10 AM - 4 PM Eastern Time (weekdays only)
 - **Assets**: Stocks only
@@ -15,7 +15,7 @@ A focused automated trading signal system that scans for breakout setups using t
 
 ```
 asymmetric/
-├── analysts/                    # Multiple Analysts
+├── analyst/                    # Analyst modules
 │   ├── breakout/               # Flag Breakout Analyst
 │   │   ├── breakout_analyst.sh # Main breakout scanner
 │   │   ├── breakout_scanner.py # Breakout detection logic
@@ -33,7 +33,7 @@ asymmetric/
 │   ├── start.sh              # Start script
 │   ├── stop.sh               # Stop script
 │   └── status.sh             # Status checker
-└── (space for future analysts)
+└── (space for future analyst modules)
 ```
 
 ## 🚀 Quick Start
@@ -41,7 +41,7 @@ asymmetric/
 ### Start Both Modes
 ```bash
 # Start Breakout Analyst
-./analysts/breakout/start.sh
+./analyst/breakout/start.sh
 
 # Start Investor (Paper Trading)
 ./investor/start.sh
@@ -50,7 +50,7 @@ asymmetric/
 ### Check Status
 ```bash
 # Check breakout analyst
-./analysts/breakout/status.sh
+./analyst/breakout/status.sh
 
 # Check investor
 ./investor/status.sh
@@ -58,7 +58,7 @@ asymmetric/
 
 ### Stop Modes
 ```bash
-./analysts/breakout/stop.sh
+./analyst/breakout/stop.sh
 ./investor/stop.sh
 ```
 
@@ -113,8 +113,8 @@ The investor module executes paper trades based on breakout signals:
 ## 📧 Email Notifications
 
 ### Email Setup
-1. **Gmail API**: `analysts/output/gmail/token.json`
-   - Run: `python3 analysts/output/gmail/scripts/gmail_auth.py`
+1. **Gmail API**: `analyst/output/gmail/token.json`
+   - Run: `python3 analyst/output/gmail/scripts/gmail_auth.py`
    - Requires OAuth2 credentials from Google Cloud Console
 
 2. **Recipient**: `deniz@bora.box`
@@ -135,21 +135,21 @@ The investor module executes paper trades based on breakout signals:
 ## 🔧 Configuration
 
 ### Required API Keys
-1. **Alpaca Markets**: `analysts/input/alpaca/.env`
+1. **Alpaca Markets**: `analyst/input/alpaca/.env`
    ```
    ALPACA_API_KEY=your_key
    ALPACA_SECRET_KEY=your_secret
    ```
 
-2. **Gmail API**: `analysts/output/gmail/token.json`
-   - Run: `python3 analysts/output/gmail/scripts/gmail_auth.py`
+2. **Gmail API**: `analyst/output/gmail/token.json`
+   - Run: `python3 analyst/output/gmail/scripts/gmail_auth.py`
 
 ## 📈 Monitoring
 
 ### View Logs
 ```bash
 # Breakout analyst logs
-tail -f analysts/breakout/logs/breakout_analyst.log
+tail -f analyst/breakout/logs/breakout_analyst.log
 
 # Investor logs
 tail -f investor/logs/investor.log
@@ -158,7 +158,7 @@ tail -f investor/logs/investor.log
 ### Check Status
 ```bash
 # Breakout analyst status
-./analysts/breakout/status.sh
+./analyst/breakout/status.sh
 
 # Investor status
 ./investor/status.sh
@@ -174,7 +174,7 @@ tail -f investor/logs/investor.log
 6. **Market Awareness**: Only scans stocks during market hours
 7. **Fault Tolerance**: Process locking, error handling
 8. **Clean Output**: Console + email output format
-9. **Modular Design**: Easy to add new analysts
+9. **Modular Design**: Easy to add new analyst modules
 
 ## 🔄 Workflow
 
@@ -186,14 +186,14 @@ tail -f investor/logs/investor.log
    - Logs all activity
 
 2. **Investor Mode**:
-   - Monitors analysts logs for breakout signals
+   - Monitors analyst logs for breakout signals
    - Executes paper trades based on signal strength
    - Manages portfolio positions
    - Implements risk management
 
 ## 📞 Support
 
-- **Breakout Analyst Status**: `./analysts/breakout/status.sh`
+- **Breakout Analyst Status**: `./analyst/breakout/status.sh`
 - **Investor Status**: `./investor/status.sh`
 - **Logs**: Check log files
 - **API Limits**: Built-in monitoring tools

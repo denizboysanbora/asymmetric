@@ -4,10 +4,18 @@
 echo "📊 MCP-Enhanced Breakout Analyst Status"
 echo "======================================="
 
+# Base directory helpers
+SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+
 # Check if running
-if pgrep -f "mcp_breakout_analyst.sh" > /dev/null; then
+ANALYST_PIDS=$(pgrep -f "mcp_breakout_analyst.sh" 2>/dev/null || true)
+if [ -n "$ANALYST_PIDS" ]; then
     echo "✅ Status: Running"
-    echo "📅 Started: $(ps -o lstart= -p $(pgrep -f "mcp_breakout_analyst.sh"))"
+    FIRST_PID=$(echo "$ANALYST_PIDS" | head -n 1)
+    START_TIME=$(ps -p "$FIRST_PID" -o lstart= 2>/dev/null | head -n 1)
+    if [ -n "$START_TIME" ]; then
+        echo "📅 Started: $START_TIME"
+    fi
 else
     echo "❌ Status: Not running"
 fi
@@ -26,7 +34,7 @@ else
 fi
 
 # Check log file
-LOG_FILE="logs/mcp_breakout_analyst.log"
+LOG_FILE="$SCRIPT_DIR/logs/mcp_breakout_analyst.log"
 if [ -f "$LOG_FILE" ]; then
     echo "📝 Log file: $LOG_FILE"
     echo "📏 Size: $(du -h "$LOG_FILE" | cut -f1)"
@@ -38,7 +46,7 @@ fi
 # Check MCP server
 echo ""
 echo "🔧 MCP Server Status:"
-MCP_SERVER_PATH="../../alpaca-mcp-server"
+MCP_SERVER_PATH="$SCRIPT_DIR/../alpaca"
 if [ -d "$MCP_SERVER_PATH" ]; then
     echo "✅ MCP Server: Installed"
     
@@ -64,4 +72,3 @@ echo "🎯 Quick Actions:"
 echo "   Start: ./start_mcp.sh"
 echo "   Stop:  ./stop_mcp.sh"
 echo "   Logs:  tail -f logs/mcp_breakout_analyst.log"
-
