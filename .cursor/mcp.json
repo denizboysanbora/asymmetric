@@ -1,0 +1,17 @@
+{
+  "mcpServers": {
+    "alpaca": {
+      "type": "stdio",
+      "command": "/Users/deniz/Code/asymmetric/alpaca-mcp-server/venv/bin/python",
+      "args": [
+        "/Users/deniz/Code/asymmetric/alpaca-mcp-server/alpaca_mcp_server.py"
+      ],
+      "env": {
+        "ALPACA_API_KEY": "PK5KN56VW1TVTL7X2GSJ",
+        "ALPACA_SECRET_KEY": "Ojsiz7lO4SgTHRLLHz2nYxEoitOaKL1sOmGXAcz3",
+        "ALPACA_PAPER_TRADE": "True"
+      }
+    }
+  }
+}
+
