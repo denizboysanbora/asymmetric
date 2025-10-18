@@ -19,14 +19,27 @@ sys.path.insert(0, str(ALPACA_DIR))
 
 # Import Alpaca modules
 try:
-    from alpaca.data.historical import StockHistoricalDataClient
-    from alpaca.data.requests import StockBarsRequest
+    from alpaca.data.historical import ScreenerClient, StockHistoricalDataClient
+    from alpaca.data.requests import (
+        MarketMoversRequest,
+        MostActivesRequest,
+        StockBarsRequest,
+        StockSnapshotRequest,
+    )
     from alpaca.data.timeframe import TimeFrame
+    from alpaca.data.enums import MarketType, MostActivesBy
+    from alpaca.trading.requests import GetAssetsRequest
+    from alpaca.trading.enums import AssetClass, AssetExchange, AssetStatus
     from alpaca.trading.client import TradingClient
     from alpaca.data.models import Bar
 except ImportError as e:
     print(f"Error importing Alpaca modules: {e}", file=sys.stderr)
     sys.exit(1)
+
+try:
+    from dotenv import load_dotenv
+except ImportError:
+    load_dotenv = None
 
 class SetupTag(BaseModel):
     """Setup tag model."""
@@ -37,180 +50,243 @@ class SetupTag(BaseModel):
     
     model_config = {"extra": "allow"}
 
+LIQUID_CACHE_DIR = Path(__file__).parent / "cache"
+LIQUID_CACHE_PATH = LIQUID_CACHE_DIR / "liquid_universe.json"
+ENV_FILE_PATH = Path(__file__).parent / "config" / "api_keys.env"
+DEFAULT_CACHE_MINUTES = int(os.getenv("LIQUID_UNIVERSE_CACHE_MINUTES", "20"))
+DEFAULT_MOST_ACTIVE = int(os.getenv("LIQUID_UNIVERSE_MOST_ACTIVE_TOP", "100"))  # Max 100
+DEFAULT_MOVERS = int(os.getenv("LIQUID_UNIVERSE_MOVERS_TOP", "50"))  # Max 50
+MAX_UNIVERSE_SIZE = int(os.getenv("LIQUID_UNIVERSE_MAX", "1000"))  # Increased from 500
+MIN_PRICE = float(os.getenv("LIQUID_UNIVERSE_MIN_PRICE", "1"))  # Lowered from 5
+MAX_PRICE = float(os.getenv("LIQUID_UNIVERSE_MAX_PRICE", "1000"))  # Increased from 500
+MIN_DAILY_VOLUME = float(os.getenv("LIQUID_UNIVERSE_MIN_DAILY_VOLUME", "100000"))  # Lowered from 500000
+
+
+def _load_cached_universe() -> Optional[List[str]]:
+    # Always disable cache for dynamic analysis
+    return None
+
+
+def _write_cached_universe(symbols: List[str], meta: Dict[str, Any]) -> None:
+    # Always disable cache for dynamic analysis
+    return
+
+
+def _symbol_passes_basic_filters(symbol: str) -> bool:
+    upl = symbol.upper()
+    if not (2 <= len(upl) <= 5):
+        return False
+    if upl.isdigit():
+        return False
+    if not upl.replace(".", "").replace("-", "").isalnum():
+        return False
+    disallowed_fragments = ["ETF", "FUND", "TRUST", "REIT", "UT", "CEF", "CLOSED"]
+    if any(fragment in upl for fragment in disallowed_fragments):
+        return False
+    disallowed_suffixes = [".PR", ".PW", ".W", ".WS", ".WT"]
+    if any(upl.endswith(suffix) for suffix in disallowed_suffixes):
+        return False
+    foreign_markers = [".TO", ".L", ".HK", ".SH", ".SZ"]
+    if any(marker in upl for marker in foreign_markers):
+        return False
+    return True
+
+
+def _is_preferred_exchange(exchange: Optional[Any]) -> bool:
+    if exchange is None:
+        return False
+    if isinstance(exchange, AssetExchange):
+        exchange = exchange.value
+    return exchange in {AssetExchange.NASDAQ.value, AssetExchange.NYSE.value}
+
+
+def _chunk(seq: List[str], size: int) -> List[List[str]]:
+    return [seq[i : i + size] for i in range(0, len(seq), size)]
+
+
 def get_liquid_stocks():
-    """Get liquid stocks dynamically from Alpaca API with filters"""
+    """Assemble a liquid trading universe using Alpaca screeners, metadata, and caching."""
+    # Check initial environment state
+    initial_api_key = os.getenv("ALPACA_API_KEY")
+    initial_secret_key = os.getenv("ALPACA_SECRET_KEY")
+    
+    print(f"🔑 Initial env state: API_KEY={'✓' if initial_api_key else '✗'}, SECRET_KEY={'✓' if initial_secret_key else '✗'}", file=sys.stderr)
+    
+    # Load from .env file if keys not found
+    if not (initial_api_key and initial_secret_key):
+        if load_dotenv and ENV_FILE_PATH.exists():
+            print(f"📁 Loading API keys from {ENV_FILE_PATH}", file=sys.stderr)
+            load_dotenv(ENV_FILE_PATH)
+            
+            # Check if loading was successful
+            post_load_api_key = os.getenv("ALPACA_API_KEY")
+            post_load_secret_key = os.getenv("ALPACA_SECRET_KEY")
+            print(f"🔑 Post-load env state: API_KEY={'✓' if post_load_api_key else '✗'}, SECRET_KEY={'✓' if post_load_secret_key else '✗'}", file=sys.stderr)
+        else:
+            print(f"⚠️  No .env file found at {ENV_FILE_PATH}", file=sys.stderr)
+
+    cached = _load_cached_universe()
+    if cached:
+        return cached
+
+    api_key = os.getenv("ALPACA_API_KEY")
+    secret_key = os.getenv("ALPACA_SECRET_KEY")
+    if not api_key or not secret_key:
+        print("⚠️  ALPACA API keys missing after all attempts, using fallback list", file=sys.stderr)
+        return get_fallback_stocks()
+
+    # Test network connectivity to Alpaca
     try:
-        from alpaca.trading.client import TradingClient
+        import socket
+        import urllib.request
+        import urllib.error
         
-        # Initialize trading client
-        api_key = os.getenv('ALPACA_API_KEY')
-        secret_key = os.getenv('ALPACA_SECRET_KEY')
-        
-        if not api_key or not secret_key:
-            print("Warning: ALPACA_API_KEY and ALPACA_SECRET_KEY not set, using fallback list", file=sys.stderr)
+        # Test DNS resolution
+        try:
+            socket.gethostbyname('data.alpaca.markets')
+            print("🌐 DNS resolution: ✓ (data.alpaca.markets)", file=sys.stderr)
+        except socket.gaierror as e:
+            print(f"🌐 DNS resolution: ✗ (data.alpaca.markets) - {e}", file=sys.stderr)
+            print("⚠️  Network access blocked, using fallback list", file=sys.stderr)
             return get_fallback_stocks()
         
+        # Test HTTPS connectivity with proper API headers
+        try:
+            req = urllib.request.Request('https://data.alpaca.markets/v2/stocks/SPY/bars/latest')
+            req.add_header('APCA-API-KEY-ID', api_key)
+            req.add_header('APCA-API-SECRET-KEY', secret_key)
+            urllib.request.urlopen(req, timeout=5)
+            print("🌐 HTTPS connectivity: ✓ (data.alpaca.markets API)", file=sys.stderr)
+        except (urllib.error.URLError, socket.timeout) as e:
+            print(f"🌐 HTTPS connectivity: ✗ (data.alpaca.markets API) - {e}", file=sys.stderr)
+            print("⚠️  Network access blocked, using fallback list", file=sys.stderr)
+            return get_fallback_stocks()
+            
+    except ImportError:
+        print("⚠️  Network diagnostics unavailable (missing urllib/socket)", file=sys.stderr)
+
+    try:
+        print("🔧 Initializing Alpaca clients...", file=sys.stderr)
         trading_client = TradingClient(api_key, secret_key, paper=True)
-        
-        # Get all assets
-        print("🔍 Fetching dynamic stock universe from Alpaca...", file=sys.stderr)
-        assets = trading_client.get_all_assets()
-        
-        # Apply comprehensive filters
-        filtered_stocks = []
-        filter_stats = {
-            'total_assets': len(assets),
-            'us_equity': 0,
-            'nasdaq_nyse': 0,
-            'no_etfs': 0,
-            'no_preferred': 0,
-            'valid_symbols': 0,
-            'price_volume_filtered': 0,
-            'final_count': 0
-        }
-        
-        # Get recent price and volume data for filtering
-        print("🔍 Fetching price and volume data for filtering...", file=sys.stderr)
+        screener_client = ScreenerClient(api_key, secret_key)
         data_client = StockHistoricalDataClient(api_key, secret_key)
-        
-        # Get symbols that pass basic filters first
-        basic_filtered = []
-        for asset in assets:
-            # Filter 1: Only US equity stocks (no ETFs, bonds, etc.)
-            if not (asset.tradable and asset.asset_class == 'us_equity'):
-                continue
-            filter_stats['us_equity'] += 1
-            
-            # Filter 2: Only NASDAQ and NYSE exchanges
-            if asset.exchange not in ['NASDAQ', 'NYSE']:
-                continue
-            filter_stats['nasdaq_nyse'] += 1
-            
-            # Filter 3: Exclude ETFs (common ETF patterns)
-            symbol = asset.symbol.upper()
-            if any(etf_pattern in symbol for etf_pattern in ['ETF', 'FUND', 'TRUST', 'REIT']):
-                continue
-            filter_stats['no_etfs'] += 1
-            
-            # Filter 4: Exclude preferred stocks and warrants
-            if any(suffix in symbol for suffix in ['.PR', '.PW', '.W', '.WS', '.WT']):
-                continue
-            filter_stats['no_preferred'] += 1
-            
-            # Filter 5: Exclude very short symbols (likely not liquid stocks)
-            if len(symbol) < 2:
-                continue
-            
-            # Filter 6: Exclude symbols with numbers only
-            if symbol.isdigit():
-                continue
-            
-            # Filter 7: Exclude foreign stocks (common patterns)
-            if any(foreign_pattern in symbol for foreign_pattern in ['.TO', '.L', '.HK', '.SH', '.SZ']):
-                continue
-            
-            # Filter 8: Exclude unit trusts and closed-end funds
-            if any(trust_pattern in symbol for trust_pattern in ['UT', 'CEF', 'CLOSED']):
-                continue
-            
-            # Filter 9: Exclude symbols with special characters (except dots for some valid stocks)
-            if not symbol.replace('.', '').replace('-', '').isalnum():
-                continue
-            
-            filter_stats['valid_symbols'] += 1
-            basic_filtered.append(symbol)
-        
-        print(f"📊 Basic filters: {filter_stats['valid_symbols']} stocks", file=sys.stderr)
-        
-        # Apply comprehensive liquidity filters
-        from datetime import datetime, timedelta
-        end_date = datetime.now()
-        start_date = end_date - timedelta(days=25)  # Get 25 days to check 20 sessions
-        
-        print(f"🔍 Applying liquidity filters (Price $5-$500, Volume ≥500K, 18/20 sessions)...", file=sys.stderr)
-        
-        # Process stocks in batches to build the filtered universe
-        print(f"🔍 Building filtered universe from {len(basic_filtered)} stocks...", file=sys.stderr)
-        
-        batch_size = 100  # Larger batches since we're just filtering
-        max_stocks = 500  # Stop when we have enough stocks for analysis
-        
-        for i in range(0, len(basic_filtered), batch_size):
-            if len(filtered_stocks) >= max_stocks:
-                print(f"✅ Found {len(filtered_stocks)} qualified stocks, stopping early", file=sys.stderr)
-                break
-                
-            batch = basic_filtered[i:i+batch_size]
-            if i % 1000 == 0:  # Progress every 1000 stocks
-                print(f"📊 Processing batch {i//batch_size + 1}/{(len(basic_filtered)-1)//batch_size + 1}... ({len(filtered_stocks)} qualified so far)", file=sys.stderr)
-            
-            try:
-                request = StockBarsRequest(
-                    symbol_or_symbols=batch,
-                    timeframe=TimeFrame.Day,
-                    start=start_date,
-                    end=end_date
-                )
-                
-                bars = data_client.get_stock_bars(request)
-                
-                if not bars or not bars.data:
-                    continue
-                
-                for symbol in batch:
-                    if symbol not in bars.data:
-                        continue
-                    
-                    symbol_bars = bars.data[symbol]
-                    if len(symbol_bars) < 18:  # Need at least 18 sessions
-                        continue
-                    
-                    # Get price and volume data
-                    prices = [float(bar.close) for bar in symbol_bars]
-                    volumes = [float(bar.volume) for bar in symbol_bars]
-                    
-                    # Filter 10: Price between $5-$500
-                    latest_price = prices[-1]
-                    if latest_price < 5.0 or latest_price > 500.0:
-                        continue
-                    
-                    # Filter 11: Average daily volume ≥ 500,000
-                    avg_volume = sum(volumes) / len(volumes)
-                    if avg_volume < 500000:
-                        continue
-                    
-                    # Filter 12: Traded at least 18 of the past 20 sessions
-                    # (We already checked len(symbol_bars) >= 18 above)
-                    # Additional check: ensure we have recent data
-                    if len(symbol_bars) < 18:
-                        continue
-                    
-                    filter_stats['price_volume_filtered'] += 1
-                    filtered_stocks.append(symbol)
-                    
-            except Exception as e:
-                print(f"Error processing batch {i//batch_size + 1}: {e}", file=sys.stderr)
-                continue
-        
-        filter_stats['final_count'] = len(filtered_stocks)
-        
-        # Print filter statistics
-        print(f"📊 Filter Statistics:", file=sys.stderr)
-        print(f"  Total assets: {filter_stats['total_assets']:,}", file=sys.stderr)
-        print(f"  US equity: {filter_stats['us_equity']:,}", file=sys.stderr)
-        print(f"  NASDAQ/NYSE: {filter_stats['nasdaq_nyse']:,}", file=sys.stderr)
-        print(f"  No ETFs: {filter_stats['no_etfs']:,}", file=sys.stderr)
-        print(f"  No preferred: {filter_stats['no_preferred']:,}", file=sys.stderr)
-        print(f"  Valid symbols: {filter_stats['valid_symbols']:,}", file=sys.stderr)
-        print(f"  Price $5-$500 & Volume ≥500K & 18/20 sessions: {filter_stats['price_volume_filtered']:,}", file=sys.stderr)
-        print(f"  Final count: {filter_stats['final_count']:,}", file=sys.stderr)
-        
-        print(f"📊 Filtered to {len(filtered_stocks)} liquid stocks (Price $5-$500, Volume ≥500K, 18/20 sessions)", file=sys.stderr)
-        return filtered_stocks
-        
-    except Exception as e:
-        print(f"Error fetching dynamic stocks: {e}", file=sys.stderr)
+        print("✅ Alpaca clients initialized successfully", file=sys.stderr)
+    except Exception as exc:
+        print(f"❌ Error initialising Alpaca clients: {exc}", file=sys.stderr)
+        print("⚠️  Using fallback list due to client initialization failure", file=sys.stderr)
         return get_fallback_stocks()
+
+    # Get all tradable assets as our base universe
+    try:
+        print("📊 Fetching all tradable assets...", file=sys.stderr)
+        asset_filter = GetAssetsRequest(
+            status=AssetStatus.ACTIVE,
+            asset_class=AssetClass.US_EQUITY,
+        )
+        assets = trading_client.get_all_assets(asset_filter)
+        assets_by_symbol = {
+            asset.symbol.upper(): asset
+            for asset in assets
+            if asset.tradable and asset.shortable and asset.status == AssetStatus.ACTIVE
+        }
+        print(f"✅ Retrieved {len(assets_by_symbol)} tradable assets", file=sys.stderr)
+    except Exception as exc:
+        print(f"❌ Asset metadata lookup failed: {exc}", file=sys.stderr)
+        assets_by_symbol = {}
+
+    # Use the full stock universe instead of just screener results
+    print("📊 Using full stock universe...", file=sys.stderr)
+    
+    # Get all tradable assets as our base universe
+    all_symbols = list(assets_by_symbol.keys())
+    print(f"📊 Full universe: {len(all_symbols)} tradable assets", file=sys.stderr)
+    
+    # Apply basic filters to get candidate symbols
+    candidate_symbols = [sym for sym in all_symbols if _symbol_passes_basic_filters(sym)]
+    print(f"📊 After basic filters: {len(candidate_symbols)} candidate symbols", file=sys.stderr)
+    
+    if not candidate_symbols:
+        print("⚠️  No symbols passed basic filters, falling back", file=sys.stderr)
+        return get_fallback_stocks()
+
+    # Apply asset metadata filters to candidate symbols
+    filtered_symbols: List[str] = []
+    for symbol in candidate_symbols:
+        asset = assets_by_symbol.get(symbol)
+        if not asset:
+            continue
+        if asset.asset_class != AssetClass.US_EQUITY:
+            continue
+        if not _is_preferred_exchange(asset.exchange):
+            continue
+        filtered_symbols.append(symbol)
+
+    print(f"📊 After asset metadata filters: {len(filtered_symbols)} symbols", file=sys.stderr)
+    
+    if not filtered_symbols:
+        print("⚠️  Asset metadata filters removed all symbols, using fallback", file=sys.stderr)
+        return get_fallback_stocks()
+
+    # Get snapshots for all filtered symbols
+    symbols_to_snapshot = filtered_symbols
+    
+    print(f"📊 Getting snapshots for {len(symbols_to_snapshot)} symbols...", file=sys.stderr)
+    
+    snapshots: Dict[str, Any] = {}
+    try:
+        chunk_size = int(os.getenv("LIQUID_UNIVERSE_SNAPSHOT_CHUNK", "150"))
+        for i, chunk in enumerate(_chunk(symbols_to_snapshot, chunk_size)):
+            try:
+                print(f"📊 Fetching snapshot chunk {i+1}/{(len(symbols_to_snapshot) + chunk_size - 1) // chunk_size} ({len(chunk)} symbols)...", file=sys.stderr)
+                response = data_client.get_stock_snapshot(
+                    StockSnapshotRequest(symbol_or_symbols=chunk)
+                )
+                snapshots.update(response)
+            except Exception as chunk_exc:
+                print(f"⚠️  Snapshot fetch failed for chunk ({len(chunk)} symbols): {chunk_exc}", file=sys.stderr)
+    except Exception as exc:
+        print(f"⚠️  Snapshot retrieval failed: {exc}", file=sys.stderr)
+
+    liquid_candidates: List[Tuple[str, float]] = []
+    skipped_no_snapshot = 0
+    skipped_price = 0
+    skipped_volume = 0
+    skipped_basic_filters = 0
+    
+    # Filter symbols with snapshots
+    for symbol in symbols_to_snapshot:
+        # Apply basic filters first
+        if not _symbol_passes_basic_filters(symbol):
+            skipped_basic_filters += 1
+            continue
+            
+        snap = snapshots.get(symbol)
+        daily_bar = getattr(snap, "daily_bar", None) if snap else None
+        if not daily_bar:
+            skipped_no_snapshot += 1
+            continue
+        close_price = float(getattr(daily_bar, "close", 0.0))
+        daily_volume = float(getattr(daily_bar, "volume", 0.0))
+        if close_price < MIN_PRICE or close_price > MAX_PRICE:
+            skipped_price += 1
+            continue
+        if daily_volume < MIN_DAILY_VOLUME:
+            skipped_volume += 1
+            continue
+        liquid_candidates.append((symbol, daily_volume))
+    
+    print(f"📊 Snapshot filtering: {len(liquid_candidates)} passed, {skipped_no_snapshot} no snapshot, {skipped_price} price filter, {skipped_volume} volume filter, {skipped_basic_filters} basic filters", file=sys.stderr)
+
+    if not liquid_candidates:
+        print("⚠️  No symbols passed price/volume filters, falling back", file=sys.stderr)
+        return get_fallback_stocks()
+
+    liquid_candidates.sort(key=lambda item: item[1], reverse=True)
+    universe = [symbol for symbol, _ in liquid_candidates[:MAX_UNIVERSE_SIZE]]
+
+    _write_cached_universe(universe, {"candidate_pool": len(candidate_symbols), "universe_type": "full_universe"})
+    print(f"✅ Using {len(universe)} liquid symbols after screener + metadata filters", file=sys.stderr)
+    return universe
 
 def get_fallback_stocks():
     """Fallback stock list if API fails"""

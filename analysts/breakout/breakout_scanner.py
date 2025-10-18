@@ -13,6 +13,16 @@ from pathlib import Path
 from typing import List, Dict, Optional, Tuple
 from pydantic import BaseModel, Field
 
+# Load environment variables first
+try:
+    from dotenv import load_dotenv
+    env_file = Path(__file__).parent.parent / "config" / "api_keys.env"
+    if env_file.exists():
+        load_dotenv(env_file)
+        print("🔑 Loaded API keys from .env file", file=sys.stderr)
+except ImportError:
+    pass
+
 # Add alpaca directory to path
 ALPACA_DIR = Path(__file__).parent.parent / "input" / "alpaca"
 sys.path.insert(0, str(ALPACA_DIR))
@@ -28,6 +38,14 @@ except ImportError as e:
     print(f"Error importing Alpaca modules: {e}", file=sys.stderr)
     sys.exit(1)
 
+try:
+    # Add parent directory to path for imports
+    sys.path.insert(0, str(Path(__file__).parent.parent))
+    from breakout_analysis import get_liquid_stocks
+except Exception as import_exc:
+    print(f"Error importing shared get_liquid_stocks: {import_exc}", file=sys.stderr)
+    sys.exit(1)
+
 class SetupTag(BaseModel):
     """Setup tag model."""
     setup: str = Field(..., description="Setup type")
@@ -36,29 +54,6 @@ class SetupTag(BaseModel):
     meta: Dict = Field(default_factory=dict, description="Setup-specific metadata")
     
     model_config = {"extra": "allow"}
-
-def get_liquid_stocks():
-    """Get liquid stocks for scanning - expanded dynamic list"""
-    return [
-        # Mega Cap Tech
-        'AAPL', 'MSFT', 'GOOGL', 'AMZN', 'NVDA', 'META', 'TSLA', 'NFLX', 'AMD', 'INTC',
-        # Growth & Cloud
-        'CRM', 'ADBE', 'PYPL', 'UBER', 'LYFT', 'SQ', 'ROKU', 'ZM', 'PTON', 'SPOT',
-        # Crypto & Fintech
-        'COIN', 'PLTR', 'SNOW', 'CRWD', 'OKTA', 'NET', 'DDOG', 'ZS', 'MDB', 'TEAM',
-        # AI & Semiconductors
-        'AVGO', 'QCOM', 'TXN', 'ADI', 'MRVL', 'LRCX', 'KLAC', 'AMAT', 'MU', 'WDC',
-        # Biotech & Healthcare
-        'GILD', 'AMGN', 'BIIB', 'REGN', 'VRTX', 'ILMN', 'MRNA', 'BNTX', 'PFE', 'JNJ',
-        # Energy & Materials
-        'XOM', 'CVX', 'COP', 'EOG', 'SLB', 'HAL', 'NEE', 'DUK', 'SO', 'AEP',
-        # Financials
-        'JPM', 'BAC', 'WFC', 'GS', 'MS', 'C', 'BLK', 'AXP', 'V', 'MA',
-        # Consumer & Retail
-        'WMT', 'HD', 'PG', 'KO', 'PEP', 'NKE', 'SBUX', 'MCD', 'DIS', 'NFLX',
-        # Emerging Growth
-        'RBLX', 'U', 'SNOW', 'DDOG', 'NET', 'ZS', 'CRWD', 'OKTA', 'PLTR', 'COIN'
-    ]
 
 def calculate_adr_pct(prices: List[float], period: int = 20) -> float:
     """Calculate Average Daily Range percentage"""
@@ -735,7 +730,9 @@ def main():
         # Get liquid stocks
         symbols = get_liquid_stocks()
         
-        for symbol in symbols[:20]:  # Analyze first 20 dynamic stocks
+        print(f"📊 Analyzing {len(symbols)} stocks from filtered universe...", file=sys.stderr)
+        
+        for symbol in symbols:  # Analyze all filtered dynamic stocks
             try:
                 # Get daily bars for last 3 months
                 end_date = datetime.now()
