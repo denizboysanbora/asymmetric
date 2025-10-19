@@ -16,13 +16,15 @@ import subprocess
 import numpy as np
 import pandas as pd
 import sqlite3
-from datetime import datetime, timedelta
+from datetime import date, datetime, timedelta
 from pathlib import Path
 from typing import List, Dict, Optional, Tuple, Any
 from pydantic import BaseModel, Field
 import smtplib
 from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
+
+from db_manager import MonthKey, MonthlyDatabaseManager
 
 # Load environment variables first
 try:
@@ -115,8 +117,10 @@ class UnifiedAnalyst:
         
         # Configuration
         self.config = AnalystConfig()
-        # Database path
-        self.db_path = str(Path(__file__).parent / "nasdaq_2025.db")
+        base_dir = Path(__file__).parent
+        self.db_dir = base_dir / "nasdaq_db"
+        legacy_db = base_dir / "nasdaq_2025.db"
+        self.db_manager = MonthlyDatabaseManager(self.db_dir, fallback_path=legacy_db)
         
         # State
         self.portfolio_state_file = Path(__file__).parent / "portfolio_state.json"
@@ -234,16 +238,52 @@ class UnifiedAnalyst:
         return True
 
     # --- Database helpers ---
-    def _db_conn(self):
-        return sqlite3.connect(self.db_path)
+    def _db_month_key(self, value: Any) -> MonthKey:
+        if isinstance(value, date):
+            target = value
+        elif isinstance(value, datetime):
+            target = value.date()
+        elif isinstance(value, str):
+            target = datetime.strptime(value, "%Y-%m-%d").date()
+        else:
+            raise ValueError(f"Unsupported date value: {value!r}")
+        return MonthKey(target.year, target.month)
+
+    def _db_connect_for_value(self, value: Any) -> sqlite3.Connection:
+        key = self._db_month_key(value)
+        return self.db_manager.connect_for_month(key)
+
+    def _db_paths_between(self, start_date: str, end_date: str) -> List[Path]:
+        return self.db_manager.paths_between(start_date, end_date)
+
+    def _db_existing_dates(self, symbol: str, start_date: str, end_date: str) -> set[str]:
+        paths = self._db_paths_between(start_date, end_date)
+        existing_days: set[str] = set()
+        for path in paths:
+            conn = None
+            try:
+                conn = sqlite3.connect(path)
+                df = pd.read_sql(
+                    """
+                    SELECT date
+                    FROM nasdaq_prices
+                    WHERE symbol = ? AND date BETWEEN ? AND ?
+                    """,
+                    conn,
+                    params=(symbol, start_date, end_date),
+                )
+            except Exception:
+                df = pd.DataFrame()
+            finally:
+                if conn is not None:
+                    conn.close()
+            if not df.empty:
+                existing_days.update(df["date"].astype(str).tolist())
+        return existing_days
 
     def _db_latest_date(self) -> Optional[str]:
         try:
-            with self._db_conn() as conn:
-                cur = conn.cursor()
-                cur.execute("SELECT MAX(date) FROM nasdaq_prices")
-                row = cur.fetchone()
-                return row[0] if row and row[0] else None
+            return self.db_manager.latest_date()
         except Exception:
             return None
 
@@ -252,21 +292,46 @@ class UnifiedAnalyst:
             latest = self._db_latest_date()
             if not latest:
                 return None
-            with self._db_conn() as conn:
-                df = pd.read_sql(
-                    """
-                    SELECT date, open, high, low, close, volume
-                    FROM nasdaq_prices
-                    WHERE symbol = ? AND date <= ?
-                    ORDER BY date DESC
-                    LIMIT ?
-                    """,
-                    conn,
-                    params=(symbol, latest, num_days),
-                )
+
+            end_dt = datetime.strptime(latest, "%Y-%m-%d").date()
+            lookback_days = max(num_days * 3, 30)
+            start_dt = end_dt - timedelta(days=lookback_days)
+            start_str = start_dt.isoformat()
+            frames = []
+            for path in self._db_paths_between(start_str, latest):
+                conn = None
+                try:
+                    conn = sqlite3.connect(path)
+                    df = pd.read_sql(
+                        """
+                        SELECT date, open, high, low, close, volume
+                        FROM nasdaq_prices
+                        WHERE symbol = ? AND date BETWEEN ? AND ?
+                        ORDER BY date ASC
+                        """,
+                        conn,
+                        params=(symbol, start_str, latest),
+                    )
+                except Exception:
+                    df = pd.DataFrame()
+                finally:
+                    if conn is not None:
+                        conn.close()
+                if not df.empty:
+                    frames.append(df)
+
+            if not frames:
+                return None
+
+            df = pd.concat(frames, ignore_index=True)
             if df.empty:
                 return None
-            df = df.sort_values("date").reset_index(drop=True)
+
+            df = df.drop_duplicates(subset=["date"], keep="last")
+            df = df.sort_values("date")
+            if len(df) > num_days:
+                df = df.tail(num_days)
+            df = df.reset_index(drop=True)
             return df
         except Exception:
             return None
@@ -275,7 +340,8 @@ class UnifiedAnalyst:
         return self._db_get_recent_bars(symbol, num_days)
 
     def _db_upsert_row(self, row: dict) -> None:
-        with self._db_conn() as conn:
+        conn = self._db_connect_for_value(row.get("date"))
+        try:
             cur = conn.cursor()
             cur.execute(
                 """
@@ -290,10 +356,13 @@ class UnifiedAnalyst:
                 ),
             )
             conn.commit()
+        finally:
+            conn.close()
 
     def _db_insert_ignore_row(self, row: dict) -> None:
         """Insert if missing; do not overwrite existing rows."""
-        with self._db_conn() as conn:
+        conn = self._db_connect_for_value(row.get("date"))
+        try:
             cur = conn.cursor()
             cur.execute(
                 """
@@ -308,9 +377,12 @@ class UnifiedAnalyst:
                 ),
             )
             conn.commit()
+        finally:
+            conn.close()
 
     def _db_update_indicators_if_null(self, symbol: str, date: str, rsi: Optional[float], atr: Optional[float]) -> None:
-        with self._db_conn() as conn:
+        conn = self._db_connect_for_value(date)
+        try:
             cur = conn.cursor()
             cur.execute(
                 """
@@ -321,6 +393,8 @@ class UnifiedAnalyst:
                 (rsi, atr, symbol, date),
             )
             conn.commit()
+        finally:
+            conn.close()
 
     # --- Daily close database update ---
     def update_database_after_close(self) -> None:
@@ -446,59 +520,51 @@ class UnifiedAnalyst:
                     df.rename(columns={"timestamp": "date"}, inplace=True)
                     df["date"] = pd.to_datetime(df["date"]).dt.date.astype(str)
 
-                    with self._db_conn() as conn:
-                        for sym in chunk:
-                            sdf = df[df["symbol"] == sym]
-                            if sdf.empty:
-                                continue
-                            # Existing dates for symbol
-                            existing = pd.read_sql(
-                                "SELECT date FROM nasdaq_prices WHERE symbol=? AND date BETWEEN ? AND ?",
-                                conn,
-                                params=(sym, start_date, end_date),
-                            )
-                            existing_days = set(existing["date"].astype(str).tolist()) if not existing.empty else set()
-                            missing_days = [d for d in sdf["date"].tolist() if d in trading_days and d not in existing_days]
+                    for sym in chunk:
+                        sdf = df[df["symbol"] == sym]
+                        if sdf.empty:
+                            continue
+                        existing_days = self._db_existing_dates(sym, start_date, end_date)
+                        missing_days = [d for d in sdf["date"].tolist() if d in trading_days and d not in existing_days]
 
-                            if not missing_days:
-                                # Still try to fill indicators if null on the last day
-                                continue
+                        if not missing_days:
+                            continue
 
-                            for _, row in sdf[sdf["date"].isin(missing_days)].iterrows():
-                                # Compute indicators using prior 20 days from DB + this row
-                                hist = self._db_get_recent_bars(sym, 20) or pd.DataFrame()
-                                merged = pd.concat([hist, pd.DataFrame([{
-                                    "date": row["date"],
-                                    "open": float(row["open"]),
-                                    "high": float(row["high"]),
-                                    "low": float(row["low"]),
-                                    "close": float(row["close"]),
-                                    "volume": int(row["volume"]),
-                                }])], ignore_index=True)
-                                merged = merged.sort_values("date").reset_index(drop=True)
-                                closes = merged["close"].astype(float)
-                                highs = merged["high"].astype(float)
-                                lows = merged["low"].astype(float)
-                                rsi_val = self.calculate_rsi(list(closes.values)) if len(closes) >= 15 else None
-                                atr_val = self.calculate_atr(list(highs.values), list(lows.values), list(closes.values)) if len(closes) >= 15 else None
+                        for _, row in sdf[sdf["date"].isin(missing_days)].iterrows():
+                            # Compute indicators using prior 20 days from DB + this row
+                            hist = self._db_get_recent_bars(sym, 20) or pd.DataFrame()
+                            merged = pd.concat([hist, pd.DataFrame([{
+                                "date": row["date"],
+                                "open": float(row["open"]),
+                                "high": float(row["high"]),
+                                "low": float(row["low"]),
+                                "close": float(row["close"]),
+                                "volume": int(row["volume"]),
+                            }])], ignore_index=True)
+                            merged = merged.sort_values("date").reset_index(drop=True)
+                            closes = merged["close"].astype(float)
+                            highs = merged["high"].astype(float)
+                            lows = merged["low"].astype(float)
+                            rsi_val = self.calculate_rsi(list(closes.values)) if len(closes) >= 15 else None
+                            atr_val = self.calculate_atr(list(highs.values), list(lows.values), list(closes.values)) if len(closes) >= 15 else None
 
-                                self._db_insert_ignore_row({
-                                    "symbol": sym,
-                                    "date": row["date"],
-                                    "open": float(row["open"]),
-                                    "high": float(row["high"]),
-                                    "low": float(row["low"]),
-                                    "close": float(row["close"]),
-                                    "volume": int(row["volume"]),
-                                    "adjusted_close": float(row.get("close", row["close"])),
-                                    "rsi": round(rsi_val, 2) if rsi_val is not None else None,
-                                    "atr": round(atr_val, 4) if atr_val is not None else None,
-                                })
-                                # Ensure indicators are set if previously null
-                                self._db_update_indicators_if_null(sym, row["date"],
-                                                                  round(rsi_val, 2) if rsi_val is not None else None,
-                                                                  round(atr_val, 4) if atr_val is not None else None)
-                                healed += 1
+                            self._db_insert_ignore_row({
+                                "symbol": sym,
+                                "date": row["date"],
+                                "open": float(row["open"]),
+                                "high": float(row["high"]),
+                                "low": float(row["low"]),
+                                "close": float(row["close"]),
+                                "volume": int(row["volume"]),
+                                "adjusted_close": float(row.get("close", row["close"])),
+                                "rsi": round(rsi_val, 2) if rsi_val is not None else None,
+                                "atr": round(atr_val, 4) if atr_val is not None else None,
+                            })
+                            # Ensure indicators are set if previously null
+                            self._db_update_indicators_if_null(sym, row["date"],
+                                                              round(rsi_val, 2) if rsi_val is not None else None,
+                                                              round(atr_val, 4) if atr_val is not None else None)
+                            healed += 1
                 except Exception as ce:
                     print(f"Heal chunk failed: {ce}", file=sys.stderr)
                     continue

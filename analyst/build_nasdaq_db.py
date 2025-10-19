@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 """
-Build a real NASDAQ SQLite database using Alpaca market data.
+Build a real NASDAQ SQLite database using Alpaca market data or split existing data into monthly files.
 
 Requirements:
-- Env vars: ALPACA_API_KEY, ALPACA_SECRET_KEY, optional ALPACA_DATA_FEED (iex or sip)
+- Env vars: ALPACA_API_KEY, ALPACA_SECRET_KEY, optional ALPACA_DATA_FEED (iex or sip) when pulling from Alpaca
 - Date range: 2025-01-01 to 2025-10-17 (inclusive)
 - Universe: All active, tradable NASDAQ US equities from Alpaca assets
 - Stores: open, high, low, close, adjusted_close, volume, rsi(14), atr(14)
@@ -12,12 +12,14 @@ Notes:
 - Batches symbols to respect rate limits
 - Retries with exponential backoff on rate limits/network errors
 - Upserts by (symbol, date) for resume-safe re-runs
+- `--split-existing` copies rows from a legacy annual database into monthly databases without making API calls
 """
+import argparse
 import os
-import time
-import math
 import sqlite3
+import time
 from datetime import datetime, timezone
+from pathlib import Path
 from typing import List, Optional, Tuple
 
 import numpy as np
@@ -35,8 +37,12 @@ from alpaca.data.timeframe import TimeFrame
 from alpaca.data.enums import Adjustment, DataFeed
 from alpaca.common.exceptions import APIError
 
+from db_manager import MonthKey, MonthlyDatabaseManager, ensure_directory
 
-DB_PATH = os.path.join(os.path.dirname(__file__), "nasdaq_2025.db")
+
+BASE_DIR = Path(__file__).parent
+DB_DIR = ensure_directory(BASE_DIR / "nasdaq_db")
+DB_MANAGER = MonthlyDatabaseManager(DB_DIR)
 START_DATE = "2025-01-01"
 END_DATE = "2025-10-17"
 SYMBOL_CHUNK_SIZE = 200  # conservative; Alpaca supports multi-symbol requests
@@ -45,8 +51,8 @@ BASE_BACKOFF_SECONDS = 2.0
 
 
 def load_config() -> Tuple[str, str, str]:
-    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), ".env"))
-    load_dotenv(dotenv_path=os.path.join(os.path.dirname(__file__), "..", ".env"))
+    load_dotenv(dotenv_path=BASE_DIR / ".env")
+    load_dotenv(dotenv_path=BASE_DIR.parent / ".env")
 
     api_key = os.getenv("ALPACA_API_KEY")
     secret_key = os.getenv("ALPACA_SECRET_KEY")
@@ -56,38 +62,6 @@ def load_config() -> Tuple[str, str, str]:
         raise RuntimeError("Missing ALPACA_API_KEY or ALPACA_SECRET_KEY in environment.")
 
     return api_key, secret_key, data_feed
-
-
-def create_database() -> None:
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.execute(
-        """
-        CREATE TABLE IF NOT EXISTS nasdaq_prices (
-            symbol VARCHAR(10) NOT NULL,
-            date DATE NOT NULL,
-            open DECIMAL(10,2),
-            high DECIMAL(10,2),
-            low DECIMAL(10,2),
-            close DECIMAL(10,2),
-            volume BIGINT,
-            adjusted_close DECIMAL(10,2),
-            rsi DECIMAL(5,2),
-            atr DECIMAL(10,4),
-            created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-            PRIMARY KEY (symbol, date)
-        )
-        """
-    )
-    cur.execute("CREATE INDEX IF NOT EXISTS idx_np_date ON nasdaq_prices(date)")
-    cur.execute("CREATE INDEX IF NOT EXISTS idx_np_symbol ON nasdaq_prices(symbol)")
-    cur.execute("CREATE INDEX IF NOT EXISTS idx_np_close ON nasdaq_prices(close)")
-    cur.execute("CREATE INDEX IF NOT EXISTS idx_np_rsi ON nasdaq_prices(rsi)")
-    cur.execute("CREATE INDEX IF NOT EXISTS idx_np_atr ON nasdaq_prices(atr)")
-
-    conn.commit()
-    conn.close()
 
 
 def get_nasdaq_symbols(trading_client: TradingClient) -> List[str]:
@@ -182,36 +156,68 @@ def upsert_prices(df: pd.DataFrame) -> int:
     if df is None or df.empty:
         return 0
 
-    records = []
-    for _, row in df.iterrows():
-        records.append(
-            (
-                row["symbol"],
-                str(row["date"]),
-                float(row["open"]),
-                float(row["high"]),
-                float(row["low"]),
-                float(row["close"]),
-                int(row["volume"]),
-                float(row.get("adjusted_close", row["close"])),
-                float(row.get("rsi", np.nan)) if not pd.isna(row.get("rsi", np.nan)) else None,
-                float(row.get("atr", np.nan)) if not pd.isna(row.get("atr", np.nan)) else None,
-            )
-        )
+    df["date"] = pd.to_datetime(df["date"]).dt.date
+    df["year"] = df["date"].apply(lambda d: d.year)
+    df["month"] = df["date"].apply(lambda d: d.month)
 
-    conn = sqlite3.connect(DB_PATH)
-    cur = conn.cursor()
-    cur.executemany(
-        """
-        INSERT OR REPLACE INTO nasdaq_prices
-        (symbol, date, open, high, low, close, volume, adjusted_close, rsi, atr)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
-        """,
-        records,
-    )
-    conn.commit()
-    conn.close()
-    return len(records)
+    inserted = 0
+    for (year, month), group in df.groupby(["year", "month"]):
+        key = MonthKey(year=year, month=month)
+        conn = DB_MANAGER.connect_for_month(key)
+        try:
+            cur = conn.cursor()
+            records = [
+                (
+                    row["symbol"],
+                    row["date"].isoformat(),
+                    float(row["open"]),
+                    float(row["high"]),
+                    float(row["low"]),
+                    float(row["close"]),
+                    int(row["volume"]),
+                    float(row.get("adjusted_close", row["close"])),
+                    float(row.get("rsi", np.nan)) if not pd.isna(row.get("rsi", np.nan)) else None,
+                    float(row.get("atr", np.nan)) if not pd.isna(row.get("atr", np.nan)) else None,
+                )
+                for _, row in group.iterrows()
+            ]
+            cur.executemany(
+                """
+                INSERT OR REPLACE INTO nasdaq_prices
+                (symbol, date, open, high, low, close, volume, adjusted_close, rsi, atr)
+                VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+                """,
+                records,
+            )
+            conn.commit()
+            inserted += len(records)
+        finally:
+            conn.close()
+
+    df.drop(columns=["year", "month"], inplace=True)
+
+    return inserted
+
+
+def split_existing_database(source_path: Path) -> None:
+    if not source_path.exists():
+        print(f"Legacy database not found at {source_path}")
+        return
+
+    conn = sqlite3.connect(source_path)
+    try:
+        df = pd.read_sql("SELECT * FROM nasdaq_prices", conn, parse_dates=["date"])
+    finally:
+        conn.close()
+
+    if df.empty:
+        print("Legacy database contains no rows.")
+        return
+
+    df["date"] = pd.to_datetime(df["date"]).dt.date
+    inserted = upsert_prices(df)
+    print(f"Split {inserted:,} rows from {source_path.name} into monthly databases.")
+    verify()
 
 
 def process_and_store(
@@ -249,25 +255,38 @@ def process_and_store(
 
 
 def verify() -> None:
-    conn = sqlite3.connect(DB_PATH)
-    q = """
-    SELECT COUNT(*) as rows, COUNT(DISTINCT symbol) as symbols,
-           MIN(date) as first_date, MAX(date) as last_date
-    FROM nasdaq_prices
-    """
-    df = pd.read_sql(q, conn)
-    print(
-        f"Rows: {int(df.rows.iloc[0]):,}, Symbols: {int(df.symbols.iloc[0])}, "
-        f"Date range: {df.first_date.iloc[0]} -> {df.last_date.iloc[0]}"
-    )
-    conn.close()
+    summaries = DB_MANAGER.summarize()
+    total_rows = sum(item[1] for item in summaries)
+    first_dates = [item[2] for item in summaries if item[2]]
+    last_dates = [item[3] for item in summaries if item[3]]
+    if not summaries:
+        print("No database files found.")
+        return
+
+    print(f"Total rows: {total_rows:,}")
+    if first_dates and last_dates:
+        print(f"Date range: {min(first_dates)} -> {max(last_dates)}")
+
+    for path, count, first, last in summaries:
+        print(f" - {path.name}: {count:,} rows ({first} -> {last})")
 
 
 def main() -> None:
+    parser = argparse.ArgumentParser(description="Build or split NASDAQ SQLite databases.")
+    parser.add_argument(
+        "--split-existing",
+        action="store_true",
+        help="Split the legacy annual database into monthly partitioned files without hitting the API.",
+    )
+    args = parser.parse_args()
+
+    if args.split_existing:
+        legacy_db_path = BASE_DIR / "nasdaq_2025.db"
+        split_existing_database(legacy_db_path)
+        return
+
     print("Building NASDAQ database from Alpaca (2025-01-01 .. 2025-10-17)")
     api_key, secret_key, data_feed = load_config()
-
-    create_database()
 
     # Do not purge existing rows; allow resume-safe upserts
 
@@ -300,5 +319,3 @@ def main() -> None:
 
 if __name__ == "__main__":
     main()
-
-
