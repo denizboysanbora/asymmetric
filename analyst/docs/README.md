@@ -62,6 +62,13 @@ asymmetric/
 ./investor/stop.sh
 ```
 
+## ⚙️ Automation Setup
+
+- **Bootstrap environment**: `./scripts/bootstrap_env.sh` (creates `analyst/input/alpaca/venv` and installs deps)
+- **Authorize Gmail**: `analyst/input/alpaca/venv/bin/python analyst/output/gmail/scripts/gmail_auth.py`
+- **Install cron jobs**: `./scripts/install_cron.sh --apply` (adds weekday schedules to `crontab`)
+- **Verify**: `crontab -l` should list the analyst (every 30m) and investor (every 5m) entries
+
 ## 📊 Breakout Strategy
 
 ### Signal Detection
@@ -114,7 +121,7 @@ The investor module executes paper trades based on breakout signals:
 
 ### Email Setup
 1. **Gmail API**: `analyst/output/gmail/token.json`
-   - Run: `python3 analyst/output/gmail/scripts/gmail_auth.py`
+   - Run: `analyst/input/alpaca/venv/bin/python analyst/output/gmail/scripts/gmail_auth.py`
    - Requires OAuth2 credentials from Google Cloud Console
 
 2. **Recipient**: `deniz@bora.box`
@@ -142,7 +149,7 @@ The investor module executes paper trades based on breakout signals:
    ```
 
 2. **Gmail API**: `analyst/output/gmail/token.json`
-   - Run: `python3 analyst/output/gmail/scripts/gmail_auth.py`
+   - Run: `analyst/input/alpaca/venv/bin/python analyst/output/gmail/scripts/gmail_auth.py`
 
 ## 📈 Monitoring
 
