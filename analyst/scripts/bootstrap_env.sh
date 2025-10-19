@@ -1,11 +1,11 @@
 #!/bin/bash
 # Bootstrap the Python environment expected by the analyst and investor bots.
-# Creates/updates the venv at analyst/input/alpaca/venv and installs dependencies.
+# Creates/updates the venv at input/alpaca/venv and installs dependencies.
 
 set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
-VENV_DIR="$ROOT_DIR/analyst/input/alpaca/venv"
+VENV_DIR="$ROOT_DIR/input/alpaca/venv"
 REQUIREMENTS_FILE="$ROOT_DIR/requirements.txt"
 PYTHON_EXEC=${PYTHON:-python3}
 
@@ -38,6 +38,6 @@ cat <<EOF
 - Packages: $(wc -l < "$REQUIREMENTS_FILE") listed in $REQUIREMENTS_FILE
 
 Next steps:
-1. Run Gmail auth (once): $VENV_PYTHON analyst/output/gmail/scripts/gmail_auth.py
+1. Run Gmail auth (once): $VENV_PYTHON output/gmail/scripts/gmail_auth.py
 2. Install cron jobs: ./scripts/install_cron.sh --apply
 EOF

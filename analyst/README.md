@@ -204,7 +204,7 @@ The unified analyst replaces all previous scripts:
 1. **Module not found errors**
    ```bash
    cd analyst/input/alpaca/venv
-   ./bin/pip install -r ../../../requirements.txt
+   ./bin/pip install -r ../requirements.txt
    ```
 
 2. **API key errors**

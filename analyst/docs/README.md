@@ -64,8 +64,8 @@ asymmetric/
 
 ## ⚙️ Automation Setup
 
-- **Bootstrap environment**: `./scripts/bootstrap_env.sh` (creates `analyst/input/alpaca/venv` and installs deps)
-- **Authorize Gmail**: `analyst/input/alpaca/venv/bin/python analyst/output/gmail/scripts/gmail_auth.py`
+- **Bootstrap environment**: `./scripts/bootstrap_env.sh` (creates `input/alpaca/venv` and installs deps)
+- **Authorize Gmail**: `input/alpaca/venv/bin/python output/gmail/scripts/gmail_auth.py`
 - **Install cron jobs**: `./scripts/install_cron.sh --apply` (adds weekday schedules to `crontab`)
 - **Verify**: `crontab -l` should list the analyst (every 30m) and investor (every 5m) entries
 
@@ -121,7 +121,7 @@ The investor module executes paper trades based on breakout signals:
 
 ### Email Setup
 1. **Gmail API**: `analyst/output/gmail/token.json`
-   - Run: `analyst/input/alpaca/venv/bin/python analyst/output/gmail/scripts/gmail_auth.py`
+   - Run: `input/alpaca/venv/bin/python output/gmail/scripts/gmail_auth.py`
    - Requires OAuth2 credentials from Google Cloud Console
 
 2. **Recipient**: `deniz@bora.box`
@@ -149,7 +149,7 @@ The investor module executes paper trades based on breakout signals:
    ```
 
 2. **Gmail API**: `analyst/output/gmail/token.json`
-   - Run: `analyst/input/alpaca/venv/bin/python analyst/output/gmail/scripts/gmail_auth.py`
+   - Run: `input/alpaca/venv/bin/python output/gmail/scripts/gmail_auth.py`
 
 ## 📈 Monitoring
 
