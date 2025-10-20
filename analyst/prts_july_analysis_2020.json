@@ -1,0 +1,187 @@
+{
+  "symbol": "PRTS",
+  "month": "July 2020",
+  "total_days": 21,
+  "daily_analysis": [
+    {
+      "date": "2020-07-27",
+      "price": 12.63,
+      "daily_change_pct": 7.580919931856904,
+      "volume": 846100.0,
+      "rsi": 86.31578947368422,
+      "atr": 1.0078214285714289,
+      "z_score": 0.964590432369173,
+      "flag_breakout": false,
+      "range_breakout": false,
+      "breakout_details": {
+        "flag": {
+          "impulse_detected": true,
+          "impulse_pct": 213.0718954248366,
+          "impulse_window": "Days 0 to 40",
+          "higher_lows_count": 12,
+          "higher_lows_pct": 60.0,
+          "atr_contraction": 1.3117888965044553,
+          "atr_contraction_ok": "False",
+          "recent_high": 12.7796,
+          "current_price": 12.63,
+          "breakout_above_high": false,
+          "breakout_distance_pct": -1.170615668722022
+        },
+        "range": {
+          "range_high": 12.63,
+          "range_low": 8.62,
+          "range_size": 4.010000000000002,
+          "range_pct": 46.519721577726244,
+          "tight_base": false,
+          "atr14": 1.0078214285714289,
+          "atr50": 1.0078214285714289,
+          "atr_ratio": 1.0,
+          "contraction_ok": "False",
+          "volume_current": 846100.0,
+          "volume_avg50": 1261758.08,
+          "volume_multiple": 0.6705722859329737,
+          "vol_spike": "False",
+          "min_break_price": 12.81945,
+          "current_price": 12.63,
+          "price_break": "False",
+          "breakout_ok": "False"
+        }
+      }
+    },
+    {
+      "date": "2020-07-28",
+      "price": 12.99,
+      "daily_change_pct": 2.8503562945368124,
+      "volume": 1321519.0,
+      "rsi": 86.31578947368422,
+      "atr": 1.0199642857142859,
+      "z_score": 0.12966640779059177,
+      "flag_breakout": false,
+      "range_breakout": false,
+      "breakout_details": {
+        "flag": {
+          "impulse_detected": true,
+          "impulse_pct": 213.0718954248366,
+          "impulse_window": "Days 0 to 40",
+          "higher_lows_count": 13,
+          "higher_lows_pct": 65.0,
+          "atr_contraction": 1.3136601307189542,
+          "atr_contraction_ok": "False",
+          "recent_high": 14.28,
+          "current_price": 12.99,
+          "breakout_above_high": false,
+          "breakout_distance_pct": -9.033613445378146
+        },
+        "range": {
+          "range_high": 12.99,
+          "range_low": 8.62,
+          "range_size": 4.370000000000001,
+          "range_pct": 50.69605568445478,
+          "tight_base": false,
+          "atr14": 1.0199642857142859,
+          "atr50": 1.0199642857142859,
+          "atr_ratio": 1.0,
+          "contraction_ok": "False",
+          "volume_current": 1321519.0,
+          "volume_avg50": 1258388.38,
+          "volume_multiple": 1.0501678345122674,
+          "vol_spike": "False",
+          "min_break_price": 13.184849999999999,
+          "current_price": 12.99,
+          "price_break": "False",
+          "breakout_ok": "False"
+        }
+      }
+    },
+    {
+      "date": "2020-07-29",
+      "price": 13.06,
+      "daily_change_pct": 0.5388760585065456,
+      "volume": 1417109.0,
+      "rsi": 86.31578947368422,
+      "atr": 0.9996357142857145,
+      "z_score": -0.298430585757116,
+      "flag_breakout": false,
+      "range_breakout": false,
+      "breakout_details": {
+        "flag": {
+          "impulse_detected": true,
+          "impulse_pct": 213.0718954248366,
+          "impulse_window": "Days 0 to 40",
+          "higher_lows_count": 12,
+          "higher_lows_pct": 60.0,
+          "atr_contraction": 1.257254174397031,
+          "atr_contraction_ok": "False",
+          "recent_high": 14.28,
+          "current_price": 13.06,
+          "breakout_above_high": false,
+          "breakout_distance_pct": -8.54341736694677
+        },
+        "range": {
+          "range_high": 13.06,
+          "range_low": 8.62,
+          "range_size": 4.440000000000001,
+          "range_pct": 51.50812064965199,
+          "tight_base": false,
+          "atr14": 0.9996357142857145,
+          "atr50": 0.9996357142857145,
+          "atr_ratio": 1.0,
+          "contraction_ok": "False",
+          "volume_current": 1417109.0,
+          "volume_avg50": 1270094.96,
+          "volume_multiple": 1.115750431762992,
+          "vol_spike": "False",
+          "min_break_price": 13.255899999999999,
+          "current_price": 13.06,
+          "price_break": "False",
+          "breakout_ok": "False"
+        }
+      }
+    },
+    {
+      "date": "2020-07-30",
+      "price": 14.42,
+      "daily_change_pct": 10.413476263399689,
+      "volume": 1255137.0,
+      "rsi": 86.31578947368422,
+      "atr": 1.088207142857143,
+      "z_score": 1.302845632251108,
+      "flag_breakout": false,
+      "range_breakout": false,
+      "breakout_details": {
+        "flag": {
+          "impulse_detected": true,
+          "impulse_pct": 213.0718954248366,
+          "impulse_window": "Days 0 to 40",
+          "higher_lows_count": 12,
+          "higher_lows_pct": 60.0,
+          "atr_contraction": 1.2073258731919563,
+          "atr_contraction_ok": "False",
+          "recent_high": 14.79,
+          "current_price": 14.42,
+          "breakout_above_high": false,
+          "breakout_distance_pct": -2.5016903313049306
+        },
+        "range": {
+          "range_high": 14.42,
+          "range_low": 8.62,
+          "range_size": 5.800000000000001,
+          "range_pct": 67.28538283062646,
+          "tight_base": false,
+          "atr14": 1.088207142857143,
+          "atr50": 1.088207142857143,
+          "atr_ratio": 1.0,
+          "contraction_ok": "False",
+          "volume_current": 1255137.0,
+          "volume_avg50": 1285314.68,
+          "volume_multiple": 0.976521173787574,
+          "vol_spike": "False",
+          "min_break_price": 14.636299999999999,
+          "current_price": 14.42,
+          "price_break": "False",
+          "breakout_ok": "False"
+        }
+      }
+    }
+  ]
+}

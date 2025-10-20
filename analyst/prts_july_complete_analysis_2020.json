@@ -1,0 +1,287 @@
+{
+  "symbol": "PRTS",
+  "month": "July 2020",
+  "total_days": 21,
+  "daily_analysis": [
+    {
+      "date": "2020-07-27",
+      "price": 12.63,
+      "daily_change_pct": 7.580919931856904,
+      "volume": 846100.0,
+      "rsi": 86.31578947368422,
+      "atr": 1.0078214285714289,
+      "z_score": 0.964590432369173,
+      "flag_breakout": {
+        "prior_impulse": {
+          "detected": true,
+          "best_impulse_pct": 213.0718954248366,
+          "required_impulse_pct": 30.0,
+          "passed": true
+        },
+        "higher_lows": {
+          "count": 12,
+          "total_days": 20,
+          "percentage": 60.0,
+          "passed": true
+        },
+        "atr_contraction": {
+          "recent_atr": 0.9569500000000003,
+          "baseline_atr": 0.7295000000000001,
+          "ratio": 1.3117888965044553,
+          "required": "< 1.0",
+          "passed": "False"
+        },
+        "breakout_above_high": {
+          "recent_high": 12.7796,
+          "current_price": 12.63,
+          "required_price": 12.971293999999999,
+          "distance_pct": -1.170615668722022,
+          "required_distance_pct": 1.5,
+          "passed": "False"
+        },
+        "overall_passed": "False"
+      },
+      "range_breakout": {
+        "tight_base": {
+          "range_high": 12.63,
+          "range_low": 8.62,
+          "range_size": 4.010000000000002,
+          "range_pct": 46.519721577726244,
+          "required_pct": 15.0,
+          "passed": false
+        },
+        "atr_contraction": {
+          "atr14": 1.0078214285714289,
+          "atr50": 1.0078214285714289,
+          "ratio": 1.0,
+          "required": "\u2264 0.8",
+          "passed": "False"
+        },
+        "volume_expansion": {
+          "current_volume": 846100.0,
+          "avg_volume_50": 1261758.08,
+          "multiple": 0.6705722859329737,
+          "required": "\u2265 1.5x",
+          "passed": "False"
+        },
+        "price_breakout": {
+          "min_break_price": 12.81945,
+          "current_price": 12.63,
+          "required_distance_pct": 1.5,
+          "passed": false
+        },
+        "overall_passed": false
+      }
+    },
+    {
+      "date": "2020-07-28",
+      "price": 12.99,
+      "daily_change_pct": 2.8503562945368124,
+      "volume": 1321519.0,
+      "rsi": 86.31578947368422,
+      "atr": 1.0199642857142859,
+      "z_score": 0.12966640779059177,
+      "flag_breakout": {
+        "prior_impulse": {
+          "detected": true,
+          "best_impulse_pct": 213.0718954248366,
+          "required_impulse_pct": 30.0,
+          "passed": true
+        },
+        "higher_lows": {
+          "count": 13,
+          "total_days": 20,
+          "percentage": 65.0,
+          "passed": true
+        },
+        "atr_contraction": {
+          "recent_atr": 1.0049500000000002,
+          "baseline_atr": 0.7650000000000002,
+          "ratio": 1.3136601307189542,
+          "required": "< 1.0",
+          "passed": "False"
+        },
+        "breakout_above_high": {
+          "recent_high": 14.28,
+          "current_price": 12.99,
+          "required_price": 14.494199999999998,
+          "distance_pct": -9.033613445378146,
+          "required_distance_pct": 1.5,
+          "passed": "False"
+        },
+        "overall_passed": "False"
+      },
+      "range_breakout": {
+        "tight_base": {
+          "range_high": 12.99,
+          "range_low": 8.62,
+          "range_size": 4.370000000000001,
+          "range_pct": 50.69605568445478,
+          "required_pct": 15.0,
+          "passed": false
+        },
+        "atr_contraction": {
+          "atr14": 1.0199642857142859,
+          "atr50": 1.0199642857142859,
+          "ratio": 1.0,
+          "required": "\u2264 0.8",
+          "passed": "False"
+        },
+        "volume_expansion": {
+          "current_volume": 1321519.0,
+          "avg_volume_50": 1258388.38,
+          "multiple": 1.0501678345122674,
+          "required": "\u2265 1.5x",
+          "passed": "False"
+        },
+        "price_breakout": {
+          "min_break_price": 13.184849999999999,
+          "current_price": 12.99,
+          "required_distance_pct": 1.5,
+          "passed": false
+        },
+        "overall_passed": false
+      }
+    },
+    {
+      "date": "2020-07-29",
+      "price": 13.06,
+      "daily_change_pct": 0.5388760585065456,
+      "volume": 1417109.0,
+      "rsi": 86.31578947368422,
+      "atr": 0.9996357142857145,
+      "z_score": -0.298430585757116,
+      "flag_breakout": {
+        "prior_impulse": {
+          "detected": true,
+          "best_impulse_pct": 213.0718954248366,
+          "required_impulse_pct": 30.0,
+          "passed": true
+        },
+        "higher_lows": {
+          "count": 12,
+          "total_days": 20,
+          "percentage": 60.0,
+          "passed": true
+        },
+        "atr_contraction": {
+          "recent_atr": 1.0164900000000001,
+          "baseline_atr": 0.8085000000000004,
+          "ratio": 1.257254174397031,
+          "required": "< 1.0",
+          "passed": "False"
+        },
+        "breakout_above_high": {
+          "recent_high": 14.28,
+          "current_price": 13.06,
+          "required_price": 14.494199999999998,
+          "distance_pct": -8.54341736694677,
+          "required_distance_pct": 1.5,
+          "passed": "False"
+        },
+        "overall_passed": "False"
+      },
+      "range_breakout": {
+        "tight_base": {
+          "range_high": 13.06,
+          "range_low": 8.62,
+          "range_size": 4.440000000000001,
+          "range_pct": 51.50812064965199,
+          "required_pct": 15.0,
+          "passed": false
+        },
+        "atr_contraction": {
+          "atr14": 0.9996357142857145,
+          "atr50": 0.9996357142857145,
+          "ratio": 1.0,
+          "required": "\u2264 0.8",
+          "passed": "False"
+        },
+        "volume_expansion": {
+          "current_volume": 1417109.0,
+          "avg_volume_50": 1270094.96,
+          "multiple": 1.115750431762992,
+          "required": "\u2265 1.5x",
+          "passed": "False"
+        },
+        "price_breakout": {
+          "min_break_price": 13.255899999999999,
+          "current_price": 13.06,
+          "required_distance_pct": 1.5,
+          "passed": false
+        },
+        "overall_passed": false
+      }
+    },
+    {
+      "date": "2020-07-30",
+      "price": 14.42,
+      "daily_change_pct": 10.413476263399689,
+      "volume": 1255137.0,
+      "rsi": 86.31578947368422,
+      "atr": 1.088207142857143,
+      "z_score": 1.302845632251108,
+      "flag_breakout": {
+        "prior_impulse": {
+          "detected": true,
+          "best_impulse_pct": 213.0718954248366,
+          "required_impulse_pct": 30.0,
+          "passed": true
+        },
+        "higher_lows": {
+          "count": 12,
+          "total_days": 20,
+          "percentage": 60.0,
+          "passed": true
+        },
+        "atr_contraction": {
+          "recent_atr": 1.12099,
+          "baseline_atr": 0.9284900000000004,
+          "ratio": 1.2073258731919563,
+          "required": "< 1.0",
+          "passed": "False"
+        },
+        "breakout_above_high": {
+          "recent_high": 14.79,
+          "current_price": 14.42,
+          "required_price": 15.011849999999997,
+          "distance_pct": -2.5016903313049306,
+          "required_distance_pct": 1.5,
+          "passed": "False"
+        },
+        "overall_passed": "False"
+      },
+      "range_breakout": {
+        "tight_base": {
+          "range_high": 14.42,
+          "range_low": 8.62,
+          "range_size": 5.800000000000001,
+          "range_pct": 67.28538283062646,
+          "required_pct": 15.0,
+          "passed": false
+        },
+        "atr_contraction": {
+          "atr14": 1.088207142857143,
+          "atr50": 1.088207142857143,
+          "ratio": 1.0,
+          "required": "\u2264 0.8",
+          "passed": "False"
+        },
+        "volume_expansion": {
+          "current_volume": 1255137.0,
+          "avg_volume_50": 1285314.68,
+          "multiple": 0.976521173787574,
+          "required": "\u2265 1.5x",
+          "passed": "False"
+        },
+        "price_breakout": {
+          "min_break_price": 14.636299999999999,
+          "current_price": 14.42,
+          "required_distance_pct": 1.5,
+          "passed": false
+        },
+        "overall_passed": false
+      }
+    }
+  ]
+}

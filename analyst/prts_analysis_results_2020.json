@@ -1,0 +1,36 @@
+{
+  "symbol": "PRTS",
+  "total_days": 63,
+  "date_range": "2020-05-01 to 2020-07-30",
+  "flag_breakouts": [],
+  "range_breakouts": [],
+  "daily_analysis": [
+    {
+      "date": "2020-07-28",
+      "price": 12.99,
+      "rsi": 86.31578947368422,
+      "atr": 1.0199642857142859,
+      "z_score": 0.12966640779059177,
+      "flag_breakout": false,
+      "range_breakout": false
+    },
+    {
+      "date": "2020-07-29",
+      "price": 13.06,
+      "rsi": 86.31578947368422,
+      "atr": 0.9996357142857145,
+      "z_score": -0.298430585757116,
+      "flag_breakout": false,
+      "range_breakout": false
+    },
+    {
+      "date": "2020-07-30",
+      "price": 14.42,
+      "rsi": 86.31578947368422,
+      "atr": 1.088207142857143,
+      "z_score": 1.302845632251108,
+      "flag_breakout": false,
+      "range_breakout": false
+    }
+  ]
+}
