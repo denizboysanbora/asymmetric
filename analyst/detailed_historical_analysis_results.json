@@ -1,0 +1,372 @@
+[
+  {
+    "price_analysis": {
+      "symbol": "APPS",
+      "period": "2020-07-01 to 2020-07-31",
+      "days_analyzed": 21,
+      "start_price": 12.675,
+      "end_price": 13.36,
+      "total_return_pct": 5.404339250493086,
+      "high_price": 13.96,
+      "low_price": 11.76,
+      "range_pct": 18.70748299319729,
+      "avg_volume": 1892796.761904762,
+      "max_volume": 3212697,
+      "volume_spike": 1.6973280304891236,
+      "daily_data": [
+        {
+          "date": "2020-07-01",
+          "open": 12.82,
+          "high": 12.92,
+          "low": 12.415,
+          "close": 12.675,
+          "volume": 2755693
+        },
+        {
+          "date": "2020-07-02",
+          "open": 12.85,
+          "high": 13.31,
+          "low": 12.66,
+          "close": 12.91,
+          "volume": 2097939
+        },
+        {
+          "date": "2020-07-06",
+          "open": 13.4065,
+          "high": 13.96,
+          "low": 13.12,
+          "close": 13.43,
+          "volume": 3212697
+        },
+        {
+          "date": "2020-07-07",
+          "open": 13.01,
+          "high": 13.09,
+          "low": 12.16,
+          "close": 12.74,
+          "volume": 2764816
+        },
+        {
+          "date": "2020-07-08",
+          "open": 12.78,
+          "high": 13.0,
+          "low": 12.185,
+          "close": 12.8,
+          "volume": 2625631
+        },
+        {
+          "date": "2020-07-09",
+          "open": 12.85,
+          "high": 13.2177,
+          "low": 12.69,
+          "close": 12.86,
+          "volume": 1568299
+        },
+        {
+          "date": "2020-07-10",
+          "open": 12.79,
+          "high": 13.235,
+          "low": 12.7,
+          "close": 13.22,
+          "volume": 1383483
+        },
+        {
+          "date": "2020-07-13",
+          "open": 13.68,
+          "high": 13.68,
+          "low": 12.215,
+          "close": 12.24,
+          "volume": 2951150
+        },
+        {
+          "date": "2020-07-14",
+          "open": 12.27,
+          "high": 12.67,
+          "low": 11.76,
+          "close": 12.66,
+          "volume": 2349666
+        },
+        {
+          "date": "2020-07-15",
+          "open": 13.09,
+          "high": 13.1,
+          "low": 12.5,
+          "close": 12.93,
+          "volume": 1371603
+        },
+        {
+          "date": "2020-07-16",
+          "open": 12.74,
+          "high": 12.87,
+          "low": 12.55,
+          "close": 12.72,
+          "volume": 1174955
+        },
+        {
+          "date": "2020-07-17",
+          "open": 12.78,
+          "high": 12.86,
+          "low": 12.48,
+          "close": 12.775,
+          "volume": 1377634
+        },
+        {
+          "date": "2020-07-20",
+          "open": 12.78,
+          "high": 13.43,
+          "low": 12.78,
+          "close": 13.28,
+          "volume": 1690197
+        },
+        {
+          "date": "2020-07-21",
+          "open": 13.47,
+          "high": 13.49,
+          "low": 12.73,
+          "close": 12.84,
+          "volume": 1595319
+        },
+        {
+          "date": "2020-07-22",
+          "open": 12.85,
+          "high": 12.98,
+          "low": 12.2866,
+          "close": 12.57,
+          "volume": 1554752
+        },
+        {
+          "date": "2020-07-23",
+          "open": 12.55,
+          "high": 12.94,
+          "low": 12.17,
+          "close": 12.36,
+          "volume": 1502667
+        },
+        {
+          "date": "2020-07-24",
+          "open": 12.21,
+          "high": 12.3883,
+          "low": 11.79,
+          "close": 12.19,
+          "volume": 1254723
+        },
+        {
+          "date": "2020-07-27",
+          "open": 12.32,
+          "high": 12.58,
+          "low": 12.155,
+          "close": 12.56,
+          "volume": 1356954
+        },
+        {
+          "date": "2020-07-28",
+          "open": 12.5,
+          "high": 12.5889,
+          "low": 12.095,
+          "close": 12.11,
+          "volume": 1033782
+        },
+        {
+          "date": "2020-07-29",
+          "open": 12.28,
+          "high": 12.575,
+          "low": 12.151,
+          "close": 12.52,
+          "volume": 1160641
+        },
+        {
+          "date": "2020-07-30",
+          "open": 12.36,
+          "high": 13.42,
+          "low": 12.26,
+          "close": 13.36,
+          "volume": 2966131
+        }
+      ]
+    },
+    "breakout_analysis": {
+      "symbol": "APPS",
+      "total_bars": 105,
+      "flag_breakout": null,
+      "range_breakout": null,
+      "criteria_details": {}
+    }
+  },
+  {
+    "price_analysis": {
+      "symbol": "CODX",
+      "period": "2020-02-01 to 2020-02-29",
+      "days_analyzed": 19,
+      "start_price": 3.0,
+      "end_price": 13.23,
+      "total_return_pct": 341.0,
+      "high_price": 21.75,
+      "low_price": 2.44,
+      "range_pct": 791.3934426229508,
+      "avg_volume": 16734197.52631579,
+      "max_volume": 83245896,
+      "volume_spike": 4.974597429550449,
+      "daily_data": [
+        {
+          "date": "2020-02-03",
+          "open": 3.1,
+          "high": 3.25,
+          "low": 2.9,
+          "close": 3.0,
+          "volume": 7910068
+        },
+        {
+          "date": "2020-02-04",
+          "open": 2.68,
+          "high": 2.89,
+          "low": 2.46,
+          "close": 2.73,
+          "volume": 6107396
+        },
+        {
+          "date": "2020-02-05",
+          "open": 2.86,
+          "high": 2.97,
+          "low": 2.52,
+          "close": 2.59,
+          "volume": 5370361
+        },
+        {
+          "date": "2020-02-06",
+          "open": 2.5,
+          "high": 3.2,
+          "low": 2.44,
+          "close": 3.08,
+          "volume": 10953825
+        },
+        {
+          "date": "2020-02-07",
+          "open": 3.25,
+          "high": 3.29,
+          "low": 2.9,
+          "close": 3.0,
+          "volume": 9714664
+        },
+        {
+          "date": "2020-02-10",
+          "open": 2.89,
+          "high": 4.24,
+          "low": 2.8,
+          "close": 3.96,
+          "volume": 28972112
+        },
+        {
+          "date": "2020-02-11",
+          "open": 3.16,
+          "high": 3.49,
+          "low": 3.15,
+          "close": 3.26,
+          "volume": 12859302
+        },
+        {
+          "date": "2020-02-12",
+          "open": 3.3,
+          "high": 3.3,
+          "low": 3.07,
+          "close": 3.13,
+          "volume": 4464727
+        },
+        {
+          "date": "2020-02-13",
+          "open": 3.45,
+          "high": 3.54,
+          "low": 3.28,
+          "close": 3.37,
+          "volume": 9788218
+        },
+        {
+          "date": "2020-02-14",
+          "open": 3.3,
+          "high": 3.38,
+          "low": 3.16,
+          "close": 3.32,
+          "volume": 3150885
+        },
+        {
+          "date": "2020-02-18",
+          "open": 3.22,
+          "high": 3.32,
+          "low": 2.83,
+          "close": 2.92,
+          "volume": 6480610
+        },
+        {
+          "date": "2020-02-19",
+          "open": 3.06,
+          "high": 3.07,
+          "low": 2.85,
+          "close": 3.01,
+          "volume": 2923778
+        },
+        {
+          "date": "2020-02-20",
+          "open": 2.92,
+          "high": 3.3,
+          "low": 2.7,
+          "close": 3.05,
+          "volume": 7741247
+        },
+        {
+          "date": "2020-02-21",
+          "open": 3.0,
+          "high": 3.16,
+          "low": 2.99,
+          "close": 3.05,
+          "volume": 2452170
+        },
+        {
+          "date": "2020-02-24",
+          "open": 3.36,
+          "high": 4.4,
+          "low": 3.16,
+          "close": 3.93,
+          "volume": 13670364
+        },
+        {
+          "date": "2020-02-25",
+          "open": 3.9,
+          "high": 4.6,
+          "low": 3.62,
+          "close": 4.315,
+          "volume": 14639655
+        },
+        {
+          "date": "2020-02-26",
+          "open": 4.42,
+          "high": 10.89,
+          "low": 4.37,
+          "close": 8.9,
+          "volume": 83245896
+        },
+        {
+          "date": "2020-02-27",
+          "open": 17.62,
+          "high": 19.67,
+          "low": 11.13,
+          "close": 15.96,
+          "volume": 59646682
+        },
+        {
+          "date": "2020-02-28",
+          "open": 21.67,
+          "high": 21.75,
+          "low": 11.0,
+          "close": 13.23,
+          "volume": 27857793
+        }
+      ]
+    },
+    "breakout_analysis": {
+      "symbol": "CODX",
+      "total_bars": 101,
+      "flag_breakout": null,
+      "range_breakout": null,
+      "criteria_details": {}
+    }
+  }
+]

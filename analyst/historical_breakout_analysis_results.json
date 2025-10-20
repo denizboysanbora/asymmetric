@@ -1,0 +1,10 @@
+[
+  {
+    "symbol": "APPS",
+    "analysis_period": "2020-07-01 to 2020-07-31",
+    "analysis_days": 21,
+    "total_data_days": 83,
+    "flag_breakouts": [],
+    "range_breakouts": []
+  }
+]

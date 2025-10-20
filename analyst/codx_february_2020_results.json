@@ -1,0 +1,141 @@
+{
+  "symbol": "CODX",
+  "start_date": "2020-02-01",
+  "end_date": "2020-02-29",
+  "total_days": 19,
+  "daily_results": [
+    {
+      "date": "2020-02-03",
+      "price": 3.0,
+      "volume": 7910068,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-04",
+      "price": 2.73,
+      "volume": 6107396,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-05",
+      "price": 2.59,
+      "volume": 5370361,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-06",
+      "price": 3.08,
+      "volume": 10953825,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-07",
+      "price": 3.0,
+      "volume": 9714664,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-10",
+      "price": 3.96,
+      "volume": 28972112,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-11",
+      "price": 3.26,
+      "volume": 12859302,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-12",
+      "price": 3.13,
+      "volume": 4464727,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-13",
+      "price": 3.37,
+      "volume": 9788218,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-14",
+      "price": 3.32,
+      "volume": 3150885,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-18",
+      "price": 2.92,
+      "volume": 6480610,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-19",
+      "price": 3.01,
+      "volume": 2923778,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-20",
+      "price": 3.05,
+      "volume": 7741247,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-21",
+      "price": 3.05,
+      "volume": 2452170,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-24",
+      "price": 3.93,
+      "volume": 13670364,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-25",
+      "price": 4.315,
+      "volume": 14639655,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-26",
+      "price": 8.9,
+      "volume": 83245896,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-27",
+      "price": 15.96,
+      "volume": 59646682,
+      "flag_breakout": null,
+      "range_breakout": null
+    },
+    {
+      "date": "2020-02-28",
+      "price": 13.23,
+      "volume": 27857793,
+      "flag_breakout": null,
+      "range_breakout": null
+    }
+  ]
+}

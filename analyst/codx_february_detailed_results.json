@@ -1,0 +1,76 @@
+{
+  "feb_bars": [
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 3, 5, 0, tzinfo=TzInfo(0)) open=3.1 high=3.25 low=2.9 close=3.0 volume=7910068.0 trade_count=19293.0 vwap=3.040914",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 4, 5, 0, tzinfo=TzInfo(0)) open=2.68 high=2.89 low=2.46 close=2.73 volume=6107396.0 trade_count=15500.0 vwap=2.624989",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 5, 5, 0, tzinfo=TzInfo(0)) open=2.86 high=2.97 low=2.52 close=2.59 volume=5370361.0 trade_count=13020.0 vwap=2.754408",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 6, 5, 0, tzinfo=TzInfo(0)) open=2.5 high=3.2 low=2.44 close=3.08 volume=10953825.0 trade_count=27761.0 vwap=2.847365",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 7, 5, 0, tzinfo=TzInfo(0)) open=3.25 high=3.29 low=2.9 close=3.0 volume=9714664.0 trade_count=26635.0 vwap=3.056388",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 10, 5, 0, tzinfo=TzInfo(0)) open=2.89 high=4.24 low=2.8 close=3.96 volume=28972112.0 trade_count=80171.0 vwap=3.703573",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 11, 5, 0, tzinfo=TzInfo(0)) open=3.16 high=3.49 low=3.15 close=3.26 volume=12859302.0 trade_count=40860.0 vwap=3.31528",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 12, 5, 0, tzinfo=TzInfo(0)) open=3.3 high=3.3 low=3.07 close=3.13 volume=4464727.0 trade_count=13263.0 vwap=3.154369",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 13, 5, 0, tzinfo=TzInfo(0)) open=3.45 high=3.54 low=3.28 close=3.37 volume=9788218.0 trade_count=26103.0 vwap=3.397234",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 14, 5, 0, tzinfo=TzInfo(0)) open=3.3 high=3.38 low=3.16 close=3.32 volume=3150885.0 trade_count=8726.0 vwap=3.270323",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 18, 5, 0, tzinfo=TzInfo(0)) open=3.22 high=3.32 low=2.83 close=2.92 volume=6480610.0 trade_count=19269.0 vwap=3.056736",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 19, 5, 0, tzinfo=TzInfo(0)) open=3.06 high=3.07 low=2.85 close=3.01 volume=2923778.0 trade_count=9319.0 vwap=2.969674",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 20, 5, 0, tzinfo=TzInfo(0)) open=2.92 high=3.3 low=2.7 close=3.05 volume=7741247.0 trade_count=18569.0 vwap=3.027744",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 21, 5, 0, tzinfo=TzInfo(0)) open=3.0 high=3.16 low=2.99 close=3.05 volume=2452170.0 trade_count=6551.0 vwap=3.05274",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 24, 5, 0, tzinfo=TzInfo(0)) open=3.36 high=4.4 low=3.16 close=3.93 volume=13670364.0 trade_count=33663.0 vwap=3.718952",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 25, 5, 0, tzinfo=TzInfo(0)) open=3.9 high=4.6 low=3.62 close=4.315 volume=14639655.0 trade_count=33826.0 vwap=4.102707",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 26, 5, 0, tzinfo=TzInfo(0)) open=4.42 high=10.89 low=4.37 close=8.9 volume=83245896.0 trade_count=256954.0 vwap=7.716904",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 27, 5, 0, tzinfo=TzInfo(0)) open=17.62 high=19.67 low=11.13 close=15.96 volume=59646682.0 trade_count=270369.0 vwap=15.901568",
+    "symbol='CODX' timestamp=datetime.datetime(2020, 2, 28, 5, 0, tzinfo=TzInfo(0)) open=21.67 high=21.75 low=11.0 close=13.23 volume=27857793.0 trade_count=138224.0 vwap=15.913854"
+  ],
+  "total_return": 341.0,
+  "range_pct": 791.3934426229508,
+  "volume_spike": 4.974597429550449,
+  "significant_moves": [
+    {
+      "date": "2020-02-06",
+      "change": 18.91891891891893,
+      "price": 3.08,
+      "volume": 10953825.0
+    },
+    {
+      "date": "2020-02-10",
+      "change": 32.0,
+      "price": 3.96,
+      "volume": 28972112.0
+    },
+    {
+      "date": "2020-02-11",
+      "change": -17.676767676767682,
+      "price": 3.26,
+      "volume": 12859302.0
+    },
+    {
+      "date": "2020-02-18",
+      "change": -12.048192771084336,
+      "price": 2.92,
+      "volume": 6480610.0
+    },
+    {
+      "date": "2020-02-24",
+      "change": 28.852459016393457,
+      "price": 3.93,
+      "volume": 13670364.0
+    },
+    {
+      "date": "2020-02-26",
+      "change": 106.25724217844727,
+      "price": 8.9,
+      "volume": 83245896.0
+    },
+    {
+      "date": "2020-02-27",
+      "change": 79.32584269662921,
+      "price": 15.96,
+      "volume": 59646682.0
+    },
+    {
+      "date": "2020-02-28",
+      "change": -17.105263157894736,
+      "price": 13.23,
+      "volume": 27857793.0
+    }
+  ]
+}

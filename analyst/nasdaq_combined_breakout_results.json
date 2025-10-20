@@ -1,0 +1,22 @@
+{
+  "analysis_date": "2025-10-19T20:51:02.961485",
+  "data_range": "2025-08-01 to 2025-10-17",
+  "parameters": {
+    "base_len": 20,
+    "max_range_width_pct": 25.0,
+    "flag_atr_thresh": 0.9,
+    "range_atr_thresh": 0.8,
+    "flag_price_thresh": 1.0,
+    "range_price_thresh": 1.5,
+    "volume_mult": 1.5,
+    "market_filter": true
+  },
+  "summary": {
+    "total_symbols": 100,
+    "flag_breakouts": 0,
+    "range_breakouts": 0,
+    "total_signals": 0
+  },
+  "flag_breakouts": [],
+  "range_breakouts": []
+}

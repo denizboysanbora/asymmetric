@@ -1,0 +1,27 @@
+{
+  "july_bars": [
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 1, 4, 0, tzinfo=TzInfo(0)) open=12.82 high=12.92 low=12.415 close=12.675 volume=2755693.0 trade_count=16895.0 vwap=12.648206",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 2, 4, 0, tzinfo=TzInfo(0)) open=12.85 high=13.31 low=12.66 close=12.91 volume=2097939.0 trade_count=16039.0 vwap=13.038416",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 6, 4, 0, tzinfo=TzInfo(0)) open=13.4065 high=13.96 low=13.12 close=13.43 volume=3212697.0 trade_count=23212.0 vwap=13.556011",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 7, 4, 0, tzinfo=TzInfo(0)) open=13.01 high=13.09 low=12.16 close=12.74 volume=2764816.0 trade_count=18267.0 vwap=12.80779",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 8, 4, 0, tzinfo=TzInfo(0)) open=12.78 high=13.0 low=12.185 close=12.8 volume=2625631.0 trade_count=20777.0 vwap=12.636716",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 9, 4, 0, tzinfo=TzInfo(0)) open=12.85 high=13.2177 low=12.69 close=12.86 volume=1568299.0 trade_count=11848.0 vwap=12.907776",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 10, 4, 0, tzinfo=TzInfo(0)) open=12.79 high=13.235 low=12.7 close=13.22 volume=1383483.0 trade_count=10798.0 vwap=13.047046",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 13, 4, 0, tzinfo=TzInfo(0)) open=13.68 high=13.68 low=12.215 close=12.24 volume=2951150.0 trade_count=18576.0 vwap=12.870486",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 14, 4, 0, tzinfo=TzInfo(0)) open=12.27 high=12.67 low=11.76 close=12.66 volume=2349666.0 trade_count=16256.0 vwap=12.318543",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 15, 4, 0, tzinfo=TzInfo(0)) open=13.09 high=13.1 low=12.5 close=12.93 volume=1371603.0 trade_count=10896.0 vwap=12.789108",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 16, 4, 0, tzinfo=TzInfo(0)) open=12.74 high=12.87 low=12.55 close=12.72 volume=1174955.0 trade_count=9893.0 vwap=12.671035",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 17, 4, 0, tzinfo=TzInfo(0)) open=12.78 high=12.86 low=12.48 close=12.775 volume=1377634.0 trade_count=10987.0 vwap=12.669756",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 20, 4, 0, tzinfo=TzInfo(0)) open=12.78 high=13.43 low=12.78 close=13.28 volume=1690197.0 trade_count=10825.0 vwap=13.210406",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 21, 4, 0, tzinfo=TzInfo(0)) open=13.47 high=13.49 low=12.73 close=12.84 volume=1595319.0 trade_count=10826.0 vwap=12.961452",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 22, 4, 0, tzinfo=TzInfo(0)) open=12.85 high=12.98 low=12.2866 close=12.57 volume=1554752.0 trade_count=11363.0 vwap=12.593677",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 23, 4, 0, tzinfo=TzInfo(0)) open=12.55 high=12.94 low=12.17 close=12.36 volume=1502667.0 trade_count=10669.0 vwap=12.513159",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 24, 4, 0, tzinfo=TzInfo(0)) open=12.21 high=12.3883 low=11.79 close=12.19 volume=1254723.0 trade_count=9288.0 vwap=12.160677",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 27, 4, 0, tzinfo=TzInfo(0)) open=12.32 high=12.58 low=12.155 close=12.56 volume=1356954.0 trade_count=11012.0 vwap=12.407676",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 28, 4, 0, tzinfo=TzInfo(0)) open=12.5 high=12.5889 low=12.095 close=12.11 volume=1033782.0 trade_count=9328.0 vwap=12.327744",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 29, 4, 0, tzinfo=TzInfo(0)) open=12.28 high=12.575 low=12.151 close=12.52 volume=1160641.0 trade_count=9510.0 vwap=12.363317",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 30, 4, 0, tzinfo=TzInfo(0)) open=12.36 high=13.42 low=12.26 close=13.36 volume=2966131.0 trade_count=19330.0 vwap=13.052531",
+    "symbol='APPS' timestamp=datetime.datetime(2020, 7, 31, 4, 0, tzinfo=TzInfo(0)) open=13.75 high=14.27 low=13.22 close=13.88 volume=4234342.0 trade_count=24396.0 vwap=13.837742"
+  ],
+  "july_31_bar": "symbol='APPS' timestamp=datetime.datetime(2020, 7, 31, 4, 0, tzinfo=TzInfo(0)) open=13.75 high=14.27 low=13.22 close=13.88 volume=4234342.0 trade_count=24396.0 vwap=13.837742"
+}

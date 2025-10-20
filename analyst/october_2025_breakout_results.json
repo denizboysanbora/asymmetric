@@ -1,0 +1,16 @@
+{
+  "analysis_date": "2025-10-19T21:13:32.244987",
+  "total_symbols_analyzed": 332,
+  "flag_breakouts": [],
+  "range_breakouts": [],
+  "parameters": {
+    "base_len": 20,
+    "max_range_width_pct": 25.0,
+    "atr_ratio_thresh": 0.8,
+    "min_break_above_pct": {
+      "flag": 1.0,
+      "range": 1.5
+    },
+    "use_market_filter": true
+  }
+}
