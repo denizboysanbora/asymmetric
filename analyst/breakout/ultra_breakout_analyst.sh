@@ -34,7 +34,7 @@ ALPACA_DIR="$ASYMMETRIC_DIR/analyst/input/alpaca"
 GMAIL_DIR="$OUTPUT_DIR/gmail"
 
 # Python executables
-PYTHON_CMD="python3"  # Use system Python for Ultra MCP Analyst
+PYTHON_CMD="$ALPACA_DIR/venv/bin/python3"  # Use venv Python for Ultra MCP Analyst
 GMAIL_PY="$ALPACA_DIR/venv/bin/python3"  # Use venv Python for Gmail
 
 # Scripts
@@ -90,14 +90,8 @@ if [ -n "$BREAKOUT_SIGNALS" ]; then
     if [ -n "$TOP_BREAKOUT" ]; then
         echo "[$TIMESTAMP] Selected breakout: $TOP_BREAKOUT" | tee -a "$LOG_FILE"
         
-        # Determine signal type for email subject
-        if echo "$TOP_BREAKOUT" | grep -q "Flag Breakout"; then
-            EMAIL_SUBJECT="🚀 Ultra MCP Flag Breakout Signal"
-        elif echo "$TOP_BREAKOUT" | grep -q "Range Breakout"; then
-            EMAIL_SUBJECT="🚀 Ultra MCP Range Breakout Signal"
-        else
-            EMAIL_SUBJECT="🚀 Ultra MCP Breakout Signal"
-        fi
+        # Use simple subject
+        EMAIL_SUBJECT="Signal"
         
         # Create email body with all signals
         EMAIL_BODY="Ultra MCP Breakout Analysis Results:

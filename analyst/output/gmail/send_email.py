@@ -17,11 +17,11 @@ TOKEN_PATH = BASE_DIR / 'token.json'
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-def _extract_signal_line(text: str) -> str | None:
+def _extract_signal_line(text: str) -> Optional[str]:
     """Return the first line that matches the signal format."""
-    # Pattern for breakout: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Z X.XX | Breakout
+    # Pattern for breakout: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Breakout
     breakout_pattern = re.compile(
-        r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%\s+\|\s+[0-9]+\s+RSI\s+\|\s+[0-9]+\.[0-9]{2}x\s+ATR\s+\|\s+Z\s+[+\-]?[0-9]+\.[0-9]{2}\s+\|\s+Breakout$"
+        r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%\s+\|\s+[0-9]+\s+RSI\s+\|\s+[0-9]+\.[0-9]{2}x\s+ATR\s+\|\s+Breakout$"
     )
 
     for raw_line in text.splitlines():
