@@ -20,8 +20,8 @@ echo $$ > "$LOCK_FILE"
 trap 'rm -f "$LOCK_FILE"' EXIT
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
-# Repo root (three levels up from analyst/breakout/): .../asymmetric
-ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/../../.." && pwd)"
+# Repo root (two levels up from analyst/breakout/): .../asymmetric
+ASYMMETRIC_DIR="$(cd "$SCRIPT_DIR/../.." && pwd)"
 
 # Load environment variables
 if [ -f "$ASYMMETRIC_DIR/analyst/config/api_keys.env" ]; then

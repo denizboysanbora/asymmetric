@@ -24,8 +24,8 @@ fi
 
 mkdir -p "$LOG_DIR_BREAKOUT" "$LOG_DIR_INVESTOR"
 
-BREAKOUT_ENTRY="0,30 10-15 * * 1-5 cd $ROOT_DIR && ./breakout/breakout_analyst.sh >> $LOG_DIR_BREAKOUT/cron.log 2>&1"
-INVESTOR_ENTRY="*/5 10-15 * * 1-5 cd $ROOT_DIR/../investor && ./investor.sh >> $LOG_DIR_INVESTOR/cron.log 2>&1"
+BREAKOUT_ENTRY="0,30 9-16 * * 1-5 cd $ROOT_DIR && ./breakout/ultra_breakout_analyst.sh >> $LOG_DIR_BREAKOUT/cron.log 2>&1"
+INVESTOR_ENTRY="*/5 9-16 * * 1-5 cd $ROOT_DIR/../investor && ./investor.sh >> $LOG_DIR_INVESTOR/cron.log 2>&1"
 
 print_entries() {
     cat <<EOF
