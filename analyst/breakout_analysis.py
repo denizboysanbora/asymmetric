@@ -888,11 +888,11 @@ def kristjan_checklist(symbol: str, bars: list, benchmark_bars: list) -> str:
 
     return checklist
 
-def format_breakout_signal(symbol, price, change_pct, rs_score, adr_pct, setup_type, rsi=50, tr_atr=1.0, z_score=0.0):
-    """Format breakout signal: $SYMBOL $PRICE +X.X% | ## RSI | X.XXx ATR | Z X.X | Flag/Range Breakout"""
+def format_breakout_signal(symbol, price, change_pct, rsi=50, tr_atr=1.0, setup_type="Breakout"):
+    """Format breakout signal: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Breakout"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
-    return f"${symbol} {price_str} {change_pct:+.1f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | Z {z_score:.1f} | {setup_type}"
+    return f"${symbol} {price_str} {change_pct:+.2f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | {setup_type}"
 
 def main():
     """Main unified breakout scanner with Kristjan checklist format"""

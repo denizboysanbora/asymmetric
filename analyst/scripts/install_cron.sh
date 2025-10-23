@@ -24,8 +24,8 @@ fi
 
 mkdir -p "$LOG_DIR_BREAKOUT" "$LOG_DIR_INVESTOR"
 
-BREAKOUT_ENTRY="0,30 9-16 * * 1-5 cd $ROOT_DIR && ./breakout/ultra_breakout_analyst.sh >> $LOG_DIR_BREAKOUT/cron.log 2>&1"
-INVESTOR_ENTRY="*/5 9-16 * * 1-5 cd $ROOT_DIR/../investor && ./investor.sh >> $LOG_DIR_INVESTOR/cron.log 2>&1"
+BREAKOUT_ENTRY="0,30 9-16 * * 1-5 cd $ROOT_DIR && $ROOT_DIR/input/alpaca/venv/bin/python3 enhanced_contraction_analysis.py >> $LOG_DIR_BREAKOUT/cron.log 2>&1"
+INVESTOR_ENTRY="*/5 9-16 * * 1-5 $ROOT_DIR/../investor/cron_wrapper.sh >> $LOG_DIR_INVESTOR/cron.log 2>&1"
 
 print_entries() {
     cat <<EOF
@@ -33,11 +33,14 @@ print_entries() {
 SHELL=/bin/bash
 PATH=/usr/local/bin:/usr/bin:/bin
 
-# Breakout analyst: every 30 minutes between 10:00-15:59 ET (Mon-Fri)
+# Enhanced analyst: every 30 minutes between 9:00-16:59 ET (Mon-Fri) - 3 signal types
 $BREAKOUT_ENTRY
 
 # Investor paper trader: every 5 minutes between 10:00-15:59 ET (Mon-Fri)
 $INVESTOR_ENTRY
+
+# Daily database update: 6:00 PM ET weekdays
+0 18 * * 1-5 cd $ROOT_DIR && $ROOT_DIR/input/alpaca/venv/bin/python3 final_database_update.py >> $ROOT_DIR/logs/daily_maintenance.log 2>&1
 EOF
 }
 

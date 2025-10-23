@@ -226,14 +226,7 @@ class UltraMCPAnalyst:
             batch_setups = await self.analyze_stocks_batch(batch)
             all_setups.extend(batch_setups)
         
-        # Sort by setup score
-        def sort_key(x):
-            base_score = x['setup'].score
-            if x['setup'].setup == "Flag Breakout":
-                return base_score + 0.1
-            return base_score
-        
-        all_setups.sort(key=sort_key, reverse=True)
+        # No sorting - all signals treated equally
         
         print(f"🎯 Found {len(all_setups)} breakout signals", file=sys.stderr)
         
@@ -334,7 +327,7 @@ async def main():
             z_score = signal['z_score']
             
             signal_str = format_breakout_signal(
-                symbol, price, change_pct, 0.5, 0.0, setup.setup, rsi, tr_atr, z_score
+                symbol, price, change_pct, rsi, tr_atr, setup.setup
             )
             print(signal_str)
         

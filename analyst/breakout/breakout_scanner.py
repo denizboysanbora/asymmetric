@@ -195,12 +195,11 @@ def detect_flag_breakout_setup(bars: List[Bar], symbol: str) -> Optional[SetupTa
     baseline_atr = np.mean(atr_values[:10])
     atr_contraction = recent_atr / baseline_atr if baseline_atr > 0 else 1.0
     
-    # Calculate setup score
+    # No scoring - all signals treated equally
     flag_days = len(recent_closes)
-    score = min(impulse_pct / 100, 1.0) * 0.4 + (1 - atr_contraction) * 0.3 + (higher_lows / flag_days) * 0.3
     
-    # Strict criteria: Must have strong impulse, good contraction, and higher lows
-    if score < 0.5:  # Higher threshold for quality
+    # Basic criteria: Must have strong impulse, good contraction, and higher lows
+    if impulse_pct < 30 or atr_contraction > 0.8 or higher_lows < 2:
         return None
     
     # Additional check: Must have actual breakout above recent high
@@ -214,7 +213,7 @@ def detect_flag_breakout_setup(bars: List[Bar], symbol: str) -> Optional[SetupTa
     return SetupTag(
         setup="Flag Breakout",
         triggered=True,  # Only triggered if actual breakout
-        score=score,
+        score=0.0,
         meta={
             "impulse_pct": impulse_pct,
             "flag_days": flag_days,
@@ -266,10 +265,10 @@ def detect_range_breakout_setup(
     benchmark_closes: Optional[List[float]] = None,
     base_len: int = 30,
     max_range_width_pct: float = 15.0,
-    atr_len: int = 14,
-    atr_ma: int = 50,
+    atr_len: int = 5,
+    atr_ma: int = 20,
     atr_ratio_thresh: float = 0.80,
-    require_higher_lows: bool = True,
+    require_higher_lows: bool = False,
     min_break_above_pct: float = 1.5,
     vol_ma: int = 50,
     vol_mult: float = 1.5,
@@ -360,22 +359,7 @@ def detect_range_breakout_setup(
     if not all_ok:
         return None
 
-    # --- Scoring (0..1) to rank setups ---
-    # components: (tighter base better), (how far above break), (volume multiple), (ATR contraction depth), (RS & market bonus)
-    breakout_strength = (closes[-1] - range_high) / range_size  # how far into space
-    volume_mult_eff = vols[-1] / max(vol_ma_series[-1], 1e-9) if not np.isnan(vol_ma_series[-1]) else 1.0
-    volume_score = min(volume_mult_eff / (vol_mult * 2.0), 1.0)  # cap at 2x required multiple
-    range_quality = max(0.0, 1.0 - (range_pct / (max_range_width_pct / 100.0)))  # 1 when very tight
-    atr_score = min(atr_ratio_thresh / max(atr_ratio, 1e-9), 1.0) if not np.isnan(atr_ratio) else 0.0
-    rs_mkt_bonus = 1.0 if (rs_ok and market_ok) else 0.0
-
-    score = (
-        0.30 * max(0.0, min(breakout_strength, 1.0)) +
-        0.25 * volume_score +
-        0.25 * range_quality +
-        0.15 * atr_score +
-        0.05 * rs_mkt_bonus
-    )
+    # --- No scoring - all signals treated equally ---
 
     # --- Return tag (compatible with your existing shape) ---
     entry = float(closes[-1])
@@ -384,7 +368,7 @@ def detect_range_breakout_setup(
     return SetupTag(
         setup="Range Breakout",
         triggered=True,
-        score=float(max(0.0, min(score, 1.0))),
+        score=0.0,
         meta={
             "symbol": symbol,
             "entry": entry,
@@ -406,6 +390,124 @@ def detect_range_breakout_setup(
             "higher_lows": bool(structure_ok),
             "rs_ok": bool(rs_ok),
             "market_ok": bool(market_ok),
+            **bench_info
+        }
+    )
+
+def detect_contraction_setup(
+    bars: List[Bar], 
+    symbol: str,
+    benchmark_closes: Optional[List[float]] = None,
+    base_len: int = 20,
+    max_range_width_pct: float = 25.0,
+    atr_len: int = 5,
+    atr_ma: int = 20,
+    atr_ratio_thresh: float = 0.80,
+    require_higher_lows: bool = False,
+    vol_ma: int = 50,
+    vol_mult: float = 1.5,
+    use_market_filter: bool = True
+) -> Optional[SetupTag]:
+    """
+    Contraction detector - based on Range Breakout but without breakout requirement.
+    Detects tight range + ATR contraction + volume + higher lows structure.
+    Returns a SetupTag or None.
+    """
+    min_needed = max(base_len + 1, atr_ma + atr_len + 1, vol_ma + 1, 60)
+    if len(bars) < min_needed:
+        return None
+
+    closes = np.array([float(b.close) for b in bars], dtype=float)
+    highs  = np.array([float(b.high)  for b in bars], dtype=float)
+    lows   = np.array([float(b.low)   for b in bars], dtype=float)
+    vols   = np.array([float(b.volume) for b in bars], dtype=float)
+
+    # --- Base (range) using last base_len bars (close-based) ---
+    base_slice = slice(-base_len, None)
+    base_closes = closes[base_slice]
+    range_high = float(np.max(base_closes))
+    range_low  = float(np.min(base_closes))
+    range_size = range_high - range_low
+    if range_low <= 0 or range_size <= 0:
+        return None
+    range_pct = range_size / range_low
+    tight_base = range_pct <= (max_range_width_pct / 100.0)
+
+    # --- ATR contraction (full series; evaluate last bar) ---
+    atr_series = _atr(highs, lows, closes, atr_len)
+    atr_ma_series = _sma(atr_series, atr_ma)
+    atr_ratio = float(atr_series[-1] / atr_ma_series[-1]) if (not np.isnan(atr_series[-1]) and not np.isnan(atr_ma_series[-1]) and atr_ma_series[-1] != 0) else np.nan
+    contraction_ok = (not np.isnan(atr_ratio)) and (atr_ratio <= atr_ratio_thresh)
+
+    # --- Higher lows structure (inside base window) ---
+    structure_ok = True
+    if require_higher_lows:
+        structure_ok = _higher_lows_pivots(lows[-base_len:])
+
+    # --- Volume drying up (no breakout price requirement) ---
+    vol_ma_series = _sma(vols, vol_ma)
+    vol_drying = (not np.isnan(vol_ma_series[-1])) and (vol_ma_series[-1] > 0) and (vols[-1] <= vol_ma_series[-1] * 0.5)  # Volume ≤50% of average
+
+    # --- Relative strength & market filter (optional if benchmark provided) ---
+    rs_ok = True
+    market_ok = True
+    bench_info: Dict[str, Any] = {}
+
+    if benchmark_closes is not None and len(benchmark_closes) == len(closes):
+        bench = np.array(benchmark_closes, dtype=float)
+        # RS: price / benchmark > SMA50(RS)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            rs = closes / bench
+        rs_ma50 = _sma(rs, 50)
+        rs_ok = (not np.isnan(rs[-1])) and (not np.isnan(rs_ma50[-1])) and (rs[-1] > rs_ma50[-1])
+
+        # Market filter: 10DMA > 20DMA and 10DMA rising
+        sma10 = _sma(bench, 10)
+        sma20 = _sma(bench, 20)
+        sma10_up = (not np.isnan(sma10[-1])) and (not np.isnan(sma10[-2])) and (sma10[-1] > sma10[-2])
+        market_ok = (sma10[-1] > sma20[-1]) and sma10_up if use_market_filter else True
+
+        bench_info = {
+            "benchmark_10dma": float(sma10[-1]) if not np.isnan(sma10[-1]) else None,
+            "benchmark_20dma": float(sma20[-1]) if not np.isnan(sma20[-1]) else None,
+            "benchmark_10dma_up": bool(sma10_up) if not np.isnan(sma10[-1]) and not np.isnan(sma10[-2]) else None,
+            "rs": float(rs[-1]) if not np.isnan(rs[-1]) else None,
+            "rs_sma50": float(rs_ma50[-1]) if not np.isnan(rs_ma50[-1]) else None
+        }
+
+    # --- Final decision (no breakout requirement) ---
+    range_detected = tight_base
+    all_ok = range_detected and contraction_ok and structure_ok and vol_drying and rs_ok and market_ok
+
+    # Only return if ALL criteria are met (no breakout needed)
+    if not all_ok:
+        return None
+
+    # --- Return tag (no scoring) ---
+    entry = float(closes[-1])
+    stop = float(range_low)
+
+    return SetupTag(
+        setup="Contraction",
+        triggered=True,
+        score=0.0,
+        meta={
+            "symbol": symbol,
+            "entry": entry,
+            "stop": stop,
+            "base_len": base_len,
+            "range_high": range_high,
+            "range_low": range_low,
+            "range_pct": float(range_pct),
+            "tight_base": bool(tight_base),
+            "atr_ratio": float(atr_ratio) if not np.isnan(atr_ratio) else None,
+            "contraction_ok": bool(contraction_ok),
+            "higher_lows": bool(structure_ok),
+            "rs_ok": bool(rs_ok),
+            "market_ok": bool(market_ok),
+            "vol_ma": float(vol_ma_series[-1]) if not np.isnan(vol_ma_series[-1]) else None,
+            "volume_mult": float(vols[-1] / vol_ma_series[-1]) if not np.isnan(vol_ma_series[-1]) else None,
+            "vol_drying": bool(vol_drying),
             **bench_info
         }
     )
@@ -500,19 +602,27 @@ def scan_breakout_setups(top_n=10):
                         'bars': symbol_bars  # Store bars for Kristjan checklist
                     })
                 
+                # Check for contraction setup
+                contraction_setup = detect_contraction_setup(symbol_bars, symbol)
+                if contraction_setup:
+                    setups.append({
+                        'symbol': symbol,
+                        'setup': contraction_setup,
+                        'price': float(symbol_bars[-1].close),
+                        'change_pct': change_pct,
+                        'adr_pct': adr_pct,
+                        'rs_score': 0.5,  # Simplified for now
+                        'rsi': rsi,
+                        'tr_atr': atr,
+                        'z_score': z_score,
+                        'bars': symbol_bars  # Store bars for Kristjan checklist
+                    })
+                
             except Exception as e:
                 print(f"Error processing {symbol}: {e}", file=sys.stderr)
                 continue
         
-        # Sort by setup score (flag breakouts get slight priority)
-        def sort_key(x):
-            base_score = x['setup'].score
-            # Flag breakouts get +0.1 priority boost
-            if x['setup'].setup == "Flag Breakout":
-                return base_score + 0.1
-            return base_score
-        
-        setups.sort(key=sort_key, reverse=True)
+        # No sorting - all signals treated equally
         
         return setups[:top_n]
         
@@ -520,7 +630,8 @@ def scan_breakout_setups(top_n=10):
         print(f"Breakout scan failed: {e}", file=sys.stderr)
         return []
 
-def kristjan_checklist(symbol: str, bars: list, benchmark_bars: list) -> str:
+# Removed old kristjan_checklist function - using clean format_breakout_signal instead
+def _old_kristjan_checklist_removed(symbol: str, bars: list, benchmark_bars: list) -> str:
     """
     Kristjan-style breakout checklist with numeric stats, +/- ratings,
     and reference points separated by '/' instead of 'vs'.
@@ -555,10 +666,10 @@ def kristjan_checklist(symbol: str, bars: list, benchmark_bars: list) -> str:
         prev[0] = c[0]
         tr = np.maximum.reduce([h - l, abs(h - prev), abs(l - prev)])
         return np.mean(tr[-n:])
-    atr14 = atr(highs, lows, closes, 14)
-    atr50 = np.mean([atr(highs[i-14:i], lows[i-14:i], closes[i-14:i])
-                     for i in range(14, len(closes))][-50:])
-    atr_ratio = atr14 / atr50 if atr50 > 0 else np.nan
+    atr5 = atr(highs, lows, closes, 5)
+    atr20 = np.mean([atr(highs[i-5:i], lows[i-5:i], closes[i-5:i])
+                     for i in range(5, len(closes))][-20:])
+    atr_ratio = atr5 / atr20 if atr20 > 0 else np.nan
     atr_flag = "+" if atr_ratio <= 0.8 else "-"
 
     # --- 5. Volume expansion
@@ -611,7 +722,7 @@ def kristjan_checklist(symbol: str, bars: list, benchmark_bars: list) -> str:
         f"${symbol} {price:.2f} {pct_change:+.1f}% | "
         f"ADR {adr:.1f}/{adr_ref:.0f}%{adr_flag} | "
         f"Range {range_pct:.1f}/{range_ref:.0f}%{tight_flag} | "
-        f"ATR {atr14:.2f}/{atr50:.2f} ({atr_ratio:.2f}×){atr_flag} | "
+        f"ATR {atr5:.2f}/{atr20:.2f} ({atr_ratio:.2f}×){atr_flag} | "
         f"V {vol_now_m:.1f}M/{vol_ref_m:.1f}M ({vol_mult:.1f}×){vol_flag} | "
         f"RS {rs_ratio:.2f}/{rs_ref:.2f}{rs_flag} | "
         f"M {bench_10:.1f}/{bench_20:.1f} ({market_ref}){market_flag} | "
@@ -624,11 +735,11 @@ def kristjan_checklist(symbol: str, bars: list, benchmark_bars: list) -> str:
 
     return checklist
 
-def format_breakout_signal(symbol, price, change_pct, rs_score, adr_pct, setup_type, rsi=50, tr_atr=1.0, z_score=0.0):
-    """Format breakout signal: $SYMBOL $PRICE +X.X% | ## RSI | X.XXx ATR | Flag/Range Breakout"""
+def format_breakout_signal(symbol, price, change_pct, rsi=50, tr_atr=1.0, setup_type="Breakout"):
+    """Format breakout signal: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Breakout"""
     # Format price: no cents for thousands+, with cents for under $1000
     price_str = f"${price:,.0f}" if price >= 1000 else f"${price:,.2f}"
-    return f"${symbol} {price_str} {change_pct:+.1f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | {setup_type}"
+    return f"${symbol} {price_str} {change_pct:+.2f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | {setup_type}"
 
 def main():
     """Main unified breakout scanner with Kristjan checklist format"""

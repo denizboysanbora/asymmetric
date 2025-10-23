@@ -72,28 +72,25 @@ asymmetric/
 ## 📊 Breakout Strategy
 
 ### Signal Detection
-The system detects breakout setups based on:
+The system detects three types of setups:
 
-1. **Prior Impulse**: 30%+ move in the last 60 days
-2. **Tight Flag Consolidation**: Last 20 days showing:
-   - Higher lows pattern
-   - ATR contraction (reduced volatility)
-   - Consolidation after impulse
+1. **Flag Breakout**: Prior impulse (30%+ move) + tight consolidation + breakout
+2. **Range Breakout**: Tight range + ATR contraction + volume + breakout above range
+3. **Contraction**: Tight range + ATR contraction (5d vs 20d) + volume drying up + higher lows (no breakout required)
 
 ### Technical Indicators
 - **RSI**: Relative Strength Index
 - **ATR**: Average True Range
-- **Z-Score**: Volatility measure
-- **ADR**: Average Daily Range percentage
 
 ### Signal Format
 ```
-$SYMBOL $PRICE +X.X% | ## RSI | X.XXx ATR | Z X.X | Breakout
+$SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Signal Type
 ```
 
 Examples:
-- `$NVDA $450.25 +2.3% | 65 RSI | 2.10x ATR | Z 1.8 | Breakout`
-- `$TSLA $250.50 +1.7% | 58 RSI | 1.90x ATR | Z 1.2 | Breakout`
+- `$NVDA $450.25 +2.30% | 65 RSI | 2.10x ATR | Flag Breakout`
+- `$TSLA $250.50 +1.70% | 58 RSI | 1.90x ATR | Range Breakout`
+- `$AAPL $185.50 +0.80% | 62 RSI | 1.20x ATR | Contraction`
 
 ## 💰 Paper Trading
 
@@ -102,7 +99,6 @@ The investor module executes paper trades based on breakout signals:
 
 1. **Buy Criteria**:
    - RSI between 40-70 (not overbought/oversold)
-   - Z-score > 1.5 (strong momentum)
    - TR/ATR > 1.5 (high volatility)
    - Positive change percentage
 

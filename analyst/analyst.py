@@ -1134,8 +1134,9 @@ class UnifiedAnalyst:
             symbol = signal['symbol']
             bars = signal['bars']
             
-            # Use kristjan checklist format with benchmark data
-            signal_str = self.kristjan_checklist(symbol, bars, benchmark_bars)
+            # Use clean format_breakout_signal
+            from breakout_scanner import format_breakout_signal
+            signal_str = format_breakout_signal(symbol, bars[-1].close, ((bars[-1].close / bars[-2].close) - 1) * 100, 50, 1.0, "Breakout")
             print(signal_str)
             formatted_signals.append(signal_str)
         

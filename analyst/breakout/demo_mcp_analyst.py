@@ -174,7 +174,7 @@ async def main():
             z_score = signal['z_score']
             
             signal_str = format_breakout_signal(
-                symbol, price, change_pct, 0.5, 0.0, setup_type, rsi, tr_atr, z_score
+                symbol, price, change_pct, rsi, tr_atr, setup_type
             )
             print(signal_str)
         

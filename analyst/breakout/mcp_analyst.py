@@ -338,15 +338,7 @@ class NativeMCPAnalyst:
             if signal:
                 setups.append(signal)
         
-        # Sort by setup score
-        def sort_key(x):
-            base_score = x['setup'].score
-            # Flag breakouts get slight priority
-            if x['setup'].setup == "Flag Breakout":
-                return base_score + 0.1
-            return base_score
-        
-        setups.sort(key=sort_key, reverse=True)
+        # No sorting - all signals treated equally
         
         print(f"🎯 Found {len(setups)} breakout signals", file=sys.stderr)
         
@@ -423,7 +415,7 @@ def main():
             z_score = signal['z_score']
             
             signal_str = format_breakout_signal(
-                symbol, price, change_pct, 0.5, 0.0, setup.setup, rsi, tr_atr, z_score
+                symbol, price, change_pct, rsi, tr_atr, setup.setup
             )
             print(signal_str)
         
