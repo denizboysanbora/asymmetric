@@ -75,8 +75,8 @@ asymmetric/
 The system detects three types of setups:
 
 1. **Flag Breakout**: Prior impulse (30%+ move) + tight consolidation + breakout
-2. **Range Breakout**: Tight range + ATR contraction + volume + breakout above range
-3. **Contraction**: Tight range + ATR contraction (5d vs 20d) + volume drying up + higher lows (no breakout required)
+2. **Range Breakout**: Tight range (≤15%) + ATR contraction (≤0.70) + volume + breakout above range
+3. **Contraction**: Tight range (≤15%) + ATR contraction (≤0.70) + volume drying up + higher lows (no breakout required)
 
 ### Technical Indicators
 - **RSI**: Relative Strength Index
