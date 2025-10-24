@@ -7,7 +7,7 @@ import os
 import re
 from email.mime.text import MIMEText
 from pathlib import Path
-from typing import Optional
+from typing import Optional, List
 
 from googleapiclient.discovery import build
 from google.oauth2.credentials import Credentials
@@ -17,26 +17,48 @@ TOKEN_PATH = BASE_DIR / 'token.json'
 
 SCOPES = ['https://www.googleapis.com/auth/gmail.send']
 
-def _extract_signal_line(text: str) -> Optional[str]:
-    """Return the first line that matches the signal format."""
-    # Pattern for breakout: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Breakout
-    breakout_pattern = re.compile(
-        r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%\s+\|\s+[0-9]+\s+RSI\s+\|\s+[0-9]+\.[0-9]{2}x\s+ATR\s+\|\s+Breakout$"
-    )
+def _extract_signal_lines(text: str) -> List[str]:
+    """Return all lines that match signal formats."""
+    # Pattern for breakout: $SYMBOL $PRICE +X.XX% | ## RSI | X.XXx ATR | Signal Type
+    # Updated to match various signal types (Flag Breakout, Range Breakout, Contraction, etc.)
+    signal_patterns = [
+        # Standard breakout format
+        re.compile(
+            r"^\$[A-Za-z0-9]{1,10}\s+\$[0-9]{1,3}(?:,[0-9]{3})*(?:\.[0-9]{2})?\s+[+\-][0-9]+\.[0-9]{2}%\s+\|\s+[0-9]+\s+RSI\s+\|\s+[0-9]+\.[0-9]{2}x\s+ATR\s+\|\s+(Flag Breakout|Range Breakout|Contraction)$"
+        ),
+        # Extended format with more data
+        re.compile(
+            r"^\$[A-Za-z0-9]{1,10}\s+[0-9]+\.[0-9]{2}\s+[+\-][0-9]+\.[0-9]%\s+\|.*\|\s+(Flag Breakout|Range Breakout|Contraction|Breakout)$"
+        ),
+        # Simple format
+        re.compile(
+            r"^\$[A-Za-z0-9]{1,10}\s+[0-9]+\.[0-9]{2}\s+[+\-][0-9]+\.[0-9]%\s+\|.*\|\s+(Flag Breakout|Range Breakout|Contraction|Breakout)$"
+        )
+    ]
 
+    signal_lines = []
     for raw_line in text.splitlines():
         line = raw_line.strip()
         if not line:
             continue
-        if breakout_pattern.match(line):
-            return line
-    return None
+        # Check if line matches any signal pattern
+        for pattern in signal_patterns:
+            if pattern.match(line):
+                signal_lines.append(line)
+                break
+    
+    return signal_lines
 
 def _normalize_body(subject: str, body: str) -> str:
-    """If a valid signal line exists in the body, return ONLY that line."""
-    signal_line = _extract_signal_line(body)
-    if signal_line is not None:
-        return signal_line
+    """Extract and return all valid signal lines with proper formatting."""
+    signal_lines = _extract_signal_lines(body)
+    
+    if signal_lines:
+        # Return all signal lines, each on its own line
+        return "\n".join(signal_lines)
+    
+    # If no signals match patterns, return the original body
+    # but ensure proper line breaks are preserved
     return body
 
 def create_message(to_email: str, subject: str, body: str) -> dict:
