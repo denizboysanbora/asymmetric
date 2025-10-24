@@ -89,8 +89,8 @@ The system respects these environment variables:
 
 Your API keys are stored in `analyst/config/api_keys.env`:
 ```
-ALPACA_API_KEY=PK5KN56VW1TVTL7X2GSJ
-ALPACA_SECRET_KEY=Ojsiz7lO4SgTHRLLHz2nYxEoitOaKL1sOmGXAcz3
+ALPACA_API_KEY=your_alpaca_api_key_here
+ALPACA_SECRET_KEY=your_alpaca_secret_key_here
 ```
 
 ## Troubleshooting

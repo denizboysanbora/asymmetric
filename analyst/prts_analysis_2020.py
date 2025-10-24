@@ -43,7 +43,7 @@ from breakout.breakout_scanner import (
     calculate_rsi,
     calculate_atr,
     calculate_z_score,
-    kristjan_checklist
+    breakout_checklist
 )
 
 def fetch_prts_data(start_date: datetime, end_date: datetime) -> Optional[List[Bar]]:
@@ -290,9 +290,9 @@ def main():
     
     print(f"\n💾 Detailed results saved to: {output_file}")
     
-    # Show Kristjan checklist for the last few days
+    # Show breakout checklist for the last few days
     if spy_bars and len(spy_bars) > 0:
-        print(f"\n📋 KRISTJAN CHECKLIST (Last 5 Days):")
+        print(f"\n📋 BREAKOUT CHECKLIST (Last 5 Days):")
         print("-" * 60)
         
         # Get the last 5 days of analysis
@@ -302,7 +302,7 @@ def main():
             date_bars = [bar for bar in prts_bars if bar.timestamp.date() <= daily['date']]
             if len(date_bars) >= 60:  # Need enough history
                 try:
-                    checklist = kristjan_checklist("PRTS", date_bars, spy_bars)
+                    checklist = breakout_checklist("PRTS", date_bars, spy_bars)
                     print(checklist)
                 except Exception as e:
                     print(f"Error generating checklist for {daily['date']}: {e}")

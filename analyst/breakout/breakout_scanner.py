@@ -584,7 +584,7 @@ def scan_breakout_setups(top_n=10):
                         'rsi': rsi,
                         'tr_atr': atr,
                         'z_score': z_score,
-                        'bars': symbol_bars  # Store bars for Kristjan checklist
+                        'bars': symbol_bars  # Store bars for breakout analysis
                     })
                 
                 # Add range breakout if found
@@ -599,7 +599,7 @@ def scan_breakout_setups(top_n=10):
                         'rsi': rsi,
                         'tr_atr': atr,
                         'z_score': z_score,
-                        'bars': symbol_bars  # Store bars for Kristjan checklist
+                        'bars': symbol_bars  # Store bars for breakout analysis
                     })
                 
                 # Check for contraction setup
@@ -615,7 +615,7 @@ def scan_breakout_setups(top_n=10):
                         'rsi': rsi,
                         'tr_atr': atr,
                         'z_score': z_score,
-                        'bars': symbol_bars  # Store bars for Kristjan checklist
+                        'bars': symbol_bars  # Store bars for breakout analysis
                     })
                 
             except Exception as e:
@@ -630,10 +630,10 @@ def scan_breakout_setups(top_n=10):
         print(f"Breakout scan failed: {e}", file=sys.stderr)
         return []
 
-# Removed old kristjan_checklist function - using clean format_breakout_signal instead
-def _old_kristjan_checklist_removed(symbol: str, bars: list, benchmark_bars: list) -> str:
+# Removed old checklist function - using clean format_breakout_signal instead
+def _old_checklist_removed(symbol: str, bars: list, benchmark_bars: list) -> str:
     """
-    Kristjan-style breakout checklist with numeric stats, +/- ratings,
+    Breakout checklist with numeric stats, +/- ratings,
     and reference points separated by '/' instead of 'vs'.
     """
     import numpy as np
@@ -742,7 +742,7 @@ def format_breakout_signal(symbol, price, change_pct, rsi=50, tr_atr=1.0, setup_
     return f"${symbol} {price_str} {change_pct:+.2f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | {setup_type}"
 
 def main():
-    """Main unified breakout scanner with Kristjan checklist format"""
+    """Main unified breakout scanner with breakout checklist format"""
     print("📈 Scanning for breakout setups (flag and range)...", file=sys.stderr)
     
     try:
@@ -834,7 +834,7 @@ def main():
             for symbol in mock_symbols:
                 symbol_bars = create_mock_bars(symbol)
                 if benchmark_bars:
-                    signal = kristjan_checklist(symbol, symbol_bars, benchmark_bars)
+                    signal = format_breakout_signal(symbol, symbol_bars, benchmark_bars)
                     print(signal)
             return
         
@@ -867,7 +867,7 @@ def main():
                 
                 # Show checklist for this stock
                 if benchmark_bars:
-                    signal = kristjan_checklist(symbol, symbol_bars, benchmark_bars)
+                    signal = format_breakout_signal(symbol, symbol_bars, benchmark_bars)
                     print(signal)
                 
             except Exception as e:

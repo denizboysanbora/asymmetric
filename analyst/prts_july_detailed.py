@@ -42,7 +42,7 @@ from breakout.breakout_scanner import (
     calculate_rsi,
     calculate_atr,
     calculate_z_score,
-    kristjan_checklist
+    breakout_checklist
 )
 
 def analyze_july_day_by_day(bars: List[Bar], spy_bars: List[Bar]) -> Dict:

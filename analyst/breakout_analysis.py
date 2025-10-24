@@ -746,7 +746,7 @@ def scan_breakout_setups(top_n=None):
                         'rsi': rsi,
                         'tr_atr': atr,
                         'z_score': z_score,
-                        'bars': symbol_bars  # Store bars for Kristjan checklist
+                        'bars': symbol_bars  # Store bars for breakout analysis
                     })
                 
                 # Add range breakout if found
@@ -761,7 +761,7 @@ def scan_breakout_setups(top_n=None):
                         'rsi': rsi,
                         'tr_atr': atr,
                         'z_score': z_score,
-                        'bars': symbol_bars  # Store bars for Kristjan checklist
+                        'bars': symbol_bars  # Store bars for breakout analysis
                     })
                 
             except Exception as e:
@@ -784,9 +784,9 @@ def scan_breakout_setups(top_n=None):
         print(f"Breakout scan failed: {e}", file=sys.stderr)
         return []
 
-def kristjan_checklist(symbol: str, bars: list, benchmark_bars: list) -> str:
+def breakout_checklist(symbol: str, bars: list, benchmark_bars: list) -> str:
     """
-    Kristjan-style breakout checklist with numeric stats, +/- ratings,
+    Breakout checklist with numeric stats, +/- ratings,
     and reference points separated by '/' instead of 'vs'.
     """
     import numpy as np
@@ -895,7 +895,7 @@ def format_breakout_signal(symbol, price, change_pct, rsi=50, tr_atr=1.0, setup_
     return f"${symbol} {price_str} {change_pct:+.2f}% | {rsi:.0f} RSI | {tr_atr:.2f}x ATR | {setup_type}"
 
 def main():
-    """Main unified breakout scanner with Kristjan checklist format"""
+    """Main unified breakout scanner with breakout checklist format"""
     print("📈 Scanning for breakout setups (flag and range)...", file=sys.stderr)
     
     # Show available filters
@@ -990,7 +990,7 @@ def main():
             for symbol in mock_symbols:
                 symbol_bars = create_mock_bars(symbol)
                 if benchmark_bars:
-                    signal = kristjan_checklist(symbol, symbol_bars, benchmark_bars)
+                    signal = breakout_checklist(symbol, symbol_bars, benchmark_bars)
                     print(signal)
             return
         
@@ -1023,7 +1023,7 @@ def main():
                 
                 # Show checklist for this stock
                 if benchmark_bars:
-                    signal = kristjan_checklist(symbol, symbol_bars, benchmark_bars)
+                    signal = breakout_checklist(symbol, symbol_bars, benchmark_bars)
                     print(signal)
                 
             except Exception as e:

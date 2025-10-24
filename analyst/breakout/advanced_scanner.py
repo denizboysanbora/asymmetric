@@ -10,9 +10,9 @@ from pathlib import Path
 from typing import List, Dict, Optional
 import pandas as pd
 
-# Set API keys
-os.environ['ALPACA_API_KEY'] = 'PK5KN56VW1TVTL7X2GSJ'
-os.environ['ALPACA_SECRET_KEY'] = 'Ojsiz7lO4SgTHRLLHz2nYxEoitOaKL1sOmGXAcz3'
+# Set API keys - Load from environment or config file
+# os.environ['ALPACA_API_KEY'] = 'your_alpaca_api_key_here'
+# os.environ['ALPACA_SECRET_KEY'] = 'your_alpaca_secret_key_here'
 
 # Add alpaca directory to path
 ALPACA_DIR = Path(__file__).parent.parent / "input" / "alpaca"

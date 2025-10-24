@@ -766,8 +766,8 @@ class UnifiedAnalyst:
             }
         )
     
-    def kristjan_checklist(self, symbol: str, bars: list, benchmark_bars: list = None) -> str:
-        """Kristjan-style breakout checklist with numeric stats and +/- ratings"""
+    def breakout_checklist(self, symbol: str, bars: list, benchmark_bars: list = None) -> str:
+        """Breakout checklist with numeric stats and +/- ratings"""
         closes = np.array([float(bar.close) for bar in bars])
         highs = np.array([float(bar.high) for bar in bars])
         lows = np.array([float(bar.low) for bar in bars])

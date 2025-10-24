@@ -1,0 +1,58 @@
+# Environment and secrets
+.env
+.env.local
+.env.*
+*.env
+*.secret
+secret.py
+api_keys.env
+config/api_keys.env
+
+# API Keys and tokens
+token.json
+*.token
+credentials.json
+
+# Logs
+*.log
+logs/
+
+# Database files
+*.db
+*.db-journal
+*.sqlite
+*.sqlite3
+
+# Python
+__pycache__/
+*.py[cod]
+*.so
+.Python
+env/
+venv/
+.venv/
+input/alpaca/venv/
+
+# Build and distribution
+dist/
+build/
+*.egg-info/
+*.egg
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Generated data and artifacts
+*.xlsx
+*.csv
+
+# Project-specific
+_collection/
+output/gmail/token.json
