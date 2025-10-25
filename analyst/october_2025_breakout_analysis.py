@@ -35,7 +35,7 @@ except ImportError as e:
 def load_october_data():
     """Load October 2025 data from the 90-day database"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
         print(f"❌ Database not found: {db_path}")
@@ -73,7 +73,7 @@ def load_october_data():
 def get_stock_data(symbol: str, spy_closes: Optional[List[float]] = None):
     """Get stock data for a specific symbol"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     conn = sqlite3.connect(db_path)
     
     query = """

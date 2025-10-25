@@ -119,8 +119,7 @@ class UnifiedAnalyst:
         self.config = AnalystConfig()
         base_dir = Path(__file__).parent
         self.db_dir = base_dir / "nasdaq_db"
-        legacy_db = base_dir / "nasdaq_2025.db"
-        self.db_manager = MonthlyDatabaseManager(self.db_dir, fallback_path=legacy_db)
+        self.db_manager = MonthlyDatabaseManager(self.db_dir)
         
         # State
         self.portfolio_state_file = Path(__file__).parent / "portfolio_state.json"

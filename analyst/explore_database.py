@@ -8,7 +8,7 @@ from datetime import datetime
 
 def explore_database():
     """Explore the NASDAQ database"""
-    conn = sqlite3.connect("nasdaq_2025.db")
+    conn = sqlite3.connect("nasdaq_db/nasdaq.db")
     
     print("🗄️ NASDAQ Test Database Explorer")
     print("=" * 50)

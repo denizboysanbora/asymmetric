@@ -34,7 +34,7 @@ def main():
     )
     
     # Get filtered NASDAQ symbols with quality filters
-    db_path = Path(__file__).parent / 'nasdaq_db' / 'nasdaq_90day.db'
+    db_path = Path(__file__).parent / 'nasdaq_db' / 'nasdaq.db'
     
     with sqlite3.connect(db_path) as conn:
         # Use existing filter system from breakout_analysis.py

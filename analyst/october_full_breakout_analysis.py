@@ -35,7 +35,7 @@ except ImportError as e:
 def load_all_liquid_symbols():
     """Load ALL liquid symbols from the database - no hardcoded limits"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
         print(f"❌ Database not found: {db_path}")
@@ -68,7 +68,7 @@ def load_all_liquid_symbols():
 def get_stock_data(symbol: str):
     """Get stock data for a specific symbol"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     conn = sqlite3.connect(db_path)
     
     query = """

@@ -39,10 +39,10 @@ except ImportError as e:
 def get_all_nasdaq_symbols():
     """Get list of all NASDAQ symbols from the database"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
-        print("❌ nasdaq_90day.db not found")
+        print("❌ nasdaq.db not found")
         return []
     
     conn = sqlite3.connect(db_path)
@@ -54,7 +54,7 @@ def get_all_nasdaq_symbols():
 def get_database_date_range():
     """Get current date range in the database"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
         return None, None, 0
@@ -305,10 +305,10 @@ def calculate_adr_pct(hlc: np.ndarray, period: int = 20) -> np.ndarray:
 def update_database_with_new_data(new_data: List[Dict], target_date: str):
     """Update database with new data and calculate technical indicators"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
-        print("❌ nasdaq_90day.db not found")
+        print("❌ nasdaq.db not found")
         return False
     
     conn = sqlite3.connect(db_path)
@@ -339,10 +339,10 @@ def update_database_with_new_data(new_data: List[Dict], target_date: str):
 def remove_oldest_day_from_database():
     """Remove the oldest day's data to maintain 90-day window"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
-        print("❌ nasdaq_90day.db not found")
+        print("❌ nasdaq.db not found")
         return False
     
     conn = sqlite3.connect(db_path)

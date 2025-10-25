@@ -199,25 +199,7 @@ def upsert_prices(df: pd.DataFrame) -> int:
     return inserted
 
 
-def split_existing_database(source_path: Path) -> None:
-    if not source_path.exists():
-        print(f"Legacy database not found at {source_path}")
-        return
-
-    conn = sqlite3.connect(source_path)
-    try:
-        df = pd.read_sql("SELECT * FROM nasdaq_prices", conn, parse_dates=["date"])
-    finally:
-        conn.close()
-
-    if df.empty:
-        print("Legacy database contains no rows.")
-        return
-
-    df["date"] = pd.to_datetime(df["date"]).dt.date
-    inserted = upsert_prices(df)
-    print(f"Split {inserted:,} rows from {source_path.name} into monthly databases.")
-    verify()
+# Legacy database splitting functionality removed
 
 
 def process_and_store(
@@ -281,8 +263,8 @@ def main() -> None:
     args = parser.parse_args()
 
     if args.split_existing:
-        legacy_db_path = BASE_DIR / "nasdaq_2025.db"
-        split_existing_database(legacy_db_path)
+        print("Legacy database splitting functionality has been removed.")
+        print("Use the monthly database system instead.")
         return
 
     print("Building NASDAQ database from Alpaca (2025-01-01 .. 2025-10-17)")

@@ -16,10 +16,10 @@ from typing import List, Dict, Optional, Tuple
 sys.path.insert(0, str(Path(__file__).parent))
 from breakout.breakout_scanner_updated import detect_flag_breakout_setup, detect_range_breakout_setup
 
-def load_nasdaq_90day_data():
+def load_nasdaq_data():
     """Load data from the consolidated 90-day database"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
         print(f"❌ Database not found: {db_path}")
@@ -71,7 +71,7 @@ def load_nasdaq_90day_data():
 
 def get_stock_data(symbol: str, spy_df: pd.DataFrame):
     """Get stock data for a specific symbol"""
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     conn = sqlite3.connect(db_path)
     
     query = """
@@ -187,7 +187,7 @@ def main():
     print("=" * 80)
     
     # Load data
-    data = load_nasdaq_90day_data()
+    data = load_nasdaq_data()
     if not data:
         return
     

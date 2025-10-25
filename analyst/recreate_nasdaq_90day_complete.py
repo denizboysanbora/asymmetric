@@ -199,10 +199,10 @@ def calculate_technical_indicators(df: pd.DataFrame):
     print(f"✅ Technical indicators calculated")
     return result_df
 
-def create_complete_nasdaq_90day_database(df: pd.DataFrame):
-    """Create the complete nasdaq_90day.db database"""
+def create_complete_nasdaq_database(df: pd.DataFrame):
+    """Create the complete nasdaq.db database"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     print(f"💾 Creating complete consolidated database: {db_path}")
     
@@ -226,7 +226,7 @@ def create_complete_nasdaq_90day_database(df: pd.DataFrame):
     
     conn.close()
     
-    print(f"✅ Created complete nasdaq_90day.db with {len(df)} records")
+    print(f"✅ Created complete nasdaq.db with {len(df)} records")
     
     # Verify the database
     conn = sqlite3.connect(db_path)
@@ -255,12 +255,12 @@ def main():
         
         # Step 3: Create complete database
         print("\n💾 Step 3: Creating complete database...")
-        db_path = create_complete_nasdaq_90day_database(final_df)
+        db_path = create_complete_nasdaq_database(final_df)
         
         print("\n" + "=" * 80)
         print("🎯 DATABASE RECREATION COMPLETE!")
         print("=" * 80)
-        print(f"✅ Created: Complete nasdaq_90day.db")
+        print(f"✅ Created: Complete nasdaq.db")
         print(f"✅ Symbols: All symbols included")
         print(f"✅ Technical indicators: RSI, ATR, SMA calculated")
         print(f"✅ Rolling window: 90 days maintained")

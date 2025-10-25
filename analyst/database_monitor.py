@@ -24,7 +24,7 @@ except ImportError:
 def check_database_health() -> Dict:
     """Check database health and return status"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if not db_path.exists():
         return {

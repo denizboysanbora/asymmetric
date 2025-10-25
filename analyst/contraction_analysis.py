@@ -28,7 +28,7 @@ class ContractionAnalyzer:
     """Dynamic NASDAQ Contraction Analysis - NO HARDCODED STOCKS"""
     
     def __init__(self):
-        self.db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+        self.db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
         self.client = StockHistoricalDataClient(
             os.getenv('ALPACA_API_KEY'), 
             os.getenv('ALPACA_SECRET_KEY')

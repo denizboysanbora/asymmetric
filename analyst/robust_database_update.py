@@ -41,7 +41,7 @@ class RobustDatabaseUpdater:
     """Robust database updater with comprehensive error handling"""
     
     def __init__(self):
-        self.db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+        self.db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
         self.log_file = Path(__file__).parent / "logs" / "robust_update.log"
         self.log_file.parent.mkdir(exist_ok=True)
         

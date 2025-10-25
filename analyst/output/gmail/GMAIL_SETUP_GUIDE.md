@@ -73,3 +73,4 @@ python3 output/gmail/send_email.py "deniz@bora.box" "Test Signal" '$INTC 37.01 +
 ### Token Expired
 - Delete `token.json` and run the auth script again
 
+

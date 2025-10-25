@@ -127,13 +127,13 @@ def calculate_technical_indicators(df: pd.DataFrame):
     print(f"✅ Technical indicators calculated")
     return result_df
 
-def recreate_nasdaq_90day_database():
-    """Re-create the nasdaq_90day.db with ALL symbols"""
+def recreate_nasdaq_database():
+    """Re-create the nasdaq.db with ALL symbols"""
     
     print("🔧 Re-creating NASDAQ 90-day database with ALL symbols...")
     
     # First, let's see what we have in the current database
-    current_db = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    current_db = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     if current_db.exists():
         conn = sqlite3.connect(current_db)
         current_symbols = pd.read_sql_query("SELECT DISTINCT symbol FROM nasdaq_prices", conn)
@@ -162,7 +162,7 @@ def main():
     print("=" * 60)
     
     # Check current state
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     if db_path.exists():
         conn = sqlite3.connect(db_path)
@@ -191,14 +191,14 @@ def main():
             # Ask for confirmation
             response = input("Do you want to recreate the database with ALL symbols? (y/N): ")
             if response.lower() == 'y':
-                recreate_nasdaq_90day_database()
+                recreate_nasdaq_database()
             else:
                 print("❌ Database recreation cancelled")
         else:
             print("✅ Database appears to have sufficient symbols")
     else:
-        print("❌ nasdaq_90day.db not found")
-        recreate_nasdaq_90day_database()
+        print("❌ nasdaq.db not found")
+        recreate_nasdaq_database()
 
 if __name__ == "__main__":
     main()

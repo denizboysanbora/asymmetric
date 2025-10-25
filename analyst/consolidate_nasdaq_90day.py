@@ -321,10 +321,10 @@ def update_missing_data_with_alpaca(df: pd.DataFrame):
         print("⚠️  No data updated from Alpaca API")
         return df
 
-def create_nasdaq_90day_database(df: pd.DataFrame):
-    """Create the consolidated nasdaq_90day.db database"""
+def create_nasdaq_database(df: pd.DataFrame):
+    """Create the consolidated nasdaq.db database"""
     
-    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq_90day.db"
+    db_path = Path(__file__).parent / "nasdaq_db" / "nasdaq.db"
     
     print(f"💾 Creating consolidated database: {db_path}")
     
@@ -347,7 +347,7 @@ def create_nasdaq_90day_database(df: pd.DataFrame):
     
     conn.close()
     
-    print(f"✅ Created nasdaq_90day.db with {len(df)} records")
+    print(f"✅ Created nasdaq.db with {len(df)} records")
     
     # Verify the database
     conn = sqlite3.connect(db_path)
@@ -414,7 +414,7 @@ def main():
         
         # Step 5: Create consolidated database
         print("\n💾 Step 5: Creating consolidated database...")
-        db_path = create_nasdaq_90day_database(final_df)
+        db_path = create_nasdaq_database(final_df)
         
         # Step 6: Delete monthly databases
         print("\n🗑️  Step 6: Cleaning up monthly databases...")
@@ -423,7 +423,7 @@ def main():
         print("\n" + "=" * 80)
         print("🎯 CONSOLIDATION COMPLETE!")
         print("=" * 80)
-        print(f"✅ Created: nasdaq_90day.db")
+        print(f"✅ Created: nasdaq.db")
         print(f"✅ Deleted: All monthly database files")
         print(f"✅ Optimized: Schema for breakout scanners")
         print(f"✅ Technical indicators: RSI, ATR, SMA calculated")
